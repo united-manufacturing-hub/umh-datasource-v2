@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "datasource",
+  "name": "datasource-v2",
+  "id": "umh-datasource-v2",
+  "metrics": true,
+  "info": {
+    "description": "This plugin provides a datasource for connecting with factoryinsight",
+    "author": {
+      "name": "UMH Systems GmbH",
+      "url": "https://www.umh.app"
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/grafana/grafana-starter-datasource"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/grafana/grafana-starter-datasource/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=7.0.0",
+    "plugins": []
+  },
+  "routes": [
+    {
+      "path": "",
+      "url": "{{ .JsonData.baseURL }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "content": "{{ .SecureJsonData.apiKey }}"
+        },
+        {
+          "name": "Content-Type",
+          "content": "application/json"
+        }
+      ]
+    }
+  ]
+}
