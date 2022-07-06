@@ -4,46 +4,50 @@ import React, { ChangeEvent, PureComponent } from 'react';
 import { LegacyForms } from '@grafana/ui';
 import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './datasource';
-import { defaultQuery, FactoryinsightDataSourceOptions, MyQuery } from './types';
+import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 
 const { FormField } = LegacyForms;
 
-type Props = QueryEditorProps<DataSource, MyQuery, FactoryinsightDataSourceOptions>;
+type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props> {
-  onQueryTextChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query } = this.props;
-    onChange({ ...query, queryText: event.target.value });
-  };
 
-  onConstantChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, constant: parseFloat(event.target.value) });
-    // executes the query
-    onRunQuery();
-  };
+  //   onQueryTextChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const { onChange, query } = this.props;
+  //   onChange({ ...query, queryText: event.target.value });
+  // };
+    onLocationChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { onChange, query } = this.props;
+        onChange({ ...query, location: event.target.value });
+        };
+    onAssetChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const { onChange, query } = this.props;
+        onChange({ ...query, asset: event.target.value });
+    };
+
 
   render() {
-    const query = defaults(this.props.query, defaultQuery);
-    const { queryText, constant } = query;
 
+    const query = defaults(this.props.query, defaultFactoryinsightQuery);
+
+    const { location, asset } = query;
+    console.log(location, asset)
     return (
       <div className="gf-form">
-        <FormField
-          width={4}
-          value={constant}
-          onChange={this.onConstantChange}
-          label="Constant"
-          type="number"
-          step="0.1"
-        />
-        <FormField
-          labelWidth={8}
-          value={queryText || ''}
-          onChange={this.onQueryTextChange}
-          label="Query Text"
-          tooltip="Not used yet"
-        />
+          <FormField
+              width={4}
+              value={location}
+              onChange={this.onLocationChange}
+              label="Location"
+              type="string"
+          />
+          <FormField
+              width={4}
+              value={asset}
+              onChange={this.onAssetChange}
+              label="Asset"
+              type="string"
+          />
       </div>
     );
   }

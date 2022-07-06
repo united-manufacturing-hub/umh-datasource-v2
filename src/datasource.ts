@@ -9,10 +9,14 @@ import {
   FieldType,
 } from '@grafana/data';
 
-import { MyQuery, FactoryinsightDataSourceOptions, defaultQuery } from './types';
+import {
+  FactoryinsightDataSourceOptions,
+  FactoryinsightQuery,
+  defaultFactoryinsightQuery
+} from './types';
 import { BackendSrvRequest, getBackendSrv } from '@grafana/runtime';
 
-export class DataSource extends DataSourceApi<MyQuery, FactoryinsightDataSourceOptions> {
+export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
   baseUrl: string; // baseUrl is the url to factoryinsight
   apiPath: string;
   customerID: string;
@@ -24,27 +28,40 @@ export class DataSource extends DataSourceApi<MyQuery, FactoryinsightDataSourceO
 
     this.baseUrl = instanceSettings.url!;
     this.customerID = instanceSettings.jsonData.customerID!;
-    this.apiPath = `/api/v1/${this.customerID}`;
+    this.apiPath = `/api/v1/`;
   }
 
-  async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
+  async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
     const { range } = options;
     const from = range!.from.valueOf();
     const to = range!.to.valueOf();
 
     // Return a constant for each query.
     const data = options.targets.map(target => {
-      const query = defaults(target, defaultQuery);
+      const query = defaults(target, defaultFactoryinsightQuery);
       return new MutableDataFrame({
         refId: query.refId,
         fields: [
           { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
+          { name: 'Value', values: [query.location, query.asset], type: FieldType.string },
         ],
       });
     });
 
     return { data };
+  }
+
+  async getLocations(callback: Function) {
+    return this.fetchAPIRequest({
+      url: this.baseUrl+this.apiPath+this.customerID,
+    })
+        .then((res: any) => {
+          callback(res.data);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          throw new Error('Failed to fetch locations');
+        });
   }
 
   async testDatasource() {
@@ -56,7 +73,7 @@ export class DataSource extends DataSourceApi<MyQuery, FactoryinsightDataSourceO
     };
       console.log(this.baseUrl)
       await this.fetchAPIRequest({
-        url: this.baseUrl+this.apiPath,
+        url: this.baseUrl, // no API path as health check is on path /
       })
           .then((res: any) => {
             if (res === undefined || res.status !== 200 || res.data !== 'online') {
