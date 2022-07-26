@@ -51,17 +51,24 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     return { data };
   }
 
-  async getLocations(callback: Function) {
+  async GetLocations(): Promise<Array<string>> {
     return this.fetchAPIRequest({
       url: this.baseUrl+this.apiPath+this.customerID,
-    })
-        .then((res: any) => {
-          callback(res.data);
-        })
-        .catch((error: any) => {
-          console.error(error);
-          throw new Error('Failed to fetch locations');
-        });
+    }).then((res: any) => {
+        return res.data
+    });
+  }
+
+  async GetAssets(location?: string): Promise<Array<string>> {
+    if (location === undefined || location === '') {
+      return Promise.reject('location is undefined');
+    }
+
+    return this.fetchAPIRequest({
+      url: this.baseUrl+this.apiPath+this.customerID+'/'+location,
+    }).then((res: any) => {
+      return res.data
+    });
   }
 
   async testDatasource() {
