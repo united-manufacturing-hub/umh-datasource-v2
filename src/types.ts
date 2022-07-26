@@ -1,13 +1,5 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
-export enum QueryType {
-  enterprise = 'enterprise',
-  site = 'site',
-  area = 'area',
-  productionLine = 'production line',
-  workCell = 'work cell',
-}
-
 export interface FactoryinsightQuery extends DataQuery {
   location?: string;
   asset?: string;
