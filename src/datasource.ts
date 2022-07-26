@@ -20,6 +20,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   baseUrl: string; // baseUrl is the url to factoryinsight
   apiPath: string;
   customerID: string;
+  demoMode: boolean;
 
   constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
     instanceSettings.access = 'proxy'; // always set access to proxy
@@ -29,6 +30,8 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     this.baseUrl = instanceSettings.url!;
     this.customerID = instanceSettings.jsonData.customerID!;
     this.apiPath = `/api/v1/`;
+
+    this.demoMode = true;
   }
 
   async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
