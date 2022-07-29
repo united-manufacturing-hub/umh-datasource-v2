@@ -1,5 +1,6 @@
 import {FactoryinsightQuery} from "./types";
 import {FieldType, MutableDataFrame} from "@grafana/data";
+import {CascaderOption} from "@grafana/ui";
 
 let getDefaultProductionLine = (enterprise: string, site: string, area: string, productionLine: string) => {
     let defaultString = enterprise + "/" + site + "/" + area + "/" + productionLine + "/";
@@ -145,21 +146,21 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
         // now add some data to the dataframe for each aggregate in aggregatesToUse
         // starting from from and going to to
         // using the data.addRow function
-        for (let i = from; i < to; i=i+1000) {
+        for (let i = from; i < to; i = i + 1000) {
 
             let newRow: any[] = [];
 
             const avg = Math.random() * 100;
             aggregatesToUse.forEach(aggregate => {
-                switch(aggregate) {
+                switch (aggregate) {
                     case 'avg':
                         newRow[aggregate] = avg;
                         break;
                     case 'min':
-                        newRow[aggregate] = avg - Math.random()*5;
+                        newRow[aggregate] = avg - Math.random() * 5;
                         break;
                     case 'max':
-                        newRow[aggregate] = avg + Math.random()*5;
+                        newRow[aggregate] = avg + Math.random() * 5;
                         break;
                     case 'count':
                         newRow[aggregate] = Math.floor(Math.random() * 100);
@@ -177,7 +178,7 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
                     ...newRow,
                 }
             );
-            }
+        }
 
         return data;
     }
@@ -187,32 +188,135 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
 
 export let DefaultWorkCellTags = [
     {
-        label: 'temperature',
-        value: 'tags/temperature',
+        label: 'Automated',
+        value: 'tags/automated',
+        items: [
+            {
+                label: 'State',
+                value: 'tags/automated/state',
+            },
+            {
+                label: 'Shifts',
+                value: 'tags/automated/shifts',
+            },
+            {
+                label: 'Orders',
+                value: 'tags/automated/orders',
+            },
+        ]
     },
     {
-        label: 'X85_3_STOER',
-        value: 'tags/X85_3_STOER',
-    },
-    {
-        label: 'X85_4_STOER',
-        value: 'tags/X85_4_STOER',
+        label: 'Custom',
+        value: 'tags/custom',
+        items: [
+            {
+                label: 'temperature',
+                value: 'tags/custom/temperature',
+            },
+            {
+                label: 'X85_3_STOER',
+                value: 'tags/custom/X85_3_STOER',
+            },
+            {
+                label: 'X85_4_STOER',
+                value: 'tags/custom/X85_4_STOER',
+            },
+        ]
     },
 ]
 
 export let DefaultTags = [
     {
-        label: 'outside_temperature',
-        value: 'tags/outside_temperature',
+        label: 'Custom',
+        value: 'tags/custom',
+        items: [
+            {
+                label: 'outside_temperature',
+                value: 'tags/custom/outside_temperature',
+            },
+        ]
     },
 ]
-export let DefaultKPIs = [
-    {label: 'OEE', value: 'kpi/oee'},
-    {label: 'Availability', value: 'kpi/availability'},
-    {label: 'Performance', value: 'kpi/performance'},
-    {label: 'Quality', value: 'kpi/quality'},
-    {label: 'Shifts', value: 'kpi/shifts'},
-    {label: 'Job list', value: 'kpi/joblist'}, //equals to /orders
-    {label: 'Output', value: 'kpi/output'}, // equals to /count
-    {label: 'Production Speed', value: 'kpi/output_derivative'},
+
+let DefaultOEE: CascaderOption =
+    {
+        label: 'OEE',
+        value: 'kpi/oee',
+        items: [
+            {
+                label: 'Availability',
+                value: 'kpi/oee/availability',
+                //description: "The availability of the equipment as defined in the configuration. To drill-down, use the shopfloorLosses table.",
+            },
+            {
+                label: 'Performance',
+                value: 'kpi/oee/performance',
+                //description: "The performance of the equipment as defined in the configuration. To drill-down, use the shopfloorLosses table.",
+            },
+            {
+                label: 'Quality',
+                value: 'kpi/oee/quality',
+                //description: "The quality of the equipment as defined in the configuration. To drill-down, use the shopfloorLosses table.",
+            },
+        ]
+    }
+
+export let DefaultKPIs: CascaderOption[] = [
+    DefaultOEE,
+    {
+        label: 'Throughput',
+        value: 'kpi/throughput',
+        //description: "Output / time. Also known as production speed.",
+    }, //equals to production speed
+    {
+        label: 'Quality Rate',
+        value: 'kpi/quality_rate',
+        //description: "Good units / total units.",
+    }, //equals to production speed
+    {
+        label: 'Accumulated output',
+        value: 'kpi/accumulated_output',
+        //description: "Total output of the machine over time.",
+    }, // equals to /count
+]
+
+export let DefaultTables = [
+    {
+        label: 'Shopfloor losses',
+        value: 'table/shopfloor_losses',
+        //description: "Used to drill-down into OEE.",
+        items: [
+            {
+                label: 'Duration',
+                value: 'table/shopfloor_losses/duration',
+                //description: "Duration of all shopfloor losses.",
+            },
+            {
+                label: 'Frequency / histogram',
+                value: 'table/shopfloor_losses/histogram',
+                //description: "Frequency of all shopfloor losses.",
+            }
+            ]
+    },
+    {
+        label: 'Finished jobs',
+        value: 'table/finished_jobs',//equals to orderTable
+        //description: "Table of finished orders including their duration and their shopfloor losses.",
+    },
+    {
+        label: 'Open jobs',
+        value: 'table/open_jobs',//equals to /nstartedOrderTable
+        //description: "Table of unstarted orders including.",
+    },
+    {
+        label: "Products",
+        value: 'table/products',
+        //description: "Table of products.",
+    },
+    {
+        label: 'Shifts',
+        value: 'table/shifts',
+        //description: "Table of shifts.",
+    },
+
 ]

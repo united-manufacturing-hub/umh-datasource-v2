@@ -1,10 +1,10 @@
 // POC TODO
-// Alerts using Grafana's Alerting system
-// Historian functions
-// - statistical like avg, max, min, etc
-// - gapfilling, last observation carried forward, downsampling. NEEDS time_bucket_gapfill()
-// User defined functions
-// Export REST call to get data
+// Alerts using Grafana's Alerting system TODO
+// Historian functions CHECK
+// - statistical like avg, max, min, etc CHECK
+// - gapfilling, last observation carried forward, downsampling. NEEDS time_bucket_gapfill() CHECK
+// User defined functions TODO
+// Export REST call to get data TODO
 
 import React, {PureComponent} from 'react';
 import {Cascader, CascaderOption, InlineLabel, Alert, FieldSet, Select, MultiSelect, Input} from '@grafana/ui';
@@ -12,7 +12,7 @@ import {QueryEditorProps, SelectableValue} from '@grafana/data';
 import {DataSource} from './datasource';
 import {FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 
-import {GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags} from './demoData'
+import {GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags, DefaultTables} from './demoData'
 
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
@@ -67,17 +67,17 @@ export class QueryEditor extends PureComponent<Props> {
     isValidValueSelected = () => {
         if (this.selectedValue === '') {
             return false;
-        } else if (this.selectedValue === this.KPIValueID || this.selectedValue === this.tagsValueID) {
+        } else if (this.selectedValue === this.KPIValueID || this.selectedValue === this.tagsValueID || this.selectedValue === this.tagsValueID+'/custom' || this.selectedValue === this.tagsValueID+'/automated') {
             return false;
         } else {
             return true
         }
     }
 
-    // isCurrentSelectedValueATag checks whether the current selected value is a tag and therefore, begins with tagsValueID
-    isCurrentSelectedValueATag = () => {
+    // isCurrentSelectedValueACustomTag checks whether the current selected value is a tag and therefore, begins with tagsValueID
+    isCurrentSelectedValueACustomTag = () => {
         if (this.isValidValueSelected()) {
-            return this.selectedValue.startsWith(this.tagsValueID);
+            return this.selectedValue.startsWith(this.tagsValueID+'/custom');
         } else {
             return false;
         }
@@ -102,11 +102,6 @@ export class QueryEditor extends PureComponent<Props> {
                     value: this.tagsValueID,
                     items: DefaultTags
                 },
-                {
-                    label: 'KPIs',
-                    value: this.KPIValueID,
-                    items: DefaultKPIs
-                }
             ]
         } else {
             this.valueStructure = [
@@ -119,6 +114,11 @@ export class QueryEditor extends PureComponent<Props> {
                     label: 'KPIs',
                     value: this.KPIValueID,
                     items: DefaultKPIs
+                },
+                {
+                    label: 'Tables',
+                    value: 'table',
+                    items: DefaultTables,
                 }
             ]
         }
@@ -254,7 +254,7 @@ export class QueryEditor extends PureComponent<Props> {
                     </Alert>
                 </FieldSet>
                 <FieldSet
-                    hidden={!this.isCurrentSelectedValueATag()}
+                    hidden={!this.isCurrentSelectedValueACustomTag()}
                     // Configure the tag. If you are unsure, leave the defaults
                 >
                     <div className={'gf-form'}>
