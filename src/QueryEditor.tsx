@@ -57,7 +57,37 @@ export class QueryEditor extends PureComponent<Props> {
 
     constructor(props: Props) {
         super(props);
-    }
+
+        this.selectedObject = this.props.query.fullTagName || '';
+        this.selectedValue = this.props.query.value || '';
+
+        // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
+        const currentConfigurationAggregates = this.props.query.configurationTagAggregates || [this.defaultConfigurationAggregates];
+        for (let i = 0; i < currentConfigurationAggregates.length; i++) {
+            const currentValue = currentConfigurationAggregates[i];
+
+            // check if currentValue is in this.tagAggregatesOptions
+            for (let j = 0; j < this.tagAggregatesOptions.length; j++) {
+                const currentOption = this.tagAggregatesOptions[j];
+                if (currentValue === currentOption.value) {
+                    this.selectedConfigurationAggregates.push(currentOption);
+                }
+            }
+        }
+
+        // check this.props.query.configurationTagGapfilling and add to selectedConfigurationGapfilling
+        const currentGapfill = this.props.query.configurationTagGapfilling || this.defaultConfigurationGapfilling.value;
+        for (let i = 0; i < this.tagGapfillingOptions.length; i++) {
+            const currentOption = this.tagGapfillingOptions[i];
+            if (currentGapfill === currentOption.value) {
+                this.selectedConfigurationGapfilling = currentOption;
+            }
+        }
+
+        // check this.props.query.configurationTagTimeBucket and add to selectedConfigurationTimeBucket
+        this.selectedConfigurationTimeBucket = this.props.query.configurationTimeBucket || this.defaultConfigurationTimeBucket;
+
+   }
 
 
     isObjectSelected = () => {
@@ -223,6 +253,7 @@ export class QueryEditor extends PureComponent<Props> {
                         <Cascader
                             options={this.getObjectStructure()}
                             onSelect={this.onObjectChange}
+                            value={this.selectedObject}
                             displayAllSelectedLevels={true}
                             width={60}
                         />
@@ -241,6 +272,7 @@ export class QueryEditor extends PureComponent<Props> {
                             options={this.getValueStructure()}
                             onSelect={this.onValueChange}
                             displayAllSelectedLevels={true}
+                            value={this.selectedValue}
                             width={60}
                         />
                     </div>

@@ -115,9 +115,11 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
         return new MutableDataFrame<any>();
     }
 
-    const aggregates = query.configurationTagAggregates;
+    var aggregates = query.configurationTagAggregates;
     // if aggregates is empty or undefined, then we use the default aggregates of avg
-    const aggregatesToUse = aggregates ? aggregates : ['avg'];
+    if (!aggregates || aggregates.length === 0) {
+        aggregates = ['avg'];
+    }
 
     // if it is a tag query, return default time series data
     const isTag = (query.value?.startsWith('tags'))
@@ -135,7 +137,7 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
         });
 
         // foreach aggregate in aggregatesToUse, create a new row in data.fields
-        aggregatesToUse.forEach(aggregate => {
+        aggregates.forEach(aggregate => {
             data.addField({
                 name: aggregate,
                 type: FieldType.number,
@@ -151,7 +153,7 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
             let newRow: any[] = [];
 
             const avg = Math.random() * 100;
-            aggregatesToUse.forEach(aggregate => {
+            aggregates.forEach(aggregate => {
                 switch (aggregate) {
                     case 'avg':
                         newRow[aggregate] = avg;
@@ -181,6 +183,174 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
         }
 
         return data;
+    } else if (query.value === 'table/finished_jobs') {
+        let data = new MutableDataFrame({
+            name: 'factoryinsight',
+            refId: query.refId,
+            meta: {
+                preferredVisualisationType: 'table',
+            },
+            fields: [],
+        });
+
+        // add Job ID field
+        data.addField({
+            name: "Job ID",
+            values: ["107117",
+                "107118",
+                "107792",
+                "107793",
+                "107119",
+                "107796",
+                "107829",
+                "107782",
+                "107765",
+                "107823",
+                "107799",
+                "107791"],
+        });
+
+        // add product ID field
+        data.addField({
+            name: "Product ID",
+            values: ["product107117",
+                "product107118",
+                "product107792",
+                "product107793",
+                "product107119",
+                "product107796",
+                "product107829",
+                "product107782",
+                "product107765",
+                "product107823",
+                "product107799",
+                "product107791"],
+        });
+
+        // add begin timestamp field
+        data.addField({
+            name: "Begin",
+            values: [1606089943000,
+                1606094730000,
+                1606243321000,
+                1606255888000,
+                1606265579000,
+                1606269189000,
+                1606330275000,
+                1606340592000,
+                1606352142000,
+                1606357912000,
+                1606362037000,
+                1606407827000],
+            type: FieldType.time,
+        });
+
+        // add end timestamp field
+        data.addField({
+            name: "End",
+            values: [1606094711000,
+                1606100771000,
+                1606253181000,
+                1606265565000,
+                1606267349000,
+                1606279029000,
+                1606332283000,
+                1606348944000,
+                1606357896000,
+                1606360297000,
+                1606367208000,
+                1606416662000],
+            type: FieldType.time,
+        });
+
+        // add target units field
+        data.addField({
+            name: "Target Units",
+            values: [1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1],
+        });
+
+        // add actual units field
+        data.addField({
+            name: "Actual Units",
+            values: [0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0],
+        });
+
+        // add target duration field
+        data.addField({
+            name: "Target Duration",
+            values: [0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0],
+            type: FieldType.number,
+        });
+
+        // add actual duration field
+        data.addField({
+            name: "Actual Duration",
+            values: [4768,
+                6041,
+                9860,
+                9677,
+                1770,
+                9840,
+                2008,
+                8352,
+                5754,
+                2385,
+                5171,
+                8835],
+            type: FieldType.number,
+        });
+
+        // add producing field
+        data.addField({
+            name: "Producing",
+            values: [2199,
+                1446,
+                6197,
+                4665,
+                1233,
+                5825,
+                1001,
+                2599,
+                2370,
+                1337,
+                2840,
+                5836],
+            type: FieldType.number,
+        });
+        return data
     }
 
     return new MutableDataFrame<any>();

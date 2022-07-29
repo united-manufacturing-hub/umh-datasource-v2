@@ -15,7 +15,7 @@ export interface FactoryinsightQuery extends DataQuery {
     fullTagName?: string;
 
     configurationTagGapfilling?: string;
-    configurationTagAggregates: string[];
+    configurationTagAggregates: string["avg"];
     configurationTimeBucket?: string;
 }
 
@@ -34,7 +34,7 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
 
     configurationTagGapfilling : '',
     configurationTagAggregates : [],
-    configurationTimeBucket : '',
+    configurationTimeBucket : 'auto',
 };
 
 /**
