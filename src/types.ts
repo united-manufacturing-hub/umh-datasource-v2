@@ -5,12 +5,18 @@ export interface FactoryinsightQuery extends DataQuery {
     location?: string;
     asset?: string;
 
+    // new ones
     enterprise?: string;
     site?: string;
     area?: string;
     productionLine?: string;
     workCell?: string;
     value?: string;
+    fullTagName?: string;
+
+    configurationTagGapfilling?: string;
+    configurationTagAggregates: string[];
+    configurationTimeBucket?: string;
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
@@ -24,6 +30,11 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
     productionLine: '',
     workCell: '',
     value: '',
+    fullTagName: '',
+
+    configurationTagGapfilling : '',
+    configurationTagAggregates : [],
+    configurationTimeBucket : '',
 };
 
 /**

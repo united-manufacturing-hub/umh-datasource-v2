@@ -5,8 +5,6 @@ import {
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
-  MutableDataFrame,
-  FieldType,
 } from '@grafana/data';
 
 import {
@@ -15,6 +13,7 @@ import {
   defaultFactoryinsightQuery
 } from './types';
 import { BackendSrvRequest, getBackendSrv } from '@grafana/runtime';
+import {getDemoTimeseriesData} from "./demoData";
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
   baseUrl: string; // baseUrl is the url to factoryinsight
@@ -40,13 +39,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     // Return a constant for each query.
     const data = options.targets.map(target => {
       const query = defaults(target, defaultFactoryinsightQuery);
-      return new MutableDataFrame({
-        refId: query.refId,
-        fields: [
-          { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [query.location, query.asset], type: FieldType.string },
-        ],
-      });
+      return getDemoTimeseriesData(query, from, to);
     });
 
     return { data };
