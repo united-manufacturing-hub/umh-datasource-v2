@@ -1,25 +1,31 @@
+// POC TODO
+// Alerts using Grafana's Alerting system
+// Historian functions
+// - statistical like avg, max, min, etc
+// - gapfilling, last observation carried forward, downsampling
+// User defined functions
+// Export REST call to get data
 
-
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import {Cascader, CascaderOption, Label, Alert} from '@grafana/ui';
-import { QueryEditorProps } from '@grafana/data';
-import { DataSource } from './datasource';
-import { FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
+import {QueryEditorProps} from '@grafana/data';
+import {DataSource} from './datasource';
+import {FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 
-import { GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags } from './demoData'
+import {GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags} from './demoData'
 
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props> {
 
     objectStructure: Array<CascaderOption> = [];
-    KPIStructure: Array<CascaderOption> = [];
+    valueStructure: Array<CascaderOption> = [];
 
     tagsValueID: string = 'tags'
     KPIValueID: string = 'kpi'
 
     selectedObject: string = '';
-    selectedKPI: string = '';
+    selectedValue: string = '';
 
     constructor(props: Props) {
         super(props);
@@ -30,14 +36,19 @@ export class QueryEditor extends PureComponent<Props> {
         return this.selectedObject !== '';
     }
 
-    isValidKPISelected = () => {
-        if (this.selectedKPI === '') {
+    isValidValueSelected = () => {
+        if (this.selectedValue === '') {
             return false;
-        } else if (this.selectedKPI === this.KPIValueID || this.selectedKPI === this.tagsValueID) {
+        } else if (this.selectedValue === this.KPIValueID || this.selectedValue === this.tagsValueID) {
             return false;
         } else {
             return true
         }
+    }
+
+    // isCurrentSelectedValueATag checks whether the current selected value is a tag and therefore, begins with tagsValueID
+    isCurrentSelectedValueATag = () => {
+        return this.selectedValue.startsWith(this.tagsValueID);
     }
 
     getObjectStructure = () => {
@@ -51,9 +62,9 @@ export class QueryEditor extends PureComponent<Props> {
         return this.objectStructure;
     }
 
-    getKPIStructure = () => {
+    getValueStructure = () => {
         if (this.props.query.workCell === '' || this.props.query.workCell === undefined) {
-            this.KPIStructure = [
+            this.valueStructure = [
                 {
                     label: 'Tags',
                     value: this.tagsValueID,
@@ -66,7 +77,7 @@ export class QueryEditor extends PureComponent<Props> {
                 }
             ]
         } else {
-            this.KPIStructure = [
+            this.valueStructure = [
                 {
                     label: 'Tags',
                     value: this.tagsValueID,
@@ -80,14 +91,14 @@ export class QueryEditor extends PureComponent<Props> {
             ]
         }
 
-        return this.KPIStructure;
+        return this.valueStructure;
 
     }
 
     onObjectChange = (val: string) => {
 
         // split object into enterprise, area, production line, work cell
-        const { onChange, query } = this.props;
+        const {onChange, query} = this.props;
         const object = val;
         const enterprise = object.split('/')[0];
         const site = object.split('/')[1];
@@ -95,7 +106,7 @@ export class QueryEditor extends PureComponent<Props> {
         const productionLine = object.split('/')[3];
         const workCell = object.split('/')[4];
 
-        onChange({ ...query, enterprise, site, area, productionLine, workCell });
+        onChange({...query, enterprise, site, area, productionLine, workCell});
 
         // and also in QueryEditor
         this.selectedObject = val;
@@ -104,14 +115,14 @@ export class QueryEditor extends PureComponent<Props> {
         this.forceUpdate();
     }
 
-    onKPIChange = (val: string) => {
+    onValueChange = (val: string) => {
 
-        const { onChange, query } = this.props;
-        const kpi = val;
-        onChange({ ...query, kpi });
+        const {onChange, query} = this.props;
+        const value = val;
+        onChange({...query, value});
 
         // and also in QueryEditor
-        this.selectedKPI = val;
+        this.selectedValue = val;
 
         // force render
         this.forceUpdate();
@@ -119,37 +130,38 @@ export class QueryEditor extends PureComponent<Props> {
     }
 
 
-  render() {
-              return (
-                  <div>
-                    <div className="gf-form">
-                        <Label className="gf-form-label width-10">Object</Label>
-                        <Cascader
-                            options={this.getObjectStructure()}
-                            onSelect={this.onObjectChange}
-                            displayAllSelectedLevels={true}
-                            width={60}
-                        />
-                    </div>
-                    <div
-                        className="gf-form"
-                        hidden={!this.isObjectSelected()}
-                    >
-                        <label className="gf-form-label width-10">Value</label>
-                        <Cascader
-                            options={this.getKPIStructure()}
-                            onSelect={this.onKPIChange}
-                            displayAllSelectedLevels={true}
-                            width={60}
-                        />
-                    </div>
-                  <Alert
-                      title="Please select a value from the dropdown menu"
-                      severity="error"
-                      hidden={this.isValidKPISelected() || !this.isObjectSelected()}
-                  >
-                      "Tags" or "KPIs" are not valid values for the "Element" field.
-                  </Alert>
-              </div>)
-          }
+    render() {
+        return (
+            <div>
+                <div className="gf-form">
+                    <Label className="gf-form-label width-10">Object</Label>
+                    <Cascader
+                        options={this.getObjectStructure()}
+                        onSelect={this.onObjectChange}
+                        displayAllSelectedLevels={true}
+                        width={60}
+                    />
+                </div>
+                <div
+                    className="gf-form"
+                    hidden={!this.isObjectSelected()}
+                >
+                    <label className="gf-form-label width-10">Value</label>
+                    <Cascader
+                        options={this.getValueStructure()}
+                        onSelect={this.onValueChange}
+                        displayAllSelectedLevels={true}
+                        width={60}
+                    />
+                </div>
+
+                <Alert
+                    title="Please select a value from the dropdown menu"
+                    severity="error"
+                    hidden={this.isValidValueSelected() || !this.isObjectSelected()}
+                >
+                    "Tags" or "KPIs" are not valid values for the "Element" field.
+                </Alert>
+            </div>)
+    }
 }

@@ -1,6 +1,7 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 export interface FactoryinsightQuery extends DataQuery {
+  // to be removed
   location?: string;
   asset?: string;
 
@@ -9,18 +10,20 @@ export interface FactoryinsightQuery extends DataQuery {
   area?: string;
   productionLine?: string;
   workCell?: string;
-  kpi?: string;
+  value?: string;
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
+  // to be removed
   location: '', // TODO TESTDATA
   asset: '',
+
     enterprise: '',
     site: '',
     area: '',
     productionLine: '',
     workCell: '',
-    kpi: '',
+    value: '',
 };
 
 /**
