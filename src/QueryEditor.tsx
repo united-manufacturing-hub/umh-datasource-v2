@@ -698,37 +698,32 @@ export class QueryEditor extends PureComponent<Props, State> {
   render() {
     return (
       <div className="gf-form-group">
-        <FieldSet>
-          <div className="gf-form">
-            <InlineLabel tooltip={'Select site, area, production line and work cell you want the data of'}>
-              Query
-            </InlineLabel>
-            <Cascader
-              options={this.state.siteOptions}
-              onChange={this.onSiteChange}
-              displayAllSelectedLevels={true}
-              value={this.state.selectedSite?.index}
-            />
-            <label className="gf-form-label">Area</label>
-            <Select
-              options={this.state.areaOptions}
-              onChange={this.onAreaChange}
-              value={this.state.selectedArea?.index}
-            />
-            <label className="gf-form-label">Production line</label>
-            <Select
-              options={this.state.productionLineOptions}
-              onChange={this.onProductionLineChange}
-              value={this.state.selectedProductionLine?.index}
-            />
-            <label className="gf-form-label">Work cell</label>
-            <Select
-              options={this.state.workCellOptions}
-              onChange={this.onWorkCellChange}
-              value={this.state.selectedWorkCell?.index}
-            />
-          </div>
-        </FieldSet>
+        <div className="gf-form">
+          <label className="gf-form-label">Query</label>
+          <Select
+            options={this.state.siteOptions}
+            onChange={this.onSiteChange}
+            value={this.state.selectedSite?.index}
+          />
+          <label className="gf-form-label">Area</label>
+          <Select
+            options={this.state.areaOptions}
+            onChange={this.onAreaChange}
+            value={this.state.selectedArea?.index}
+          />
+          <label className="gf-form-label">Production line</label>
+          <Select
+            options={this.state.productionLineOptions}
+            onChange={this.onProductionLineChange}
+            value={this.state.selectedProductionLine?.index}
+          />
+          <label className="gf-form-label">Work cell</label>
+          <Select
+            options={this.state.workCellOptions}
+            onChange={this.onWorkCellChange}
+            value={this.state.selectedWorkCell?.index}
+          />
+        </div>
         <div hidden={!this.isWorkCellSelected()}>
           <span className="gf-from-pre">Transformations</span>
           <div className="gf-form">
