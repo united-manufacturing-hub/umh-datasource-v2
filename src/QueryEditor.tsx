@@ -7,51 +7,20 @@
 // Export REST call to get data TODO
 
 import React, { PureComponent } from 'react';
-import { Cascader, CascaderOption, InlineLabel, Alert, FieldSet, Select, MultiSelect, Input } from '@grafana/ui';
+import { Cascader, CascaderOption, InlineLabel, FieldSet } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
-import {
-  defaultFactoryinsightQuery,
-  Enterprise,
-  FactoryinsightDataSourceOptions,
-  FactoryinsightQuery,
-  Site,
-  TreeStructure,
-} from './types';
+import { FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
 
-import { GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags, DefaultTables } from './demoData';
-import defaults from 'lodash/defaults';
+import { DefaultTags, DefaultWorkCellTags, DefaultKPIs, DefaultTables } from 'demoData';
 
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
-type State = {
-  selectedEnterprise: { label: string; index: number };
-  selectedSite?: { label: string; index: number };
-  selectedArea?: { label: string; index: number };
-  selectedProductionLine?: { label: string; index: number };
-  selectedWorkCell?: { label: string; index: number };
-  selectedDataFormat?: { label: string; index: number };
-  selectedTagGroup?: { label: string; index: number };
-  selectedTag?: { label: string; index: number };
-  selectedKpiMethod?: { label: string; index: number };
-  selectedTableType?: { label: string; index: number };
-  labelsField?: string;
-  siteOptions?: SelectableValue[];
-  areaOptions?: SelectableValue[];
-  productionLineOptions: SelectableValue[];
-  workCellOptions: SelectableValue[];
-  dataFormatOptions: SelectableValue[];
-  tagGroupOptions: SelectableValue[];
-  tagOptions: SelectableValue[];
-  kpiMethodOptions: SelectableValue[];
-  tableTypeOptions: SelectableValue[];
-  objectOptions: CascaderOption[];
-  parameterString?: string;
-  uriPathExtension?: string;
-};
-export class QueryEditor extends PureComponent<Props, State> {
+
+export class QueryEditor extends PureComponent<Props> {
   enterpriseName = this.props.datasource.enterpriseName;
   objectStructure: CascaderOption[] = [];
   valueStructure: CascaderOption[] = [];
+  initialPayload: any;
 
   tagsQueryParameter = 'tags';
   kpisQueryParameter = 'kpi';
@@ -101,53 +70,11 @@ export class QueryEditor extends PureComponent<Props, State> {
   defaultConfigurationGapfilling: SelectableValue = this.tagGapfillingOptions[0];
   selectedConfigurationGapfilling: SelectableValue = this.defaultConfigurationGapfilling;
 
-  constructor(props: Readonly<Props>) {
+  constructor(props: Props) {
     super(props);
 
-    const query = defaults(this.props.query, defaultFactoryinsightQuery);
-    this.state = {
-      selectedEnterprise: { label: this.enterpriseName, index: 0 },
-      selectedSite: query.siteName,
-      selectedArea: query.areaName,
-      selectedProductionLine: query.productionLineName,
-      selectedWorkCell: query.workCellName,
-      selectedDataFormat: query.dataFormat,
-      selectedTagGroup: query.tagGroup,
-      selectedTag: query.tag,
-      selectedKpiMethod: query.kpiMethod,
-      selectedTableType: query.tableType,
-      labelsField: query.labelsField,
-      siteOptions: [{ label: '', value: 0 }],
-      areaOptions: [{ label: '', value: 0 }],
-      productionLineOptions: [{ label: '', value: 0 }],
-      workCellOptions: [{ label: '', value: 0 }],
-      dataFormatOptions: [{ label: '', value: 0 }],
-      tagGroupOptions: [{ label: '', value: 0 }],
-      tagOptions: [{ label: '', value: 0 }],
-      kpiMethodOptions: [{ label: '', value: 0 }],
-      tableTypeOptions: [{ label: '', value: 0 }],
-      objectOptions: [{ label: '', value: 0 }],
-      parameterString: query.parameterString,
-      uriPathExtension: query.uriPathExtension,
-    };
-
-    this.props.datasource.GetSites((sitesArray: any[]) => {
-      console.log('Got sites: ', sitesArray);
-
-      const siteIndex = this.state.selectedSite!.index;
-
-      const newSiteLabel = sitesArray[siteIndex];
-      const newSiteOptions = sitesArray.map((site, index) => {
-        return { label: site, index: index };
-      });
-      this.setState({
-        selectedSite: { label: newSiteLabel, index: siteIndex },
-        siteOptions: newSiteOptions,
-      });
-    });
-
     this.selectedObject = this.props.query.fullTagName || '';
-    //this.selectedValue = this.props.query.value || '';
+    this.selectedValue = this.props.query.value || '';
 
     // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
     const currentConfigurationAggregates = this.props.query.configurationTagAggregates || [
@@ -184,365 +111,6 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
   }
 
-  // Event handler for the Site dropdown
-  onSiteChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedSite!.index) {
-      return;
-    }
-
-    // Update the state with the selected site. When the site changes, everything else should be reset.
-    this.setState({
-      selectedSite: { label: event.label || '', index: event.value || 0 },
-      selectedArea: { label: '', index: 0 },
-      selectedProductionLine: { label: '', index: 0 },
-      selectedWorkCell: { label: '', index: 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get the areas for the selected site
-    this.props.datasource.GetAreas(event.label || '', this.setAreasOptions);
-  };
-
-  // Event handler for the Area dropdown
-  onAreaChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedArea!.index) {
-      return;
-    }
-
-    // Update the state with the selected area. When the area changes, everything else should be reset.
-    this.setState({
-      selectedArea: { label: event.label || '', index: event.value || 0 },
-      selectedProductionLine: { label: '', index: 0 },
-      selectedWorkCell: { label: '', index: 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get the production lines for the selected area
-    this.props.datasource.GetProductionLines(
-      this.state.selectedSite!.label,
-      event.label || '',
-      this.setProductionLinesOptions
-    );
-  };
-
-  // Event handler for the Production Line dropdown
-  onProductionLineChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedProductionLine!.index) {
-      return;
-    }
-
-    // Update the state with the selected production line. When the production line changes, everything else should be reset.
-    this.setState({
-      selectedProductionLine: { label: event.label || '', index: event.value || 0 },
-      selectedWorkCell: { label: '', index: 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get the work cells for the selected production line
-    this.props.datasource.GetWorkCells(
-      this.state.selectedSite!.label,
-      this.state.selectedArea!.label,
-      event.label || '',
-      this.setWorkCellsOptions
-    );
-  };
-
-  onWorkCellChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedWorkCell!.index) {
-      return;
-    }
-
-    // Update the state with the selected work cell
-    this.setState({
-      selectedWorkCell: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get data formats available for the selected work cell
-    this.props.datasource.GetDataFormats(
-      this.state.selectedSite!.label,
-      this.state.selectedArea!.label,
-      this.state.selectedProductionLine!.label,
-      event.label || '',
-      this.setDataFormatsOptions
-    );
-  };
-
-  onDataFormatChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedDataFormat!.index) {
-      return;
-    }
-
-    // Update the state with the selected data format
-    this.setState({
-      selectedDataFormat: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get options available for the selected data format
-    switch (event.label) {
-      case 'tags':
-        this.props.datasource.GetTagGroups(
-          this.state.selectedSite!.label,
-          this.state.selectedArea!.label,
-          this.state.selectedProductionLine!.label,
-          this.state.selectedWorkCell!.label,
-          this.setTagGroupsOptions
-        );
-        break;
-      case 'kpis':
-        this.props.datasource.GetKpiMethods(
-          this.state.selectedSite!.label,
-          this.state.selectedArea!.label,
-          this.state.selectedProductionLine!.label,
-          this.state.selectedWorkCell!.label,
-          this.setKpiMethodsOptions
-        );
-        break;
-      case 'tables':
-        this.props.datasource.GetTableTypes(
-          this.state.selectedSite!.label,
-          this.state.selectedArea!.label,
-          this.state.selectedProductionLine!.label,
-          this.state.selectedWorkCell!.label,
-          this.setTableTypesOptions
-        );
-      default:
-        break;
-    }
-  };
-
-  onTagGroupChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedTagGroup!.index) {
-      return;
-    }
-
-    // Update the state with the selected tag group
-    this.setState({
-      selectedTagGroup: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-
-    // Get tags for the selected tag group
-    this.props.datasource.GetTags(
-      this.state.selectedSite!.label,
-      this.state.selectedArea!.label,
-      this.state.selectedProductionLine!.label,
-      this.state.selectedWorkCell!.label,
-      event.label || '',
-      this.setTagsOptions
-    );
-  };
-
-  onTagChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedTag!.index) {
-      return;
-    }
-
-    // Update the state with the selected tag
-    this.setState({
-      selectedTag: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-  };
-
-  onKpiMethodChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedKpiMethod!.index) {
-      return;
-    }
-
-    // Update the state with the selected KPI method
-    this.setState({
-      selectedKpiMethod: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-  };
-
-  onTableTypeChange = (event: SelectableValue) => {
-    // Prevent change if the current value is the same as the new value
-    if (event.value === this.state.selectedTableType!.index) {
-      return;
-    }
-
-    // Update the state with the selected table type
-    this.setState({
-      selectedTableType: { label: event.label || '', index: event.value || 0 },
-      parameterString: '',
-      uriPathExtension: '',
-    });
-  };
-
-  setAreasOptions = (areasArray: any[]) => {
-    // Get last area
-    const areaIndex = this.state.selectedArea!.index;
-
-    // Update state with new site options
-    const newAreaLabel = areasArray[areaIndex];
-    const newAreaOptions = areasArray.map((area, index) => {
-      return { label: area, index: index };
-    });
-    this.setState({
-      selectedArea: { label: newAreaLabel, index: areaIndex },
-      areaOptions: newAreaOptions,
-    });
-
-    // Get the production lines for the selected site
-    this.props.datasource.GetProductionLines(
-      this.state.selectedSite!.label,
-      newAreaLabel,
-      this.setProductionLinesOptions
-    );
-  };
-
-  setProductionLinesOptions = (productionLinesArray: any[]) => {
-    // Get last production line
-    const productionLineIndex = this.state.selectedProductionLine!.index;
-
-    // Update state with new production line options
-    const newProductionLineLabel = productionLinesArray[productionLineIndex];
-    const newProductionLineOptions = productionLinesArray.map((productionLine, index) => {
-      return { label: productionLine, index: index };
-    });
-    this.setState({
-      selectedProductionLine: { label: newProductionLineLabel, index: productionLineIndex },
-      productionLineOptions: newProductionLineOptions,
-    });
-
-    // Get the work cells for the selected site
-    this.props.datasource.GetWorkCells(
-      this.state.selectedSite!.label,
-      this.state.selectedArea!.label,
-      newProductionLineLabel,
-      this.setWorkCellsOptions
-    );
-  };
-
-  setWorkCellsOptions = (workCellsArray: any[]) => {
-    // Get last work cell
-    const workCellIndex = this.state.selectedWorkCell!.index;
-
-    // Update state with new work cell options
-    const newWorkCellLabel = workCellsArray[workCellIndex];
-    const newWorkCellOptions = workCellsArray.map((workCell, index) => {
-      return { label: workCell, index: index };
-    });
-    this.setState({
-      selectedWorkCell: { label: newWorkCellLabel, index: workCellIndex },
-      workCellOptions: newWorkCellOptions,
-    });
-  };
-
-  setDataFormatsOptions = (dataFormatsArray: any[]) => {
-    // Get last data format
-    const dataFormatIndex = this.state.selectedDataFormat!.index;
-
-    // Update state with new data format options
-    const newDataFormatLabel = dataFormatsArray[dataFormatIndex];
-    const newDataFormatOptions = dataFormatsArray.map((dataFormat, index) => {
-      return { label: dataFormat, index: index };
-    });
-    this.setState({
-      selectedDataFormat: { label: newDataFormatLabel, index: dataFormatIndex },
-      dataFormatOptions: newDataFormatOptions,
-    });
-  };
-
-  setTagGroupsOptions = (tagGroupsArray: any[]) => {
-    // Get last tag group
-    const tagGroupIndex = this.state.selectedTagGroup!.index;
-
-    // Update state with new tag group options
-    const newTagGroupLabel = tagGroupsArray[tagGroupIndex];
-    const newTagGroupOptions = tagGroupsArray.map((tagGroup, index) => {
-      return { label: tagGroup, index: index };
-    });
-    this.setState({
-      selectedTagGroup: { label: newTagGroupLabel, index: tagGroupIndex },
-      tagGroupOptions: newTagGroupOptions,
-    });
-  };
-
-  setTagsOptions = (tagsArray: any[]) => {
-    // Get last tag
-    const tagIndex = this.state.selectedTag!.index;
-
-    // Update state with new tag options
-    const newTagLabel = tagsArray[tagIndex];
-    const newTagOptions = tagsArray.map((tag, index) => {
-      return { label: tag, index: index };
-    });
-    this.setState({
-      selectedTag: { label: newTagLabel, index: tagIndex },
-      tagOptions: newTagOptions,
-    });
-  };
-
-  setKpiMethodsOptions = (kpiMethodsArray: any[]) => {
-    // Get last kpi method
-    const kpiMethodIndex = this.state.selectedKpiMethod!.index;
-
-    // Update state with new kpi method options
-    const newKpiMethodLabel = kpiMethodsArray[kpiMethodIndex];
-    const newKpiMethodOptions = kpiMethodsArray.map((kpiMethod, index) => {
-      return { label: kpiMethod, index: index };
-    });
-    this.setState({
-      selectedKpiMethod: { label: newKpiMethodLabel, index: kpiMethodIndex },
-      kpiMethodOptions: newKpiMethodOptions,
-    });
-  };
-
-  setTableTypesOptions = (tableTypesArray: any[]) => {
-    // Get last table type
-    const tableTypeIndex = this.state.selectedTableType!.index;
-
-    // Update state with new table type options
-    const newTableTypeLabel = tableTypesArray[tableTypeIndex];
-    const newTableTypeOptions = tableTypesArray.map((tableType, index) => {
-      return { label: tableType, index: index };
-    });
-    this.setState({
-      selectedTableType: { label: newTableTypeLabel, index: tableTypeIndex },
-      tableTypeOptions: newTableTypeOptions,
-    });
-  };
-
-  isWorkCellSelected = () => {
-    return this.state.selectedWorkCell!.label !== '';
-  };
-
-  isDataFormatSelected = () => {
-    return this.state.selectedDataFormat!.label !== '';
-  };
-
-  isTagDataFormatSelected = () => {
-    return this.state.selectedTagGroup!.label !== '';
-  };
-
-  isKpiDataFormatSelected = () => {
-    return this.state.selectedKpiMethod!.label !== '';
-  };
-
-  isTableDataFormatSelected = () => {
-    return this.state.selectedTableType!.label !== '';
-  };
-
   isObjectSelected = () => {
     return this.selectedObject !== '';
   };
@@ -571,93 +139,99 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
   };
 
-  getEnterprise = () => {
-    console.log(this.props.datasource.enterpriseName);
-    let a: SelectableValue = {
-      value: this.props.datasource.enterpriseName || '',
-    };
-    return a;
-  };
-
   getObjectStructure = () => {
-    this.props.datasource.GetResourceTree().then((response) => {
-      const result = Object.entries(response.data);
-      console.log(result);
-    });
+    console.log(this.objectStructure.length);
+    if (this.objectStructure.length == 0) {
+      const newObject: CascaderOption[] = [];
+      this.props.datasource.GetResourceTree().then((response: any) => {
+        console.log(response[0][1]);
+        const payload = response[0][1];
+        this.initialPayload = payload;
+        newObject.push({
+          label: payload.label,
+          value: payload.value,
+          items: payload.entries.map((sites: any) => {
+            return {
+              label: sites.label,
+              value: sites.value,
+              items: sites.entries.map((areas: any) => {
+                return {
+                  label: areas.label,
+                  value: areas.value,
+                  items: areas.entries.map((productionLines: any) => {
+                    return {
+                      label: productionLines.label,
+                      value: productionLines.value,
+                      items: productionLines.entries.map((workCells: any) => {
+                        return {
+                          label: workCells.label,
+                          value: workCells.value,
+                        };
+                      }),
+                    };
+                  }),
+                };
+              }),
+            };
+          }),
+        });
+      });
+      this.objectStructure = newObject;
+    }
 
+    console.log(this.objectStructure);
     return this.objectStructure;
   };
 
-  setObjectStructure = (objectStructure: any) => {
-    const result = Object.entries(objectStructure);
-    console.log(result);
-    return { value: 'a', label: 'a' };
-    // const newObjectOptions: CascaderOption[] = objectStructure.map((object: TreeStructure) => {
-    //   let siteCascader: CascaderOption = {
-
-    //   }
-    //   let enterpriseCascader: CascaderOption = {
-    //     value: this.enterpriseName,
-    //     label: this.enterpriseName,
-    //     children: siteCascader,
-    //   };
-    //   let sites = object.get(this.enterpriseName)!.sites.keys();
-    //   let site: Site = enterprise.sites.get()!;
-
-    //   let newObject: CascaderOption = {
-    //   label: this.enterpriseName,
-    //   value: this.enterpriseName,
-    //   children: object.get(this.enterpriseName)
-    //   }
-    //   return {[{label: }]};
-    // });
-
-    // this.setState({
-    //   objectOptions: newObjectOptions,
-    // })
-  };
-
   getValueStructure = () => {
-    // if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
-    //   this.valueStructure = [
-    //     {
-    //       label: 'Tags',
-    //       value: this.tagsQueryParameter,
-    //       items: DefaultTags,
-    //     },
-    //   ];
-    // } else {
-    //   this.valueStructure = [
-    //     {
-    //       label: 'Tags',
-    //       value: this.tagsQueryParameter,
-    //       items: DefaultWorkCellTags,
-    //     },
-    //     {
-    //       label: 'KPIs',
-    //       value: this.kpisQueryParameter,
-    //       items: DefaultKPIs,
-    //     },
-    //     {
-    //       label: 'Tables',
-    //       value: 'table',
-    //       items: DefaultTables,
-    //     },
-    //   ];
-    // }
+    if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
+      this.valueStructure = [
+        {
+          label: 'Tags',
+          value: this.tagsQueryParameter,
+          items: DefaultTags,
+        },
+      ];
+    } else {
+      const newValues: CascaderOption[] = [];
+      this.valueStructure = [
+        {
+          label: this.initialPayload.label,
+          value: this.initialPayload.value,
+          items: this.initialPayload.entries,
+        },
+      ];
+      this.valueStructure = [
+        {
+          label: 'Tags',
+          value: this.tagsQueryParameter,
+          items: DefaultWorkCellTags,
+        },
+        {
+          label: 'KPIs',
+          value: this.kpisQueryParameter,
+          items: DefaultKPIs,
+        },
+        {
+          label: 'Tables',
+          value: 'table',
+          items: DefaultTables,
+        },
+      ];
+    }
 
     return this.valueStructure;
   };
 
   onObjectChange = (val: string) => {
     // split object into enterprise, area, production line, work cell
-    //const { onChange, query } = this.props;
-    const fullTagName = val;
-    const enterprise = fullTagName.split('/')[0];
-    const site = fullTagName.split('/')[1];
-    const area = fullTagName.split('/')[2];
-    const productionLine = fullTagName.split('/')[3];
-    const workCell = fullTagName.split('/')[4];
+    // const { onChange, query } = this.props;
+    // const fullTagName = val;
+    // const enterprise = fullTagName.split('/')[0];
+    // const site = fullTagName.split('/')[1];
+    // const area = fullTagName.split('/')[2];
+    // const productionLine = fullTagName.split('/')[3];
+    // const workCell = fullTagName.split('/')[4];
 
     // onChange({
     //   ...query,
@@ -683,7 +257,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   onValueChange = (val: string) => {
     const { onChange, query } = this.props;
     const value = val;
-    onChange({ ...query });
+    onChange({ ...query, value });
 
     // and also in QueryEditor
     this.selectedValue = val;
@@ -748,25 +322,18 @@ export class QueryEditor extends PureComponent<Props, State> {
               onSelect={this.onObjectChange}
               width={60}
             />
-            {/* <label className="gf-form-label">Area</label>
-            <Select
-              options={this.state.areaOptions}
-              onChange={this.onAreaChange}
-              value={this.state.selectedArea?.index}
-            />
-            <label className="gf-form-label">Production line</label>
-            <Select
-              options={this.state.productionLineOptions}
-              onChange={this.onProductionLineChange}
-              value={this.state.selectedProductionLine?.index}
-            />
-            <label className="gf-form-label">Work cell</label>
-            <Select
-              options={this.state.workCellOptions}
-              onChange={this.onWorkCellChange}
-              value={this.state.selectedWorkCell?.index}
-    /> */}
           </div>
+          {/* <div className="gf-form" hidden={!this.isObjectSelected()}>
+            <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+              Value
+            </InlineLabel>
+            <Cascader
+              options={this.getValueStructure()}
+              onSelect={this.onValueChange}
+              displayAllSelectedLevels={true}
+              width={60}
+            />
+          </div> */}
         </FieldSet>
         {/* <div hidden={!this.isWorkCellSelected()}>
           <span className="gf-from-pre">Transformations</span>

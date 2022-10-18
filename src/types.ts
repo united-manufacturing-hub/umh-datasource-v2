@@ -23,21 +23,21 @@ export interface GetWorkCellsQuery extends DataQuery {
 }
 
 export interface FactoryinsightQuery extends DataQuery {
-  enterpriseName: { label: string; index: number };
-  siteName?: { label: string; index: number };
-  areaName?: { label: string; index: number };
-  productionLineName?: { label: string; index: number };
-  workCellName?: { label: string; index: number };
-  dataFormat?: { label: string; index: number };
+  enterpriseName: string;
+  siteName?: string;
+  areaName?: string;
+  productionLineName?: string;
+  workCellName?: string;
+  dataFormat?: string;
 
-  tagGroup?: { label: string; index: number };
-  tag?: { label: string; index: number };
+  tagGroup?: string;
+  tag?: string;
 
-  kpiMethod?: { label: string; index: number };
+  kpiMethod?: string;
 
-  tableType?: { label: string; index: number };
+  tableType?: string;
 
-  value?: { label: string; index: number };
+  value?: string;
   fullTagName?: string;
 
   labelsField?: string;
@@ -50,21 +50,21 @@ export interface FactoryinsightQuery extends DataQuery {
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
-  enterpriseName: { label: 'factoryinsight', index: 0 },
-  siteName: { label: '', index: 0 },
-  areaName: { label: '', index: 0 },
-  productionLineName: { label: '', index: 0 },
-  workCellName: { label: '', index: 0 },
-  dataFormat: { label: '', index: 0 },
+  enterpriseName: 'factoryinsight',
+  siteName: '',
+  areaName: '',
+  productionLineName: '',
+  workCellName: '',
+  dataFormat: '',
 
-  tagGroup: { label: '', index: 0 },
-  tag: { label: '', index: 0 },
+  tagGroup: '',
+  tag: '',
 
-  kpiMethod: { label: '', index: 0 },
+  kpiMethod: '',
 
-  tableType: { label: '', index: 0 },
+  tableType: '',
 
-  value: { label: '', index: 0 },
+  value: '',
   fullTagName: '',
 
   labelsField: '',

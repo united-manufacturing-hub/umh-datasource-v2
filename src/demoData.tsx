@@ -121,7 +121,7 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
   console.log(aggregates);
 
   // if it is a tag query, return default time series data
-  const isTag = query.value?.label.startsWith('tags');
+  const isTag = query.value?.startsWith('tags');
   if (isTag) {
     let data = new MutableDataFrame({
       name: 'factoryinsight',
@@ -185,7 +185,7 @@ export function getDemoTimeseriesData(query: FactoryinsightQuery, from: number, 
     }
 
     return data;
-  } else if (query.value?.label === 'table/finished_jobs') {
+  } else if (query.value === 'table/finished_jobs') {
     let data = new MutableDataFrame({
       name: 'factoryinsight',
       refId: query.refId,
