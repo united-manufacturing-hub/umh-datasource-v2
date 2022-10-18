@@ -17,10 +17,12 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
     super(instanceSettings);
 
-    this.baseUrl = instanceSettings.jsonData.baseURL!;
-    this.enterpriseName = instanceSettings.jsonData.customerId!;
+    this.baseUrl = instanceSettings.url!;
+    this.enterpriseName =
+      instanceSettings.jsonData.customerID == undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
     this.apiPath = `/api/v2/`;
-    console.log(this.enterpriseName);
+    console.log('enterpriseName: ' + this.enterpriseName);
+    console.log('jsonData', instanceSettings.jsonData);
   }
 
   async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {

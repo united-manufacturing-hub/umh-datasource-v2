@@ -50,7 +50,7 @@ export interface FactoryinsightQuery extends DataQuery {
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
-  enterpriseName: { label: '', index: 0 },
+  enterpriseName: { label: 'factoryinsight', index: 0 },
   siteName: { label: '', index: 0 },
   areaName: { label: '', index: 0 },
   productionLineName: { label: '', index: 0 },
@@ -81,7 +81,7 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
  */
 export interface FactoryinsightDataSourceOptions extends DataSourceJsonData {
   baseURL?: string;
-  customerId?: string;
+  customerID?: string;
 }
 
 /**

@@ -24,7 +24,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
     const { onOptionsChange, options } = this.props;
     const jsonData = {
       ...options.jsonData,
-      customerId: event.target.value,
+      customerID: event.target.value,
     };
     onOptionsChange({ ...options, jsonData });
   };
@@ -81,7 +81,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
             labelWidth={10}
             inputWidth={20}
             onChange={this.onEnterpriseNameChange}
-            value={jsonData.customerId || 'factoryinsight'}
+            value={jsonData.customerID || ''}
             tooltip="Defaults to factoryinsight"
             placeholder="factoryinsight"
           />

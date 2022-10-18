@@ -35,7 +35,7 @@
   },
   "routes": [
     {
-      "path": "api/datasources/proxy/1",
+      "path": "",
       "url": "{{ .JsonData.baseURL }}",
       "headers": [
         {
