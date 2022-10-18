@@ -10,7 +10,14 @@ import React, { PureComponent } from 'react';
 import { Cascader, CascaderOption, InlineLabel, Alert, FieldSet, Select, MultiSelect, Input } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
-import { defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
+import {
+  defaultFactoryinsightQuery,
+  Enterprise,
+  FactoryinsightDataSourceOptions,
+  FactoryinsightQuery,
+  Site,
+  TreeStructure,
+} from './types';
 
 import { GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags, DefaultTables } from './demoData';
 import defaults from 'lodash/defaults';
@@ -37,6 +44,7 @@ type State = {
   tagOptions: SelectableValue[];
   kpiMethodOptions: SelectableValue[];
   tableTypeOptions: SelectableValue[];
+  objectOptions: CascaderOption[];
   parameterString?: string;
   uriPathExtension?: string;
 };
@@ -98,7 +106,7 @@ export class QueryEditor extends PureComponent<Props, State> {
 
     const query = defaults(this.props.query, defaultFactoryinsightQuery);
     this.state = {
-      selectedEnterprise: query.enterpriseName,
+      selectedEnterprise: { label: this.enterpriseName, index: 0 },
       selectedSite: query.siteName,
       selectedArea: query.areaName,
       selectedProductionLine: query.productionLineName,
@@ -118,6 +126,7 @@ export class QueryEditor extends PureComponent<Props, State> {
       tagOptions: [{ label: '', value: 0 }],
       kpiMethodOptions: [{ label: '', value: 0 }],
       tableTypeOptions: [{ label: '', value: 0 }],
+      objectOptions: [{ label: '', value: 0 }],
       parameterString: query.parameterString,
       uriPathExtension: query.uriPathExtension,
     };
@@ -571,93 +580,120 @@ export class QueryEditor extends PureComponent<Props, State> {
   };
 
   getObjectStructure = () => {
-    this.objectStructure = [
-      {
-        label: 'BreweryCo',
-        value: 'BreweryCo',
-        items: GetDefaultEnterprise('BreweryCo'),
-      },
-    ];
+    this.props.datasource.GetResourceTree().then((response) => {
+      const result = Object.entries(response.data);
+      console.log(result);
+    });
+
     return this.objectStructure;
   };
 
-  // getValueStructure = () => {
-  //   if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
-  //     this.valueStructure = [
-  //       {
-  //         label: 'Tags',
-  //         value: this.tagsQueryParameter,
-  //         items: DefaultTags,
-  //       },
-  //     ];
-  //   } else {
-  //     this.valueStructure = [
-  //       {
-  //         label: 'Tags',
-  //         value: this.tagsQueryParameter,
-  //         items: DefaultWorkCellTags,
-  //       },
-  //       {
-  //         label: 'KPIs',
-  //         value: this.kpisQueryParameter,
-  //         items: DefaultKPIs,
-  //       },
-  //       {
-  //         label: 'Tables',
-  //         value: 'table',
-  //         items: DefaultTables,
-  //       },
-  //     ];
-  //   }
+  setObjectStructure = (objectStructure: any) => {
+    const result = Object.entries(objectStructure);
+    console.log(result);
+    return { value: 'a', label: 'a' };
+    // const newObjectOptions: CascaderOption[] = objectStructure.map((object: TreeStructure) => {
+    //   let siteCascader: CascaderOption = {
 
-  //   return this.valueStructure;
-  // };
+    //   }
+    //   let enterpriseCascader: CascaderOption = {
+    //     value: this.enterpriseName,
+    //     label: this.enterpriseName,
+    //     children: siteCascader,
+    //   };
+    //   let sites = object.get(this.enterpriseName)!.sites.keys();
+    //   let site: Site = enterprise.sites.get()!;
 
-  // onObjectChange = (val: string) => {
-  //   // split object into enterprise, area, production line, work cell
-  //   const { onChange, query } = this.props;
-  //   const fullTagName = val;
-  //   const enterprise = fullTagName.split('/')[0];
-  //   const site = fullTagName.split('/')[1];
-  //   const area = fullTagName.split('/')[2];
-  //   const productionLine = fullTagName.split('/')[3];
-  //   const workCell = fullTagName.split('/')[4];
+    //   let newObject: CascaderOption = {
+    //   label: this.enterpriseName,
+    //   value: this.enterpriseName,
+    //   children: object.get(this.enterpriseName)
+    //   }
+    //   return {[{label: }]};
+    // });
 
-  //   onChange({
-  //     ...query,
-  //     enterpriseName: enterprise,
-  //     siteName: site,
-  //     areaName: area,
-  //     productionLineName: productionLine,
-  //     workCellName: workCell,
-  //     fullTagName,
-  //   });
+    // this.setState({
+    //   objectOptions: newObjectOptions,
+    // })
+  };
 
-  //   // and also in QueryEditor
-  //   this.selectedObject = val;
+  getValueStructure = () => {
+    // if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
+    //   this.valueStructure = [
+    //     {
+    //       label: 'Tags',
+    //       value: this.tagsQueryParameter,
+    //       items: DefaultTags,
+    //     },
+    //   ];
+    // } else {
+    //   this.valueStructure = [
+    //     {
+    //       label: 'Tags',
+    //       value: this.tagsQueryParameter,
+    //       items: DefaultWorkCellTags,
+    //     },
+    //     {
+    //       label: 'KPIs',
+    //       value: this.kpisQueryParameter,
+    //       items: DefaultKPIs,
+    //     },
+    //     {
+    //       label: 'Tables',
+    //       value: 'table',
+    //       items: DefaultTables,
+    //     },
+    //   ];
+    // }
 
-  //   // reset value and configuration
-  //   this.selectedValue = '';
-  //   this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
+    return this.valueStructure;
+  };
 
-  //   // force render
-  //   this.forceUpdate();
-  // };
+  onObjectChange = (val: string) => {
+    // split object into enterprise, area, production line, work cell
+    //const { onChange, query } = this.props;
+    const fullTagName = val;
+    const enterprise = fullTagName.split('/')[0];
+    const site = fullTagName.split('/')[1];
+    const area = fullTagName.split('/')[2];
+    const productionLine = fullTagName.split('/')[3];
+    const workCell = fullTagName.split('/')[4];
 
-  // onValueChange = (val: string) => {
-  //   const { onChange, query } = this.props;
-  //   const value = val;
-  //   onChange({ ...query, value });
+    // onChange({
+    //   ...query,
+    //   enterpriseName: enterprise,
+    //   siteName: site,
+    //   areaName: area,
+    //   productionLineName: productionLine,
+    //   workCellName: workCell,
+    //   fullTagName,
+    // });
 
-  //   // and also in QueryEditor
-  //   this.selectedValue = val;
+    // and also in QueryEditor
+    this.selectedObject = val;
 
-  //   // reset configuration
-  //   this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
+    // reset value and configuration
+    this.selectedValue = '';
+    this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
 
-  //   // force render
-  //   this.forceUpdate();
-  // };
+    // force render
+    this.forceUpdate();
+  };
+
+  onValueChange = (val: string) => {
+    const { onChange, query } = this.props;
+    const value = val;
+    onChange({ ...query });
+
+    // and also in QueryEditor
+    this.selectedValue = val;
+
+    // reset configuration
+    this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
+
+    // force render
+    this.forceUpdate();
+  };
 
   onConfigurationGapfillingChange = (value: SelectableValue) => {
     const { onChange, query } = this.props;
@@ -698,33 +734,41 @@ export class QueryEditor extends PureComponent<Props, State> {
   render() {
     return (
       <div className="gf-form-group">
-        <div className="gf-form">
-          <label className="gf-form-label">Query</label>
-          <Select
-            options={this.state.siteOptions}
-            onChange={this.onSiteChange}
-            value={this.state.selectedSite?.index}
-          />
-          <label className="gf-form-label">Area</label>
-          <Select
-            options={this.state.areaOptions}
-            onChange={this.onAreaChange}
-            value={this.state.selectedArea?.index}
-          />
-          <label className="gf-form-label">Production line</label>
-          <Select
-            options={this.state.productionLineOptions}
-            onChange={this.onProductionLineChange}
-            value={this.state.selectedProductionLine?.index}
-          />
-          <label className="gf-form-label">Work cell</label>
-          <Select
-            options={this.state.workCellOptions}
-            onChange={this.onWorkCellChange}
-            value={this.state.selectedWorkCell?.index}
-          />
-        </div>
-        <div hidden={!this.isWorkCellSelected()}>
+        <FieldSet>
+          <div className="gf-form">
+            <InlineLabel
+              width={10}
+              tooltip={'Select site, area, production line and work cell you want to see the data of'}
+            >
+              Object
+            </InlineLabel>
+            <Cascader
+              displayAllSelectedLevels={true}
+              options={this.getObjectStructure()}
+              onSelect={this.onObjectChange}
+              width={60}
+            />
+            {/* <label className="gf-form-label">Area</label>
+            <Select
+              options={this.state.areaOptions}
+              onChange={this.onAreaChange}
+              value={this.state.selectedArea?.index}
+            />
+            <label className="gf-form-label">Production line</label>
+            <Select
+              options={this.state.productionLineOptions}
+              onChange={this.onProductionLineChange}
+              value={this.state.selectedProductionLine?.index}
+            />
+            <label className="gf-form-label">Work cell</label>
+            <Select
+              options={this.state.workCellOptions}
+              onChange={this.onWorkCellChange}
+              value={this.state.selectedWorkCell?.index}
+    /> */}
+          </div>
+        </FieldSet>
+        {/* <div hidden={!this.isWorkCellSelected()}>
           <span className="gf-from-pre">Transformations</span>
           <div className="gf-form">
             <label className="gf-form-label">Data format</label>
@@ -766,7 +810,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               />
             </div>
           </div>
-        </div>
+        </div> */}
         {/* <div className="gf-form" hidden={!this.isObjectSelected()}>
           <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
             Value

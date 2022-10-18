@@ -90,3 +90,36 @@ export interface FactoryinsightDataSourceOptions extends DataSourceJsonData {
 export interface FactoryinsightSecureJsonData {
   apiKey?: string;
 }
+
+export type TreeStructure = Map<string, Enterprise>;
+
+export type Enterprise = {
+  sites: Map<string, Site>;
+};
+
+export type Site = {
+  areas: Map<string, Area>;
+};
+
+export type Area = {
+  productionLines: Map<string, ProductionLine>;
+};
+
+export type ProductionLine = {
+  workCells: Map<string, WorkCell>;
+};
+
+export type WorkCell = {
+  kpi: string[];
+  tables: Map<string, Table>;
+  tags: Tags;
+};
+
+export type Table = {
+  id: number;
+};
+
+export type Tags = {
+  standard: string[];
+  custom: Map<string, string[]>;
+};

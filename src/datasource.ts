@@ -21,6 +21,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     this.enterpriseName =
       instanceSettings.jsonData.customerID == undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
     this.apiPath = `/api/v2/`;
+    console.log(instanceSettings.url);
     console.log('enterpriseName: ' + this.enterpriseName);
     console.log('jsonData', instanceSettings.jsonData);
   }
@@ -37,6 +38,21 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     });
 
     return { data };
+  }
+
+  async GetResourceTree() {
+    return this.fetchAPIRequest({
+      url: this.baseUrl + this.apiPath,
+    })
+      .then((res: any) => {
+        const result = Object.entries(res.data);
+        console.log(result);
+        return res.data;
+      })
+      .catch((error: any) => {
+        console.error(error);
+        throw new Error('Failed to fetch resource tree');
+      });
   }
 
   async GetSites(callback: Function) {
@@ -314,11 +330,9 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   /// Replacement for deprecated fetchAPIRequest, using fetch api
   async fetchAPIRequest(options: BackendSrvRequest): Promise<any> {
     console.log('fetchAPIRequest: ' + JSON.stringify(options));
-    return getBackendSrv()
-      .fetch({
-        url: options.url,
-        method: options.method || 'GET',
-      })
-      .toPromise();
+    return getBackendSrv().fetch({
+      url: options.url,
+      method: options.method || 'GET',
+    });
   }
 }
