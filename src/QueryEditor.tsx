@@ -195,16 +195,16 @@ export class QueryEditor extends PureComponent<Props> {
       if (this.selectedObject.split('/').length == 5) {
         const newValues: CascaderOption[] = [];
         this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
-          console.log(response[0][1]);
+          console.log(response);
           // the response is weird. it's an object array, of which the first item (index 0) contains
           // another object array, of which the second item (index 1) contains the actual payload
-          const payload = response[0][1];
           // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
           newValues.push({
             // 'tables' CascaderOption.
             label: 'tables',
             value: 'tables',
-            items: payload.tables.map((tables: any) => {
+            items: response[2][1].map((tables: any) => {
+              console.log(tables);
               // map the actual tables
               return {
                 label: tables.label,
@@ -215,7 +215,8 @@ export class QueryEditor extends PureComponent<Props> {
           newValues.push({
             label: 'kpi',
             value: 'kpi',
-            items: payload.kpi.map((kpis: any) => {
+            items: response[3][1].map((kpis: any) => {
+              console.log(kpis);
               // map the actual kpis
               return {
                 label: kpis.label,
@@ -226,7 +227,8 @@ export class QueryEditor extends PureComponent<Props> {
           newValues.push({
             label: 'tags',
             value: 'tags',
-            items: payload.tags.map((groupTags: any) => {
+            items: response[4][1].map((groupTags: any) => {
+              console.log(groupTags);
               // map the actual tags
               return {
                 label: groupTags.label,
