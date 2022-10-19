@@ -116,16 +116,10 @@ export class QueryEditor extends PureComponent<Props> {
   isValidValueSelected = () => {
     if (this.selectedValue === '') {
       return false;
-    } else if (
-      this.selectedValue === this.kpisQueryParameter ||
-      this.selectedValue === this.tagsQueryParameter ||
-      this.selectedValue === this.tagsQueryParameter + '/custom' ||
-      this.selectedValue === this.tagsQueryParameter + '/automated'
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+    } else return !(this.selectedValue === this.kpisQueryParameter ||
+        this.selectedValue === this.tagsQueryParameter ||
+        this.selectedValue === this.tagsQueryParameter + '/custom' ||
+        this.selectedValue === this.tagsQueryParameter + '/automated');
   };
 
   // isCurrentSelectedValueACustomTag checks whether the current selected value is a tag and therefore, begins with tagsValueID
@@ -194,7 +188,7 @@ export class QueryEditor extends PureComponent<Props> {
       this.valueStructure = [];
     } else {
       // check if the query is correct. it should have enterprise/site/area/productionline/workcell for a total of 4 '/'
-      if (this.selectedObject.match('/')?.length == 4 || false) {
+      if (this.selectedObject.match('/')?.length == 4) {
         const newValues: CascaderOption[] = [];
         this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
           console.log(response[0][1]);
@@ -338,11 +332,9 @@ export class QueryEditor extends PureComponent<Props> {
 
   render() {
     if (this.objectStructure.length == 0) {
-      console.log('objectStructure is empty');
-      return <div>{this.objectStructure.length}</div>;
-    }else{
-      console.log("rendering content");
+      return <div>Loading data, please wait...</div>;
     }
+    console.log("rendering");
   return (
           <div className="gf-form-group">
             <FieldSet>
