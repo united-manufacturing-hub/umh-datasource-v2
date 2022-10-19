@@ -181,10 +181,10 @@ export class QueryEditor extends PureComponent<Props> {
             };
           }),
         });
+        this.objectStructure = newObject;
+        this.forceUpdate();
+        console.log("Forced update");
       });
-      this.objectStructure = newObject;
-      this.forceUpdate();
-      console.log("Forced update");
     }
   };
 
