@@ -1,111 +1,300 @@
 import defaults from 'lodash/defaults';
 
-import {DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings} from '@grafana/data';
+import {
+    DataQueryRequest,
+    DataQueryResponse,
+    DataSourceApi,
+    DataSourceInstanceSettings,
+    FieldType,
+    MutableDataFrame
+} from '@grafana/data';
 
+import {isString, isUndefined} from 'lodash';
 import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
-import {getDemoTimeseriesData} from './demoData';
 import {lastValueFrom} from 'rxjs';
 
+
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
-  baseUrl: string; // baseUrl is the url to factoryinsight
-  apiPath: string;
-  enterpriseName: string;
+    baseUrl: string; // baseUrl is the url to factoryinsight
+    apiPath: string;
+    enterpriseName: string;
 
-  constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
-    instanceSettings.access = 'proxy'; // always set access to proxy
+    constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
+        instanceSettings.access = 'proxy'; // always set access to proxy
 
-    super(instanceSettings);
+        super(instanceSettings);
 
-    this.baseUrl = instanceSettings.url!;
-    this.enterpriseName =
-      instanceSettings.jsonData.customerID == undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
-    this.apiPath = `/api/v2/`;
-    console.log(instanceSettings.url);
-    console.log('enterpriseName: ' + this.enterpriseName);
-    console.log('jsonData', instanceSettings.jsonData);
-  }
+        this.baseUrl = instanceSettings.url!;
+        this.enterpriseName =
+            instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
+        this.apiPath = `/api/v2/`;
+        console.log(instanceSettings.url);
+        console.log('enterpriseName: ' + this.enterpriseName);
+        console.log('jsonData', instanceSettings.jsonData);
+    }
 
-  async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
-    const { range } = options;
-    const from = range!.from.valueOf();
-    const to = range!.to.valueOf();
+    async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
+        console.log('options: ', options);
+        const {range} = options;
 
-    // Return a constant for each query.
-    const data = options.targets.map((target) => {
-      const query = defaults(target, defaultFactoryinsightQuery);
-      return getDemoTimeseriesData(query, from, to);
-    });
+        const from: string = range.from.utc().toISOString();
+        const to: string = range.to.utc().toISOString();
 
-    return { data };
-  }
 
-  async GetResourceTree() {
-    return this.fetchAPIRequest({
-      url: this.baseUrl + this.apiPath + 'treeStructure',
-    })
-      .then((res: any) => {
-        //console.log(res);
-        //console.log('res data: ' + res.data);
-        const result = Object.entries(res.data);
-        //console.log(result);
-        return result;
-      })
-      .catch((error: any) => {
-        console.error(error);
-        throw new Error('Failed to fetch resource tree');
-      });
-  }
+        // Return a constant for each query.
 
-  async GetValuesTree(queryPath: string) {
-    return this.fetchAPIRequest({
-      url: this.baseUrl + this.apiPath + queryPath + '/getValues',
-    })
-      .then((res: any) => {
-        return Object.entries(res.data);
-      })
-      .catch((error: any) => {
-        console.error(error);
-        throw new Error('Failed to fetch value tree');
-      });
-  }
+        let data = [];
 
-  async testDatasource() {
-    // Implement a health check for your data source.
-    let testResult = {
-      status: 'success',
-      message: 'Data source works.',
-      title: 'Success',
-    };
-    console.log(this.baseUrl);
-    await this.fetchAPIRequest({
-      url: this.baseUrl, // no API path as health check is on path /
-    })
-      .then((res: any) => {
-        if (res === undefined || res.status !== 200 || res.data !== 'online') {
-          console.log(JSON.stringify(res));
-          testResult.status = 'error';
-          testResult.message = `Wrong response from server: ${res}`;
-          testResult.title = `Data source connection error`;
+        for (let queryIndex = 0; queryIndex < options.targets.length; queryIndex++) {
+            let target = options.targets[queryIndex];
+            data.push(await this.GetMappedValues(target, from, to, options, queryIndex));
         }
-      })
-      .catch((error: any) => {
-        testResult.status = 'error';
-        testResult.message = `Caught error in datasource test: ${JSON.stringify(error)}`;
-        testResult.title = `Data source exception`;
-      });
-    return testResult;
-  }
 
 
-  /// Replacement for deprecated fetchAPIRequest, using fetch api
-  fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
-    console.log('fetchAPIRequest: ' + JSON.stringify(options));
-    const response = getBackendSrv().fetch({
-      url: options.url,
-      method: options.method || 'GET',
-    });
-    return lastValueFrom(response)
+        return {data};
+    }
 
-  }
+
+    private async GetMappedValues(target: FactoryinsightQuery, from: string, to: string, options: DataQueryRequest<FactoryinsightQuery>, queryIndex: number) {
+        const query = defaults(target, defaultFactoryinsightQuery);
+
+        if (query.value === undefined) {
+            throw new Error('No value selected');
+        }
+
+        const resultArray = await this.getDatapoints(from, to, query.value, options.targets);
+
+        if (resultArray === null) {
+            console.log('resultArray is null');
+            return {data: []};
+        }
+
+        // Temporary space for the requested datapoints, dataformat and requested value
+        // Initialising array
+        const datapoints = resultArray.datapoints;
+        const columnNames = resultArray.columnNames;
+
+        // Return and emtpy frame if no location, asset or value has been specificied
+        const frame = new MutableDataFrame({
+            refId: query.refId,
+            fields: [],
+        });
+
+        // Handle empty arrays
+        if (isUndefined(datapoints[queryIndex])) {
+            return frame;
+        }
+
+        // Turn rows into fields if defined by user
+        if (query.labelsField !== undefined && query.labelsField !== '') {
+            const fieldNameIndex = columnNames[queryIndex].indexOf(query.labelsField);
+
+            if (fieldNameIndex === -1) {
+                console.error(`ERROR: Column ${query.labelsField} not found. Using default format.`);
+            } else {
+                // These are the new column names
+                const newColumnNames = datapoints[queryIndex][fieldNameIndex];
+                // Filter out the column names from the table and transpose it for easier assignment
+                const newDatapoints = this.transpose(
+                    datapoints[queryIndex].filter((element, eIndex) => {
+                        return eIndex !== fieldNameIndex;
+                    })
+                );
+                // Create a new field with the corresponding data
+                newColumnNames.map((columnName, columnIndex) => {
+                    frame.addField({
+                        name: columnName.toString(),
+                        type: FieldType.number,
+                        values: newDatapoints[columnIndex],
+                    });
+                });
+
+                return frame;
+            }
+        }
+
+        // If no label column was specified, handle the incoming data with the
+        // defined data model structure:
+        // { columnNames: string[], datapoints: any[][] }
+        columnNames[queryIndex].map((columnName, columnIndex) => {
+            // Look for the fixed columns
+            if (columnName === 'timestamp') {
+                frame.addField({
+                    name: columnName,
+                    type: FieldType.time,
+                    values: datapoints[queryIndex][columnIndex],
+                });
+            } else if (columnName === 'fieldName') {
+                // TODO Special case
+                console.log('TODO: Special case for fieldName');
+            } else {
+                // Check data type
+                const sampleValue = datapoints[queryIndex][columnIndex][0];
+                frame.addField({
+                    name: columnName,
+                    type: isString(sampleValue) ? FieldType.string : FieldType.number,
+                    values: datapoints[queryIndex][columnIndex],
+                });
+            }
+        });
+
+        return frame;
+    }
+
+    async getDatapoints(from: string, to: string, path: string, queries: FactoryinsightQuery[]): Promise<{ datapoints: number[][][]; columnNames: string[][] } | null> {
+        console.log('path: ', path);
+        console.log('from: ', from);
+        console.log('to: ', to);
+
+
+        let url = this.baseUrl + this.apiPath + path;
+        url = url + '?from=' + from + '&to=' + to;
+
+        const datapoints: number[][][] = [];
+        const columnNames: string[][] = [];
+
+
+        for (let i = 0; i < queries.length; i += 1) {
+            const target = queries[i];
+            // Include optional parameters
+            if (target.configurationIncludeNext !== undefined) {
+                url = url + '&includeNext=' + target.configurationIncludeNext;
+            }
+            if (target.configurationIncludePrevious !== undefined) {
+                url = url + '&includePrevious=' + target.configurationIncludePrevious;
+            }
+            if (target.configurationTagGapfilling !== undefined && target.configurationTagGapfilling.length > 0) {
+                url = url + '&gapFilling=' + target.configurationTagGapfilling;
+            } else {
+                url = url + '&gapFilling=null';
+            }
+            if (target.configurationTagAggregates !== undefined && target.configurationTagAggregates.length > 0) {
+                // join array to string separated by comma
+                url = url + '&tagAggregates=' + target.configurationTagAggregates.join(',');
+            }
+            if (target.configurationTimeBucket !== undefined) {
+                url = url + '&timeBucket=' + target.configurationTimeBucket;
+            }
+            if (target.configurationIncludeLastDatapoint !== undefined) {
+                url = url + '&includePrevious=' + target.configurationIncludeLastDatapoint;
+            }
+            if (target.configurationIncludeNextDatapoint !== undefined) {
+                url = url + '&includeNext=' + target.configurationIncludeNextDatapoint;
+            }
+
+            console.log('url: ', url);
+
+            await this.fetchAPIRequest({
+                url: url
+            }).then((res: any) => {
+                // Handle empty responses
+                if (res.data.datapoints !== null) {
+                    // Push datapoints
+                    columnNames.push(res.data.columnNames);
+                    datapoints.push(this.transpose(res.data.datapoints));
+                }
+            }).catch((error: any) => {
+                console.error(error);
+                throw new Error('Failed to fetch datapoints');
+            });
+        }
+
+        return {datapoints: datapoints, columnNames: columnNames};
+    }
+
+
+    transpose = (a: number[][]) => {
+        // Calculate the width and height of the Array
+        const w = a.length || 0;
+        const h = a[0] instanceof Array ? a[0].length : 0;
+
+        // In case it is a zero matrix, no transpose routine needed.
+        if (h === 0 || w === 0) {
+            return [];
+        }
+
+        let t: number[][];
+        t = [];
+        t.length = 0;
+
+        // Loop through every item in the outer array (height)
+        for (let i = 0; i < h; i++) {
+            // Insert a new row (array)
+            t.push([]);
+
+            // Loop through every item per item in outer array (width)
+            for (let j = 0; j < w; j++) {
+                // Save transposed data.
+                t[i][j] = a[j][i];
+            }
+        }
+
+        return t;
+    };
+
+    async GetResourceTree() {
+        return this.fetchAPIRequest({
+            url: this.baseUrl + this.apiPath + 'treeStructure',
+        })
+            .then((res: any) => {
+                return Object.entries(res.data);
+            })
+            .catch((error: any) => {
+                console.error(error);
+                throw new Error('Failed to fetch resource tree');
+            });
+    }
+
+    async GetValuesTree(queryPath: string) {
+        return this.fetchAPIRequest({
+            url: this.baseUrl + this.apiPath + queryPath + '/getValues',
+        })
+            .then((res: any) => {
+                return Object.entries(res.data);
+            })
+            .catch((error: any) => {
+                console.error(error);
+                throw new Error('Failed to fetch value tree');
+            });
+    }
+
+    async testDatasource() {
+        // Implement a health check for your data source.
+        let testResult = {
+            status: 'success',
+            message: 'Data source works.',
+            title: 'Success',
+        };
+        console.log(this.baseUrl);
+        await this.fetchAPIRequest({
+            url: this.baseUrl, // no API path as health check is on path /
+        })
+            .then((res: any) => {
+                if (res === undefined || res.status !== 200 || res.data !== 'online') {
+                    console.log(JSON.stringify(res));
+                    testResult.status = 'error';
+                    testResult.message = `Wrong response from server: ${res}`;
+                    testResult.title = `Data source connection error`;
+                }
+            })
+            .catch((error: any) => {
+                testResult.status = 'error';
+                testResult.message = `Caught error in datasource test: ${JSON.stringify(error)}`;
+                testResult.title = `Data source exception`;
+            });
+        return testResult;
+    }
+
+
+    /// Replacement for deprecated fetchAPIRequest, using fetch api
+    fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
+        console.log('fetchAPIRequest: ' + JSON.stringify(options));
+        const response = getBackendSrv().fetch({
+            url: options.url,
+            method: options.method || 'GET',
+        });
+        return lastValueFrom(response)
+
+    }
 }
