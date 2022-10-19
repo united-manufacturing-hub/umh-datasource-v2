@@ -139,6 +139,8 @@ export class QueryEditor extends PureComponent<Props> {
 
   getObjectStructure = () => {
     // only load new resources if there are no resources
+    console.log('getObjectStructure');
+    console.log(this.objectStructure.length);
     if (this.objectStructure.length == 0) {
       const newObject: CascaderOption[] = [];
       this.props.datasource.GetResourceTree().then((response: any) => {
@@ -182,6 +184,7 @@ export class QueryEditor extends PureComponent<Props> {
       });
       this.objectStructure = newObject;
       this.forceUpdate();
+      console.log("Forced update");
     }
   };
 
@@ -334,8 +337,11 @@ export class QueryEditor extends PureComponent<Props> {
   }
 
   render() {
-    if (this.objectStructure == null || this.objectStructure.length == 0) {
-      return <div>loading...</div>;
+    if (this.objectStructure.length == 0) {
+      console.log('objectStructure is empty');
+      return <div>{this.objectStructure.length}</div>;
+    }else{
+      console.log("rendering content");
     }
   return (
           <div className="gf-form-group">
