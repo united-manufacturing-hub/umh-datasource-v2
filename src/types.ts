@@ -51,6 +51,8 @@ export interface FactoryinsightQuery extends DataQuery {
     configurationIncludeNext?: string;
     configurationIncludeLastDatapoint?: boolean;
     configurationIncludeNextDatapoint?: boolean;
+    configurationIncludeRunningProcesses?: boolean;
+    configurationKeepStates?: boolean;
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
@@ -80,6 +82,8 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
     configurationTimeBucket: '1 hour',
     configurationIncludeLastDatapoint: true,
     configurationIncludeNextDatapoint: true,
+    configurationIncludeRunningProcesses: true,
+    configurationKeepStates: true,
 };
 
 /**

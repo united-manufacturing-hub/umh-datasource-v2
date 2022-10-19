@@ -83,6 +83,20 @@ export class QueryEditor extends PureComponent<Props> {
     defaultConfigurationIncludeNextDatapoint: SelectableValue = this.tagIncludeNextDatapointOptions[0];
     selectedConfigurationIncludeNextDatapoint: SelectableValue = this.defaultConfigurationIncludeNextDatapoint;
 
+    tagIncludeRunningProcessesOptions = [
+        {label: 'Yes', value: 'yes', description: 'Include running'},
+        {label: 'No', value: 'no', description: 'Do not include running'},
+    ];
+    defaultConfigurationIncludeRunningProcesses: SelectableValue = this.tagIncludeRunningProcessesOptions[0];
+    selectedConfigurationIncludeRunningProcesses: SelectableValue = this.defaultConfigurationIncludeRunningProcesses;
+
+    tagKeepStatesOptions = [
+        {label: 'Yes', value: 'yes', description: 'Keep states'},
+        {label: 'No', value: 'no', description: 'Do not keep states'},
+    ];
+    defaultConfigurationKeepStates: SelectableValue = this.tagKeepStatesOptions[0];
+    selectedConfigurationKeepStates: SelectableValue = this.defaultConfigurationKeepStates;
+
 
     constructor(props: Props) {
         super(props);
@@ -155,6 +169,14 @@ export class QueryEditor extends PureComponent<Props> {
             return false;
         }
     };
+
+    isCurrentSelectedValueAvailability = () => {
+        if (this.isValidValueSelected()) {
+            return this.selectedValue.includes(this.tablesQueryParameter + '/availability');
+        } else {
+            return false;
+        }
+    }
 
     getObjectStructure = () => {
         // only load new resources if there are no resources
@@ -387,6 +409,30 @@ export class QueryEditor extends PureComponent<Props> {
         this.forceUpdate();
     };
 
+    onConfigurationIncludeRunningProcessesChange = (value: SelectableValue) => {
+        const {onChange, query} = this.props;
+        const configurationIncludeRunningProcesses = value.value;
+        onChange({...query, configurationIncludeRunningProcesses});
+
+        // and also in QueryEditor
+        this.selectedConfigurationIncludeRunningProcesses = value;
+
+        // force render
+        this.forceUpdate();
+    }
+
+    onConfigurationKeepStatesChange = (value: SelectableValue) => {
+        const {onChange, query} = this.props;
+        const configurationKeepStates = value.value;
+        onChange({...query, configurationKeepStates});
+
+        // and also in QueryEditor
+        this.selectedConfigurationKeepStates = value;
+
+        // force render
+        this.forceUpdate();
+    }
+
     componentDidMount() {
         this.getObjectStructure();
     }
@@ -427,6 +473,36 @@ export class QueryEditor extends PureComponent<Props> {
                             width={60}
                         />
                     </div>
+                </FieldSet>
+                <FieldSet
+                    hidden={!this.isCurrentSelectedValueAvailability()}
+                >
+                    <div className="gf-form">
+                        <InlineLabel width={'auto'} tooltip={'Include running processes'}>
+                            Include running processes
+                        </InlineLabel>
+                        <Select
+                            options={this.tagIncludeRunningProcessesOptions}
+                            width={30}
+                            defaultValue={this.defaultConfigurationIncludeRunningProcesses}
+                            value={this.selectedConfigurationIncludeRunningProcesses}
+                            onChange={this.onConfigurationIncludeRunningProcessesChange}
+                        />
+                    </div>
+                    <div className="gf-form">
+                        <InlineLabel width={'auto'} tooltip={'Keep states'}>
+                            Keep states
+                        </InlineLabel>
+                        <Select
+                            options={this.tagKeepStatesOptions}
+                            width={30}
+                            defaultValue={this.defaultConfigurationKeepStates}
+                            value={this.selectedConfigurationKeepStates}
+                            onChange={this.onConfigurationKeepStatesChange}
+                        />
+                    </div>
+
+
                 </FieldSet>
                 <FieldSet
                     hidden={!this.isCurrentSelectedValueACustomTag()}

@@ -12,7 +12,7 @@ import {
 import {isString, isUndefined} from 'lodash';
 import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
-import { lastValueFrom } from 'rxjs';
+import {lastValueFrom} from 'rxjs';
 
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
@@ -25,9 +25,9 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
         super(instanceSettings);
 
-        this.baseUrl =instanceSettings.url == undefined
-        ? 'http://united-manufacturing-hub-factoryinsight-service/'
-        : instanceSettings.url;
+        this.baseUrl = instanceSettings.url == undefined
+            ? 'http://united-manufacturing-hub-factoryinsight-service/'
+            : instanceSettings.url;
         this.enterpriseName =
             instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
         this.apiPath = `/api/v2/`;
@@ -37,7 +37,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
         console.log('options: ', options);
         const {range} = options;
-
         const from: string = range.from.utc().toISOString();
         const to: string = range.to.utc().toISOString();
 
@@ -172,6 +171,8 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             if (target.configurationTagAggregates !== undefined && target.configurationTagAggregates.length > 0) {
                 // join array to string separated by comma
                 url = url + '&tagAggregates=' + target.configurationTagAggregates.join(',');
+            } else {
+                url = url + '&tagAggregates=avg';
             }
             if (target.configurationTimeBucket !== undefined) {
                 url = url + '&timeBucket=' + target.configurationTimeBucket;
@@ -181,6 +182,16 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             }
             if (target.configurationIncludeNextDatapoint !== undefined) {
                 url = url + '&includeNext=' + target.configurationIncludeNextDatapoint;
+            }
+            if (target.configurationIncludeRunningProcesses !== undefined) {
+                url = url + '&includeRunning=' + target.configurationIncludeRunningProcesses;
+            } else {
+                url = url + '&includeRunning=true';
+            }
+            if (target.configurationKeepStates !== undefined) {
+                url = url + '&keepStatesInteger=' + target.configurationKeepStates;
+            } else {
+                url = url + '&keepStatesInteger=true';
             }
 
             console.log('url: ', url);
