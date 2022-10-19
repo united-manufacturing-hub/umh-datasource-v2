@@ -12,15 +12,12 @@ import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
 import { FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
 
-import { DefaultTags, DefaultWorkCellTags, DefaultKPIs, DefaultTables } from 'demoData';
-
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props> {
   enterpriseName = this.props.datasource.enterpriseName;
   objectStructure: CascaderOption[] = [];
   valueStructure: CascaderOption[] = [];
-  initialPayload: any;
 
   tagsQueryParameter = 'tags';
   kpisQueryParameter = 'kpi';
@@ -139,30 +136,37 @@ export class QueryEditor extends PureComponent<Props> {
     }
   };
 
-  getObjectStructure = () => {
+  getObjectStructure = async () => {
     console.log(this.objectStructure.length);
+    // only load new resources if there are no resources
     if (this.objectStructure.length == 0) {
       const newObject: CascaderOption[] = [];
       this.props.datasource.GetResourceTree().then((response: any) => {
         console.log(response[0][1]);
+        // the response is weird. it's an object array, of which the first item (index 0) contains
+        // another object array, of which the second item (index 1) contains the actual payload
         const payload = response[0][1];
-        this.initialPayload = payload;
+        // the one and only CascaderOption at the top of the tree is the enterprise one
         newObject.push({
           label: payload.label,
           value: payload.value,
           items: payload.entries.map((sites: any) => {
+            // map all the sites relative to the enterprise
             return {
               label: sites.label,
               value: sites.value,
               items: sites.entries.map((areas: any) => {
+                // map all the areas relative to all the sites
                 return {
                   label: areas.label,
                   value: areas.value,
                   items: areas.entries.map((productionLines: any) => {
+                    // map all the production lines relative to all the areas
                     return {
                       label: productionLines.label,
                       value: productionLines.value,
                       items: productionLines.entries.map((workCells: any) => {
+                        // map all the work cells relative to all the production lines
                         return {
                           label: workCells.label,
                           value: workCells.value,
@@ -177,47 +181,68 @@ export class QueryEditor extends PureComponent<Props> {
         });
       });
       this.objectStructure = newObject;
+      console.log(this.objectStructure);
     }
-
-    console.log(this.objectStructure);
     return this.objectStructure;
   };
 
   getValueStructure = () => {
+    // if no work cell is in the query, no value should be shown
     if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
-      this.valueStructure = [
-        {
-          label: 'Tags',
-          value: this.tagsQueryParameter,
-          items: DefaultTags,
-        },
-      ];
+      this.valueStructure = [];
     } else {
-      const newValues: CascaderOption[] = [];
-      this.valueStructure = [
-        {
-          label: this.initialPayload.label,
-          value: this.initialPayload.value,
-          items: this.initialPayload.entries,
-        },
-      ];
-      this.valueStructure = [
-        {
-          label: 'Tags',
-          value: this.tagsQueryParameter,
-          items: DefaultWorkCellTags,
-        },
-        {
-          label: 'KPIs',
-          value: this.kpisQueryParameter,
-          items: DefaultKPIs,
-        },
-        {
-          label: 'Tables',
-          value: 'table',
-          items: DefaultTables,
-        },
-      ];
+      // check if the query is correct. it should have enterprise/site/area/productionline/workcell for a total of 4 '/'
+      if (this.selectedObject.match('/')?.length == 4 || false) {
+        const newValues: CascaderOption[] = [];
+        this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
+          console.log(response[0][1]);
+          // the response is weird. it's an object array, of which the first item (index 0) contains
+          // another object array, of which the second item (index 1) contains the actual payload
+          const payload = response[0][1];
+          // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
+          newValues.push({
+            // 'tables' CascaderOption.
+            label: 'tables',
+            value: 'tables',
+            items: payload.tables.map((tables: any) => {
+              // map the actual tables
+              return {
+                label: tables.label,
+                value: tables.value,
+              };
+            }),
+          });
+          newValues.push({
+            label: 'kpi',
+            value: 'kpi',
+            items: payload.kpi.map((kpis: any) => {
+              // map the actual kpis
+              return {
+                label: kpis.label,
+                value: kpis.value,
+              };
+            }),
+          });
+          newValues.push({
+            label: 'tags',
+            value: 'tags',
+            items: payload.tags.map((groupTags: any) => {
+              // map the actual tags
+              return {
+                label: groupTags.label,
+                value: groupTags.value,
+                items: groupTags.entries.map((tags: any) => {
+                  return {
+                    label: tags.label,
+                    value: tags.label,
+                  };
+                }),
+              };
+            }),
+          });
+        });
+        this.valueStructure = newValues;
+      }
     }
 
     return this.valueStructure;
@@ -225,23 +250,23 @@ export class QueryEditor extends PureComponent<Props> {
 
   onObjectChange = (val: string) => {
     // split object into enterprise, area, production line, work cell
-    // const { onChange, query } = this.props;
-    // const fullTagName = val;
-    // const enterprise = fullTagName.split('/')[0];
-    // const site = fullTagName.split('/')[1];
-    // const area = fullTagName.split('/')[2];
-    // const productionLine = fullTagName.split('/')[3];
-    // const workCell = fullTagName.split('/')[4];
+    const { onChange, query } = this.props;
+    const fullTagName = val;
+    const enterprise = fullTagName.split('/')[0];
+    const site = fullTagName.split('/')[1];
+    const area = fullTagName.split('/')[2];
+    const productionLine = fullTagName.split('/')[3];
+    const workCell = fullTagName.split('/')[4];
 
-    // onChange({
-    //   ...query,
-    //   enterpriseName: enterprise,
-    //   siteName: site,
-    //   areaName: area,
-    //   productionLineName: productionLine,
-    //   workCellName: workCell,
-    //   fullTagName,
-    // });
+    onChange({
+      ...query,
+      enterpriseName: enterprise,
+      siteName: site,
+      areaName: area,
+      productionLineName: productionLine,
+      workCellName: workCell,
+      fullTagName,
+    });
 
     // and also in QueryEditor
     this.selectedObject = val;
@@ -317,13 +342,14 @@ export class QueryEditor extends PureComponent<Props> {
               Object
             </InlineLabel>
             <Cascader
-              displayAllSelectedLevels={true}
-              options={this.getObjectStructure()}
+              options={await this.getObjectStructure()}
               onSelect={this.onObjectChange}
+              displayAllSelectedLevels={true}
+              value={this.selectedObject}
               width={60}
             />
           </div>
-          {/* <div className="gf-form" hidden={!this.isObjectSelected()}>
+          <div className="gf-form" hidden={!this.isObjectSelected()}>
             <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
               Value
             </InlineLabel>
@@ -331,65 +357,11 @@ export class QueryEditor extends PureComponent<Props> {
               options={this.getValueStructure()}
               onSelect={this.onValueChange}
               displayAllSelectedLevels={true}
+              value={this.selectedValue}
               width={60}
             />
-          </div> */}
+          </div>
         </FieldSet>
-        {/* <div hidden={!this.isWorkCellSelected()}>
-          <span className="gf-from-pre">Transformations</span>
-          <div className="gf-form">
-            <label className="gf-form-label">Data format</label>
-            <Select
-              options={this.state.dataFormatOptions}
-              onChange={this.onDataFormatChange}
-              value={this.state.selectedDataFormat?.index}
-            />
-          </div>
-        </div>
-        <div hidden={!this.isDataFormatSelected()}>
-          <div hidden={!this.isTagDataFormatSelected()}>
-            <div className="gf-form">
-              <label className="gf-form-label">Tag group</label>
-              <Select
-                options={this.state.tagGroupOptions}
-                onChange={this.onTagGroupChange}
-                value={this.state.selectedTagGroup?.index}
-              />
-            </div>
-          </div>
-          <div hidden={!this.isKpiDataFormatSelected()}>
-            <div className="gf-form">
-              <label className="gf-form-label">KPIs</label>
-              <Select
-                options={this.state.kpiMethodOptions}
-                onChange={this.onKpiMethodChange}
-                value={this.state.selectedTagGroup?.index}
-              />
-            </div>
-          </div>
-          <div hidden={!this.isTableDataFormatSelected()}>
-            <div className="gf-form">
-              <label className="gf-form-label">Tag group</label>
-              <Select
-                options={this.state.tableTypeOptions}
-                onChange={this.onTableTypeChange}
-                value={this.state.selectedTagGroup?.index}
-              />
-            </div>
-          </div>
-        </div> */}
-        {/* <div className="gf-form" hidden={!this.isObjectSelected()}>
-          <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-            Value
-          </InlineLabel>
-          <Cascader
-            options={this.getValueStructure()}
-            onSelect={this.onValueChange}
-            displayAllSelectedLevels={true}
-            value={this.selectedValue}
-            width={60}
-          />
-    </div> */}
 
         {/* <Alert
           title="Please select a value from the dropdown menu"

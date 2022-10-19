@@ -41,7 +41,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   }
 
   async GetResourceTree() {
-    return await this.fetchAPIRequest({
+    return this.fetchAPIRequest({
       url: this.baseUrl + this.apiPath + 'treeStructure',
     })
       .then((res: any) => {
@@ -54,6 +54,19 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       .catch((error: any) => {
         console.error(error);
         throw new Error('Failed to fetch resource tree');
+      });
+  }
+
+  async GetValuesTree(queryPath: string) {
+    return this.fetchAPIRequest({
+      url: this.baseUrl + this.apiPath + queryPath + 'getValues',
+    })
+      .then((res: any) => {
+        return Object.entries(res.data);
+      })
+      .catch((error: any) => {
+        console.error(error);
+        throw new Error('Failed to fetch value tree');
       });
   }
 
