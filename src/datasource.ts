@@ -1,11 +1,11 @@
 import defaults from 'lodash/defaults';
 
-import {DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings} from '@grafana/data';
+import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/data';
 
-import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
-import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
-import {getDemoTimeseriesData} from './demoData';
-import {lastValueFrom} from 'rxjs';
+import { defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
+import { BackendSrvRequest, FetchResponse, getBackendSrv } from '@grafana/runtime';
+import { getDemoTimeseriesData } from './demoData';
+import { lastValueFrom } from 'rxjs';
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
   baseUrl: string; // baseUrl is the url to factoryinsight
@@ -17,13 +17,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
     super(instanceSettings);
 
-    this.baseUrl = instanceSettings.url!;
+    this.baseUrl =
+      instanceSettings.url == undefined
+        ? 'http://united-manufacturing-hub-factoryinsight-service/'
+        : instanceSettings.url;
     this.enterpriseName =
       instanceSettings.jsonData.customerID == undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
     this.apiPath = `/api/v2/`;
-    console.log(instanceSettings.url);
-    console.log('enterpriseName: ' + this.enterpriseName);
-    console.log('jsonData', instanceSettings.jsonData);
   }
 
   async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
@@ -71,13 +71,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   }
 
   async testDatasource() {
+    console.log(this.baseUrl);
     // Implement a health check for your data source.
     let testResult = {
       status: 'success',
       message: 'Data source works.',
       title: 'Success',
     };
-    console.log(this.baseUrl);
     await this.fetchAPIRequest({
       url: this.baseUrl, // no API path as health check is on path /
     })
@@ -97,7 +97,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     return testResult;
   }
 
-
   /// Replacement for deprecated fetchAPIRequest, using fetch api
   fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
     console.log('fetchAPIRequest: ' + JSON.stringify(options));
@@ -105,7 +104,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       url: options.url,
       method: options.method || 'GET',
     });
-    return lastValueFrom(response)
-
+    return lastValueFrom(response);
   }
 }
