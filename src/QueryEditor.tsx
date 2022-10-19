@@ -187,10 +187,12 @@ export class QueryEditor extends PureComponent<Props> {
     console.log("workCellName: " + this.props.query.workCellName);
     // if no work cell is in the query, no value should be shown
     if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
+      console.log("No work cell selected");
       this.valueStructure = [];
     } else {
       // check if the query is correct. it should have enterprise/site/area/productionline/workcell for a total of 4 '/'
-      if (this.selectedObject.match('/')?.length == 4) {
+      console.log("selectedObject: " + this.selectedObject);
+      if (this.selectedObject.split('/').length == 5) {
         const newValues: CascaderOption[] = [];
         this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
           console.log(response[0][1]);
@@ -241,7 +243,7 @@ export class QueryEditor extends PureComponent<Props> {
         });
         this.valueStructure = newValues;
       }else{
-        console.log("The query is not correct");
+        console.log("The query is not correct" + this.selectedObject);
       }
     }
 
@@ -339,7 +341,7 @@ export class QueryEditor extends PureComponent<Props> {
       return <div>Loading data, please wait...</div>;
     }
     console.log("rendering");
-  return (
+    return (
           <div className="gf-form-group">
             <FieldSet>
               <div className="gf-form">
@@ -353,7 +355,7 @@ export class QueryEditor extends PureComponent<Props> {
                     options={this.objectStructure}
                     onSelect={this.onObjectChange}
                     displayAllSelectedLevels={true}
-                    value={this.selectedObject}
+                    //value={this.selectedObject}
                     width={60}
                 />
               </div>
@@ -365,7 +367,7 @@ export class QueryEditor extends PureComponent<Props> {
                     options={this.getValueStructure()}
                     onSelect={this.onValueChange}
                     displayAllSelectedLevels={true}
-                    value={this.selectedValue}
+                    //value={this.selectedValue}
                     width={60}
                 />
               </div>

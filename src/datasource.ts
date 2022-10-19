@@ -59,7 +59,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
   async GetValuesTree(queryPath: string) {
     return this.fetchAPIRequest({
-      url: this.baseUrl + this.apiPath + queryPath + 'getValues',
+      url: this.baseUrl + this.apiPath + queryPath + '/getValues',
     })
       .then((res: any) => {
         return Object.entries(res.data);
