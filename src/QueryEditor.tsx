@@ -15,9 +15,10 @@ import { FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props> {
+
   enterpriseName = this.props.datasource.enterpriseName;
-  objectStructure: CascaderOption[] = [];
   valueStructure: CascaderOption[] = [];
+  objectStructure: CascaderOption[] = [];
 
   tagsQueryParameter = 'tags';
   kpisQueryParameter = 'kpi';
@@ -136,8 +137,7 @@ export class QueryEditor extends PureComponent<Props> {
     }
   };
 
-  getObjectStructure = async () => {
-    console.log(this.objectStructure.length);
+  getObjectStructure = () => {
     // only load new resources if there are no resources
     if (this.objectStructure.length == 0) {
       const newObject: CascaderOption[] = [];
@@ -181,9 +181,8 @@ export class QueryEditor extends PureComponent<Props> {
         });
       });
       this.objectStructure = newObject;
-      console.log(this.objectStructure);
+      this.forceUpdate();
     }
-    return this.objectStructure;
   };
 
   getValueStructure = () => {
@@ -330,40 +329,47 @@ export class QueryEditor extends PureComponent<Props> {
     this.forceUpdate();
   };
 
-  render() {
-    return (
-      <div className="gf-form-group">
-        <FieldSet>
-          <div className="gf-form">
-            <InlineLabel
-              width={10}
-              tooltip={'Select site, area, production line and work cell you want to see the data of'}
-            >
-              Object
-            </InlineLabel>
-            <Cascader
-              options={await this.getObjectStructure()}
-              onSelect={this.onObjectChange}
-              displayAllSelectedLevels={true}
-              value={this.selectedObject}
-              width={60}
-            />
-          </div>
-          <div className="gf-form" hidden={!this.isObjectSelected()}>
-            <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-              Value
-            </InlineLabel>
-            <Cascader
-              options={this.getValueStructure()}
-              onSelect={this.onValueChange}
-              displayAllSelectedLevels={true}
-              value={this.selectedValue}
-              width={60}
-            />
-          </div>
-        </FieldSet>
+  componentDidMount() {
+    this.getObjectStructure();
+  }
 
-        {/* <Alert
+  render() {
+    if (this.objectStructure == null || this.objectStructure.length == 0) {
+      return <div>loading...</div>;
+    }
+  return (
+          <div className="gf-form-group">
+            <FieldSet>
+              <div className="gf-form">
+                <InlineLabel
+                    width={10}
+                    tooltip={'Select site, area, production line and work cell you want to see the data of'}
+                >
+                  Object
+                </InlineLabel>
+                <Cascader
+                    options={this.objectStructure}
+                    onSelect={this.onObjectChange}
+                    displayAllSelectedLevels={true}
+                    //value={this.selectedObject}
+                    width={60}
+                />
+              </div>
+              <div className="gf-form" hidden={!this.isObjectSelected()}>
+                <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+                  Value
+                </InlineLabel>
+                <Cascader
+                    options={this.getValueStructure()}
+                    onSelect={this.onValueChange}
+                    displayAllSelectedLevels={true}
+                    //value={this.selectedValue}
+                    width={60}
+                />
+              </div>
+            </FieldSet>
+
+            {/* <Alert
           title="Please select a value from the dropdown menu"
           severity="error"
           hidden={this.isValidValueSelected() || !this.isObjectSelected()}

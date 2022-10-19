@@ -1,11 +1,11 @@
 import defaults from 'lodash/defaults';
 
-import { DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings } from '@grafana/data';
+import {DataQueryRequest, DataQueryResponse, DataSourceApi, DataSourceInstanceSettings} from '@grafana/data';
 
-import { FactoryinsightDataSourceOptions, FactoryinsightQuery, defaultFactoryinsightQuery } from './types';
-import { BackendSrvRequest, getBackendSrv } from '@grafana/runtime';
-import { getDemoTimeseriesData } from './demoData';
-import { lastValueFrom } from 'rxjs';
+import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
+import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
+import {getDemoTimeseriesData} from './demoData';
+import {lastValueFrom} from 'rxjs';
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
   baseUrl: string; // baseUrl is the url to factoryinsight
@@ -97,13 +97,15 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     return testResult;
   }
 
+
   /// Replacement for deprecated fetchAPIRequest, using fetch api
-  async fetchAPIRequest(options: BackendSrvRequest): Promise<any> {
+  fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
     console.log('fetchAPIRequest: ' + JSON.stringify(options));
     const response = getBackendSrv().fetch({
       url: options.url,
       method: options.method || 'GET',
     });
-    return lastValueFrom(response);
+    return lastValueFrom(response)
+
   }
 }
