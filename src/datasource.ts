@@ -69,12 +69,12 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             return {data: []};
         }
 
-        // Temporary space for the requested datapoints, dataformat and requested value
+        // Temporary space for the requested data points, data format and requested value
         // Initialising array
         const datapoints = resultArray.datapoints;
         const columnNames = resultArray.columnNames;
 
-        // Return and emtpy frame if no location, asset or value has been specificied
+        // Return and empty frame if no location, asset or value has been specified
         const frame = new MutableDataFrame({
             refId: query.refId,
             fields: [],
@@ -126,6 +126,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
                 });
             } else if (columnName === 'fieldName') {
                 // TODO Special case
+                // Edit from 2022: I have no idea what this special case is about
                 console.log('TODO: Special case for fieldName');
             } else {
                 // Check data type
@@ -215,7 +216,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
 
-    transpose = (a: number[][]) => {
+    transpose = (a: number[][]): number[][] | any[] => {
         // Calculate the width and height of the Array
         const w = a.length || 0;
         const h = a[0] instanceof Array ? a[0].length : 0;
