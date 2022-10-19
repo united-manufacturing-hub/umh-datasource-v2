@@ -12,7 +12,7 @@ import {
 import {isString, isUndefined} from 'lodash';
 import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
-import {lastValueFrom} from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
@@ -25,13 +25,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
         super(instanceSettings);
 
-        this.baseUrl = instanceSettings.url!;
+        this.baseUrl =instanceSettings.url == undefined
+        ? 'http://united-manufacturing-hub-factoryinsight-service/'
+        : instanceSettings.url;
         this.enterpriseName =
             instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
         this.apiPath = `/api/v2/`;
-        console.log(instanceSettings.url);
-        console.log('enterpriseName: ' + this.enterpriseName);
-        console.log('jsonData', instanceSettings.jsonData);
+
     }
 
     async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
@@ -260,13 +260,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     async testDatasource() {
-        // Implement a health check for your data source.
+        console.log(this.baseUrl);// Implement a health check for your data source.
         let testResult = {
             status: 'success',
             message: 'Data source works.',
             title: 'Success',
         };
-        console.log(this.baseUrl);
+
         await this.fetchAPIRequest({
             url: this.baseUrl, // no API path as health check is on path /
         })
@@ -294,7 +294,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             url: options.url,
             method: options.method || 'GET',
         });
-        return lastValueFrom(response)
+        return lastValueFrom(response);
 
     }
 }
