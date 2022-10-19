@@ -183,6 +183,8 @@ export class QueryEditor extends PureComponent<Props> {
   };
 
   getValueStructure = () => {
+    console.log('getValueStructure');
+    console.log("workCellName: " + this.props.query.workCellName);
     // if no work cell is in the query, no value should be shown
     if (this.props.query.workCellName === '' || this.props.query.workCellName === undefined) {
       this.valueStructure = [];
@@ -238,6 +240,8 @@ export class QueryEditor extends PureComponent<Props> {
           });
         });
         this.valueStructure = newValues;
+      }else{
+        console.log("The query is not correct");
       }
     }
 
@@ -349,7 +353,7 @@ export class QueryEditor extends PureComponent<Props> {
                     options={this.objectStructure}
                     onSelect={this.onObjectChange}
                     displayAllSelectedLevels={true}
-                    //value={this.selectedObject}
+                    value={this.selectedObject}
                     width={60}
                 />
               </div>
@@ -361,7 +365,7 @@ export class QueryEditor extends PureComponent<Props> {
                     options={this.getValueStructure()}
                     onSelect={this.onValueChange}
                     displayAllSelectedLevels={true}
-                    //value={this.selectedValue}
+                    value={this.selectedValue}
                     width={60}
                 />
               </div>
