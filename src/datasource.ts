@@ -26,7 +26,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
         super(instanceSettings);
 
-        this.baseUrl = instanceSettings.url == undefined
+        this.baseUrl = instanceSettings.url === undefined
             ? 'http://united-manufacturing-hub-factoryinsight-service/'
             : instanceSettings.url;
         this.enterpriseName =
