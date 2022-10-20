@@ -10,8 +10,8 @@
     "sign": "grafana-toolkit plugin:sign",
     "start": "yarn watch"
   },
-  "author": false,
-  "license": "Apache-2.0",
+  "author": "UMH Systems GmbH",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "@grafana/data": "latest",
     "@grafana/toolkit": "latest",

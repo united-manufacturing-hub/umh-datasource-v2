@@ -28,7 +28,13 @@ Grafana supports a wide range of data sources, including Prometheus, MySQL, and 
    yarn watch
    ```
 
-3. Build plugin in production mode
+3. Test with Docker
+
+   ```bash
+   docker run -d -p 3000:3000 -v <path-to-source>:/var/lib/grafana/plugins -e GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=umh-datasource-v2 grafana/grafana
+   ```
+
+4. Build plugin in production mode
 
    ```bash
    yarn build

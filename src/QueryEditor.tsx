@@ -7,52 +7,95 @@
 // Export REST call to get data TODO
 
 import React, {PureComponent} from 'react';
-import {Cascader, CascaderOption, InlineLabel, Alert, FieldSet, Select, MultiSelect, Input} from '@grafana/ui';
+import {Cascader, CascaderOption, FieldSet, InlineLabel, MultiSelect, Select} from '@grafana/ui';
 import {QueryEditorProps, SelectableValue} from '@grafana/data';
 import {DataSource} from './datasource';
 import {FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
-
-import {GetDefaultEnterprise, DefaultTags, DefaultKPIs, DefaultWorkCellTags, DefaultTables} from './demoData'
 
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props> {
 
-    objectStructure: Array<CascaderOption> = [];
-    valueStructure: Array<CascaderOption> = [];
+    enterpriseName = this.props.datasource.enterpriseName;
+    valueStructure: CascaderOption[] = [];
+    objectStructure: CascaderOption[] = [];
 
-    tagsValueID: string = 'tags'
-    KPIValueID: string = 'kpi'
+    tagsQueryParameter = 'tags';
+    kpisQueryParameter = 'kpi';
+    tablesQueryParameter = 'tables';
 
-    selectedObject: string = '';
-    selectedValue: string = '';
+    selectedObject = '';
+    selectedValue = '';
 
     // Aggregates configuration
     tagAggregatesOptions = [
-        {label: 'Average', value: "avg", description: 'The average value of all values in the time bucket'},
-        {label: 'Minimum', value: "min", description: 'The minimum value of all values in the time bucket'},
-        {label: 'Maximum', value: "max", description: 'The maximum value of all values in the time bucket'},
-        {label: 'Sum', value: "sum", description: 'The sum of all values in the time bucket'},
-        {label: 'Count', value: "count", description: 'The number of values in the time bucket'},
-
+        {label: 'Average', value: 'avg', description: 'The average value of all values in the time bucket'},
+        {label: 'Minimum', value: 'min', description: 'The minimum value of all values in the time bucket'},
+        {label: 'Maximum', value: 'max', description: 'The maximum value of all values in the time bucket'},
+        {label: 'Sum', value: 'sum', description: 'The sum of all values in the time bucket'},
+        {label: 'Count', value: 'count', description: 'The number of values in the time bucket'},
     ];
     defaultConfigurationAggregates: SelectableValue = this.tagAggregatesOptions[0];
-    selectedConfigurationAggregates: Array<SelectableValue> = [this.defaultConfigurationAggregates];
+    selectedConfigurationAggregates: SelectableValue[] = [this.defaultConfigurationAggregates];
 
     // time bucket configuration
-    defaultConfigurationTimeBucket: string = "auto";
-    selectedConfigurationTimeBucket: string = this.defaultConfigurationTimeBucket;
+    tagTimeBucketOptions = [
+        {label: '1 minute', value: '1 minute', description: 'Aggregate data from the last minute'},
+        {label: '1 hour', value: '1 hour', description: 'Aggregate data from the last hour'},
+        {label: '1 day', value: '1 day', description: 'Aggregate data from the last day'},
+        {label: '1 week', value: '1 week', description: 'Aggregate data from the last week'},
+        {label: '1 month', value: '1 month', description: 'Aggregate data from the last month'},
+        {label: '1 year', value: '1 year', description: 'Aggregate data from the last year'},
+    ];
+    defaultConfigurationTimeBucket: SelectableValue = this.tagTimeBucketOptions[0];
+    selectedConfigurationTimeBucket: SelectableValue = this.defaultConfigurationTimeBucket;
 
     // Gapfilling configuration
     tagGapfillingOptions = [
-        {label: 'Show as NULL (default)', value: "null", description: 'Missing data will show as NULL'},
-        {label: 'Interpolate', value: "interpolation", description: 'The interpolate function does linear interpolation for missing values.'},
-        {label: 'LOCF', value: "locf", description: 'The LOCF (last observation carried forward) function allows you to carry the last seen value in an aggregation group forward. '},
+        {label: 'Show as NULL (default)', value: 'null', description: 'Missing data will show as NULL'},
+        {
+            label: 'Interpolate',
+            value: 'interpolation',
+            description: 'The interpolate function does linear interpolation for missing values.',
+        },
+        {
+            label: 'LOCF',
+            value: 'locf',
+            description:
+                'The LOCF (last observation carried forward) function allows you to carry the last seen value in an aggregation group forward. ',
+        },
     ];
     defaultConfigurationGapfilling: SelectableValue = this.tagGapfillingOptions[0];
     selectedConfigurationGapfilling: SelectableValue = this.defaultConfigurationGapfilling;
 
 
+    tagIncludeLastDatapointOptions = [
+        {label: 'Yes', value: 'yes', description: 'Include last datapoint'},
+        {label: 'No', value: 'no', description: 'Do not include last datapoint'},
+    ];
+    defaultConfigurationIncludeLastDatapoint: SelectableValue = this.tagIncludeLastDatapointOptions[0];
+    selectedConfigurationIncludeLastDatapoint: SelectableValue = this.defaultConfigurationIncludeLastDatapoint;
+
+    tagIncludeNextDatapointOptions = [
+        {label: 'Yes', value: 'yes', description: 'Include next datapoint'},
+        {label: 'No', value: 'no', description: 'Do not include next datapoint'},
+    ];
+    defaultConfigurationIncludeNextDatapoint: SelectableValue = this.tagIncludeNextDatapointOptions[0];
+    selectedConfigurationIncludeNextDatapoint: SelectableValue = this.defaultConfigurationIncludeNextDatapoint;
+
+    tagIncludeRunningProcessesOptions = [
+        {label: 'Yes', value: 'yes', description: 'Include running'},
+        {label: 'No', value: 'no', description: 'Do not include running'},
+    ];
+    defaultConfigurationIncludeRunningProcesses: SelectableValue = this.tagIncludeRunningProcessesOptions[0];
+    selectedConfigurationIncludeRunningProcesses: SelectableValue = this.defaultConfigurationIncludeRunningProcesses;
+
+    tagKeepStatesOptions = [
+        {label: 'Yes', value: 'yes', description: 'Keep states'},
+        {label: 'No', value: 'no', description: 'Do not keep states'},
+    ];
+    defaultConfigurationKeepStates: SelectableValue = this.tagKeepStatesOptions[0];
+    selectedConfigurationKeepStates: SelectableValue = this.defaultConfigurationKeepStates;
 
 
     constructor(props: Props) {
@@ -61,8 +104,14 @@ export class QueryEditor extends PureComponent<Props> {
         this.selectedObject = this.props.query.fullTagName || '';
         this.selectedValue = this.props.query.value || '';
 
+        console.log("Query Editor constructor");
+        console.log("Saved selectedObject: " + this.selectedObject);
+        console.log("Saved selectedValue: " + this.selectedValue);
+
         // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
-        const currentConfigurationAggregates = this.props.query.configurationTagAggregates || [this.defaultConfigurationAggregates];
+        const currentConfigurationAggregates = this.props.query.configurationTagAggregates || [
+            this.defaultConfigurationAggregates,
+        ];
         for (let i = 0; i < currentConfigurationAggregates.length; i++) {
             const currentValue = currentConfigurationAggregates[i];
 
@@ -85,80 +134,209 @@ export class QueryEditor extends PureComponent<Props> {
         }
 
         // check this.props.query.configurationTagTimeBucket and add to selectedConfigurationTimeBucket
-        this.selectedConfigurationTimeBucket = this.props.query.configurationTimeBucket || this.defaultConfigurationTimeBucket;
-
-   }
-
+        const currentTimeBucket = this.props.query.configurationTimeBucket || this.defaultConfigurationTimeBucket.value;
+        for (let i = 0; i < this.tagTimeBucketOptions.length; i++) {
+            const currentOption = this.tagTimeBucketOptions[i];
+            if (currentTimeBucket === currentOption.value) {
+                this.selectedConfigurationTimeBucket = currentOption;
+            }
+        }
+    }
 
     isObjectSelected = () => {
+        console.log("isObjectSelected?", this.selectedObject !== '');
+        console.log(this.selectedObject);
         return this.selectedObject !== '';
+    };
+
+
+    isObjectDataReady = () => {
+        console.log("isObjectDataReady", this.valueStructure.length !== 0)
+        console.log("valueStructure", JSON.parse(JSON.stringify(this.valueStructure)))
+        console.log("Selected value", this.selectedValue)
+        return this.valueStructure.length !== 0
     }
 
     isValidValueSelected = () => {
+        console.log('isValidValueSelected');
         if (this.selectedValue === '') {
-            return false;
-        } else if (this.selectedValue === this.KPIValueID || this.selectedValue === this.tagsValueID || this.selectedValue === this.tagsValueID+'/custom' || this.selectedValue === this.tagsValueID+'/automated') {
+            console.log('isValidValueSelected: false');
             return false;
         } else {
-            return true
+            console.log('isValidValueSelected: true selectedValue: ' + this.selectedValue);
+            return !(this.selectedValue === this.kpisQueryParameter ||
+                this.selectedValue === this.tagsQueryParameter ||
+                this.selectedValue === this.tagsQueryParameter + '/custom' ||
+                this.selectedValue === this.tagsQueryParameter + '/automated');
         }
-    }
+    };
 
     // isCurrentSelectedValueACustomTag checks whether the current selected value is a tag and therefore, begins with tagsValueID
     isCurrentSelectedValueACustomTag = () => {
         if (this.isValidValueSelected()) {
-            return this.selectedValue.startsWith(this.tagsValueID+'/custom');
+            console.log('isValidValueSelected: true');
+            const startsWithQueryParamC = this.selectedValue.includes(this.tagsQueryParameter + '/custom/');
+            console.log('isCurrentSelectedValueACustomTag: ' + startsWithQueryParamC);
+            return startsWithQueryParamC;
+        } else {
+            console.log('isCurrentSelectedValueACustomTag: false');
+            return false;
+        }
+    };
+
+    isCurrentSelectedValueAvailability = () => {
+        if (this.isValidValueSelected()) {
+            return this.selectedValue.includes(this.tablesQueryParameter + '/availability');
         } else {
             return false;
         }
     }
 
     getObjectStructure = () => {
-        this.objectStructure = [
-            {
-                label: 'BreweryCo',
-                value: 'BreweryCo',
-                items: GetDefaultEnterprise('BreweryCo')
-            }
-        ]
-        return this.objectStructure;
-    }
+        // only load new resources if there are no resources
+        console.log('getObjectStructure');
+        console.log(this.objectStructure.length);
+        if (this.objectStructure.length === 0) {
+            const newObject: CascaderOption[] = [];
+            this.props.datasource.GetResourceTree().then((response: any) => {
+                console.log(response[0][1]);
+                // the response is weird. it's an object array, of which the first item (index 0) contains
+                // another object array, of which the second item (index 1) contains the actual payload
+                const payload = response[0][1];
+                // the one and only CascaderOption at the top of the tree is the enterprise one
+                newObject.push({
+                    label: payload.label,
+                    value: payload.value,
+                    items: payload.entries.map((sites: any) => {
+                        // map all the sites relative to the enterprise
+                        return {
+                            label: sites.label,
+                            value: sites.value,
+                            items: sites.entries.map((areas: any) => {
+                                // map all the areas relative to all the sites
+                                return {
+                                    label: areas.label,
+                                    value: areas.value,
+                                    items: areas.entries.map((productionLines: any) => {
+                                        // map all the production lines relative to all the areas
+                                        return {
+                                            label: productionLines.label,
+                                            value: productionLines.value,
+                                            items: productionLines.entries.map((workCells: any) => {
+                                                // map all the work cells relative to all the production lines
+                                                return {
+                                                    label: workCells.label,
+                                                    value: workCells.value,
+                                                };
+                                            }),
+                                        };
+                                    }),
+                                };
+                            }),
+                        };
+                    }),
+                });
+                this.objectStructure = newObject;
+                this.forceUpdate();
+                console.log("Forced update");
+            });
+        }
+    };
 
     getValueStructure = () => {
-        if (this.props.query.workCell === '' || this.props.query.workCell === undefined) {
-            this.valueStructure = [
-                {
-                    label: 'Tags',
-                    value: this.tagsValueID,
-                    items: DefaultTags
-                },
-            ]
-        } else {
-            this.valueStructure = [
-                {
-                    label: 'Tags',
-                    value: this.tagsValueID,
-                    items: DefaultWorkCellTags
-                },
-                {
-                    label: 'KPIs',
-                    value: this.KPIValueID,
-                    items: DefaultKPIs
-                },
-                {
-                    label: 'Tables',
-                    value: 'table',
-                    items: DefaultTables,
+        console.log('getValueStructure');
+        console.log("props: ", this.props);
+        console.log("query: ", this.props.query);
+        console.log("workCellName: ", this.props.query.workCellName);
+        console.log("selectedObject: ", this.selectedObject);
+
+        // if no work cell is in the query, no value should be shown
+        // check if the query is correct. it should have enterprise/site/area/productionline/workcell for a total of 4 '/'
+        if (this.selectedObject.split('/').length === 5) {
+            const newValues: CascaderOption[] = [];
+            let sVal: CascaderOption | null = null;
+            this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
+                console.log(response);
+                // the response is weird. it's an object array, of which the first item (index 0) contains
+                // another object array, of which the second item (index 1) contains the actual payload
+                // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
+                newValues.push({
+                    // 'tables' CascaderOption.
+                    label: 'tables',
+                    value: 'tables',
+                    items: response[2][1].map((tables: any) => {
+                        console.log(tables);
+                        // map the actual tables
+                        let v = {
+                            label: tables.label,
+                            value: tables.value,
+                        };
+                        if (this.selectedValue === tables.value) {
+                            sVal = v;
+                        }
+                        return v;
+                    }),
+                });
+                newValues.push({
+                    label: 'kpi',
+                    value: 'kpi',
+                    items: response[3][1].map((kpis: any) => {
+                        console.log(kpis);
+                        // map the actual kpis
+                        let v = {
+                            label: kpis.label,
+                            value: kpis.value,
+                        };
+                        if (this.selectedValue === kpis.value) {
+                            sVal = v;
+                        }
+                        return v;
+                    }),
+                });
+                newValues.push({
+                    label: 'tags',
+                    value: 'tags',
+                    items: response[4][1].map((groupTags: any) => {
+                        console.log(groupTags);
+                        // map the actual tags
+                        let vx = {
+                            label: groupTags.label,
+                            value: groupTags.value,
+                            items: groupTags.entries.map((tags: any) => {
+                                let v = {
+                                    label: tags.label,
+                                    value: tags.value,
+                                };
+                                if (this.selectedValue === tags.value) {
+                                    sVal = v;
+                                }
+                                return v;
+                            }),
+                        };
+                        if (this.selectedValue === groupTags.value) {
+                            sVal = vx;
+                        }
+                        return vx;
+                    }),
+                });
+                this.valueStructure = newValues;
+                if (sVal !== null) {
+                    console.log('sVal: ', sVal);
+                    this.selectedValue = sVal.value;
                 }
-            ]
+                console.log("Updated valueStructure");
+                this.forceUpdate();
+            });
+        } else {
+            console.log("The query is not correct" + this.selectedObject);
+            this.valueStructure = [];
         }
 
-        return this.valueStructure;
 
-    }
+        return this.valueStructure;
+    };
 
     onObjectChange = (val: string) => {
-
         // split object into enterprise, area, production line, work cell
         const {onChange, query} = this.props;
         const fullTagName = val;
@@ -168,10 +346,21 @@ export class QueryEditor extends PureComponent<Props> {
         const productionLine = fullTagName.split('/')[3];
         const workCell = fullTagName.split('/')[4];
 
-        onChange({...query, enterprise, site, area, productionLine, workCell, fullTagName});
+        console.log('onObjectChange' + enterprise + " / " + site + " / " + area + " / " + productionLine + " / " + workCell);
+
+        onChange({
+            ...query,
+            enterpriseName: enterprise,
+            siteName: site,
+            areaName: area,
+            productionLineName: productionLine,
+            workCellName: workCell,
+            fullTagName,
+        });
 
         // and also in QueryEditor
         this.selectedObject = val;
+        console.log("Object changed to : " + val);
 
         // reset value and configuration
         this.selectedValue = '';
@@ -179,24 +368,24 @@ export class QueryEditor extends PureComponent<Props> {
 
         // force render
         this.forceUpdate();
-    }
+        this.getValueStructure();
+    };
 
     onValueChange = (val: string) => {
-
         const {onChange, query} = this.props;
         const value = val;
         onChange({...query, value});
 
         // and also in QueryEditor
         this.selectedValue = val;
+        console.log("Value changed to :" + val);
 
         // reset configuration
         this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
 
         // force render
         this.forceUpdate();
-
-    }
+    };
 
     onConfigurationGapfillingChange = (value: SelectableValue) => {
         const {onChange, query} = this.props;
@@ -208,11 +397,35 @@ export class QueryEditor extends PureComponent<Props> {
 
         // force render
         this.forceUpdate();
+    };
+
+    onConfigurationIncludeLastDatapointChange = (value: SelectableValue) => {
+        const {onChange, query} = this.props;
+        const configurationIncludeLastDatapoint = value.value;
+        onChange({...query, configurationIncludeLastDatapoint});
+
+        // and also in QueryEditor
+        this.selectedConfigurationIncludeLastDatapoint = value;
+
+        // force render
+        this.forceUpdate();
     }
 
-    onConfigurationAggregatesChange = (value: Array<SelectableValue>) => {
+    onConfigurationIncludeNextDatapointChange = (value: SelectableValue) => {
         const {onChange, query} = this.props;
-        const configurationTagAggregates = value.map(v => v.value);
+        const configurationIncludeNextDatapoint = value.value;
+        onChange({...query, configurationIncludeNextDatapoint});
+
+        // and also in QueryEditor
+        this.selectedConfigurationIncludeNextDatapoint = value;
+
+        // force render
+        this.forceUpdate();
+    }
+
+    onConfigurationAggregatesChange = (value: SelectableValue[]) => {
+        const {onChange, query} = this.props;
+        const configurationTagAggregates = value.map((v) => v.value);
         onChange({...query, configurationTagAggregates});
 
         // and also in QueryEditor
@@ -220,7 +433,7 @@ export class QueryEditor extends PureComponent<Props> {
 
         // force render
         this.forceUpdate();
-    }
+    };
 
     onConfigurationTimeBucketChange = (value: SelectableValue) => {
         const {onChange, query} = this.props;
@@ -232,68 +445,133 @@ export class QueryEditor extends PureComponent<Props> {
 
         // force render
         this.forceUpdate();
+    };
+
+    onConfigurationIncludeRunningProcessesChange = (value: SelectableValue) => {
+        const {onChange, query} = this.props;
+        const configurationIncludeRunningProcesses = value.value;
+        onChange({...query, configurationIncludeRunningProcesses});
+
+        // and also in QueryEditor
+        this.selectedConfigurationIncludeRunningProcesses = value;
+
+        // force render
+        this.forceUpdate();
     }
 
+    onConfigurationKeepStatesChange = (value: SelectableValue) => {
+        const {onChange, query} = this.props;
+        const configurationKeepStates = value.value;
+        onChange({...query, configurationKeepStates});
 
+        // and also in QueryEditor
+        this.selectedConfigurationKeepStates = value;
+
+        // force render
+        this.forceUpdate();
+    }
+
+    delayedForceUpdate() {
+        if (this.selectedObject === '') {
+            console.log("Skip delayed force update (no selectedObject)");
+            return;
+        }
+        if (this.selectedValue === '') {
+            console.log("Skip delayed force update (no selectedValue)");
+            return;
+        }
+
+        if (this.valueStructure.length > 0 && this.objectStructure.length > 0) {
+            console.log("delayed forceUpdate");
+            this.forceUpdate();
+            return
+        }
+        setTimeout(this.delayedForceUpdate.bind(this), 100)
+    }
+
+    componentDidMount() {
+        this.getObjectStructure();
+        this.getValueStructure();
+        setTimeout(this.delayedForceUpdate.bind(this), 1000)
+    }
 
     render() {
-
-
+        if (this.objectStructure.length === 0) {
+            return <div>Loading data, please wait...</div>;
+        }
+        console.log("rendering");
+        console.log("this.selectedValue is: ", this.selectedValue);
+        console.log("this.selectedObject is: ", this.selectedObject);
+        console.log("this.valueStructure is: ", this.valueStructure);
+        console.log("this.objectStructure is: ", this.objectStructure);
         return (
-            <div>
-                <FieldSet
-                >
+            <div className="gf-form-group">
+                <FieldSet>
                     <div className="gf-form">
                         <InlineLabel
                             width={10}
-                            tooltip={'Select an enterprise, site, area, production line, or work cell'}
+                            tooltip={'Select site, area, production line and work cell you want to see the data of'}
                         >
                             Object
                         </InlineLabel>
                         <Cascader
-                            options={this.getObjectStructure()}
+                            options={this.objectStructure}
                             onSelect={this.onObjectChange}
-                            value={this.selectedObject}
                             displayAllSelectedLevels={true}
+                            initialValue={this.selectedObject}
                             width={60}
                         />
                     </div>
-                    <div
-                        className="gf-form"
-                        hidden={!this.isObjectSelected()}
-                    >
-                        <InlineLabel
-                            width={10}
-                            tooltip={'Select an automatic calculated KPI or a tag for the selected object'}
-                        >
+                    <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+                        <InlineLabel width={10}
+                                     tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
                             Value
                         </InlineLabel>
                         <Cascader
-                            options={this.getValueStructure()}
+                            options={this.valueStructure}
                             onSelect={this.onValueChange}
                             displayAllSelectedLevels={true}
-                            value={this.selectedValue}
+                            initialValue={this.selectedValue}
                             width={60}
                         />
                     </div>
+                </FieldSet>
+                <FieldSet
+                    hidden={!this.isCurrentSelectedValueAvailability()}
+                >
+                    <div className="gf-form">
+                        <InlineLabel width={'auto'} tooltip={'Include running processes'}>
+                            Include running processes
+                        </InlineLabel>
+                        <Select
+                            options={this.tagIncludeRunningProcessesOptions}
+                            width={30}
+                            defaultValue={this.defaultConfigurationIncludeRunningProcesses}
+                            value={this.selectedConfigurationIncludeRunningProcesses}
+                            onChange={this.onConfigurationIncludeRunningProcessesChange}
+                        />
+                    </div>
+                    <div className="gf-form">
+                        <InlineLabel width={'auto'} tooltip={'Keep states'}>
+                            Keep states
+                        </InlineLabel>
+                        <Select
+                            options={this.tagKeepStatesOptions}
+                            width={30}
+                            defaultValue={this.defaultConfigurationKeepStates}
+                            value={this.selectedConfigurationKeepStates}
+                            onChange={this.onConfigurationKeepStatesChange}
+                        />
+                    </div>
 
-                    <Alert
-                        title="Please select a value from the dropdown menu"
-                        severity="error"
-                        hidden={this.isValidValueSelected() || !this.isObjectSelected()}
-                    >
-                        "Tags" or "KPIs" are not valid values for the "Element" field.
-                    </Alert>
+
                 </FieldSet>
                 <FieldSet
                     hidden={!this.isCurrentSelectedValueACustomTag()}
                     // Configure the tag. If you are unsure, leave the defaults
                 >
                     <div className={'gf-form'}>
-                        <InlineLabel
-                            width={"auto"}
-                            tooltip={'Common statistical aggregates'}
-                        >
+                        <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
                             Aggregates
                         </InlineLabel>
                         <MultiSelect
@@ -305,22 +583,20 @@ export class QueryEditor extends PureComponent<Props> {
                         />
                     </div>
                     <div className={'gf-form'}>
-                        <InlineLabel
-                            width={"auto"}
-                            tooltip={'A time interval for how long each bucket is'}
-                        >
+                        <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
                             Time Bucket
                         </InlineLabel>
-                        <Input
+                        <Select
+                            options={this.tagTimeBucketOptions}
                             width={30}
-                            defaultValue={"auto"}
+                            defaultValue={this.defaultConfigurationTimeBucket}
                             value={this.selectedConfigurationTimeBucket}
                             onChange={this.onConfigurationTimeBucketChange}
                         />
                     </div>
                     <div className={'gf-form'}>
                         <InlineLabel
-                            width={"auto"}
+                            width={'auto'}
                             tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
                         >
                             Handling missing values
@@ -333,7 +609,33 @@ export class QueryEditor extends PureComponent<Props> {
                             onChange={this.onConfigurationGapfillingChange}
                         />
                     </div>
+                    <div className={'gf-form'}>
+                        <InlineLabel width={'auto'} tooltip={'Include last datapoint before time interval'}>
+                            Include last datapoint before time interval
+                        </InlineLabel>
+                        <Select
+                            options={this.tagIncludeLastDatapointOptions}
+                            width={30}
+                            defaultValue={this.tagIncludeLastDatapointOptions[0]}
+                            value={this.selectedConfigurationIncludeLastDatapoint}
+                            onChange={this.onConfigurationIncludeLastDatapointChange}
+                        />
+                    </div>
+                    <div className={'gf-form'}>
+                        <InlineLabel width={'auto'} tooltip={'Include next datapoint after time interval'}>
+                            Include next datapoint after time interval
+                        </InlineLabel>
+                        <Select
+                            options={this.tagIncludeNextDatapointOptions}
+                            width={30}
+                            defaultValue={this.tagIncludeNextDatapointOptions[0]}
+                            value={this.selectedConfigurationIncludeNextDatapoint}
+                            onChange={this.onConfigurationIncludeNextDatapointChange}
+                        />
+                    </div>
+
                 </FieldSet>
-            </div>)
+            </div>
+        );
     }
 }

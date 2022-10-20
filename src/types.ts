@@ -1,40 +1,89 @@
 import {DataQuery, DataSourceJsonData} from '@grafana/data';
 
-export interface FactoryinsightQuery extends DataQuery {
-    // to be removed
-    location?: string;
-    asset?: string;
+export interface GetSitesQuery extends DataQuery {
+    enterprise?: string;
+}
 
-    // new ones
+export interface GetAreasQuery extends DataQuery {
+    enterprise?: string;
+    site?: string;
+}
+
+export interface GetProductionLinesQuery extends DataQuery {
+    enterprise?: string;
+    site?: string;
+    area?: string;
+}
+
+export interface GetWorkCellsQuery extends DataQuery {
     enterprise?: string;
     site?: string;
     area?: string;
     productionLine?: string;
-    workCell?: string;
+}
+
+export interface FactoryinsightQuery extends DataQuery {
+    enterpriseName: string;
+    siteName?: string;
+    areaName?: string;
+    productionLineName?: string;
+    workCellName?: string;
+    dataFormat?: string;
+
+    tagGroup?: string;
+    tag?: string;
+
+    kpiMethod?: string;
+
+    tableType?: string;
+
     value?: string;
     fullTagName?: string;
 
+    labelsField?: string;
+    parameterString?: string;
+    uriPathExtension?: string;
+
     configurationTagGapfilling?: string;
-    configurationTagAggregates: string["avg"];
+    configurationTagAggregates: string[];
     configurationTimeBucket?: string;
+    configurationIncludePrevious?: string;
+    configurationIncludeNext?: string;
+    configurationIncludeLastDatapoint?: boolean;
+    configurationIncludeNextDatapoint?: boolean;
+    configurationIncludeRunningProcesses?: boolean;
+    configurationKeepStates?: boolean;
 }
 
 export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
-    // to be removed
-    location: '', // TODO TESTDATA
-    asset: '',
+    enterpriseName: 'factoryinsight',
+    siteName: '',
+    areaName: '',
+    productionLineName: '',
+    workCellName: '',
+    dataFormat: '',
 
-    enterprise: '',
-    site: '',
-    area: '',
-    productionLine: '',
-    workCell: '',
+    tagGroup: '',
+    tag: '',
+
+    kpiMethod: '',
+
+    tableType: '',
+
     value: '',
     fullTagName: '',
 
-    configurationTagGapfilling : '',
-    configurationTagAggregates : [],
-    configurationTimeBucket : 'auto',
+    labelsField: '',
+    parameterString: '',
+    uriPathExtension: '',
+
+    configurationTagGapfilling: '',
+    configurationTagAggregates: [],
+    configurationTimeBucket: '1 hour',
+    configurationIncludeLastDatapoint: true,
+    configurationIncludeNextDatapoint: true,
+    configurationIncludeRunningProcesses: true,
+    configurationKeepStates: true,
 };
 
 /**
@@ -51,3 +100,36 @@ export interface FactoryinsightDataSourceOptions extends DataSourceJsonData {
 export interface FactoryinsightSecureJsonData {
     apiKey?: string;
 }
+
+export type TreeStructure = Map<string, Enterprise>;
+
+export type Enterprise = {
+    sites: Map<string, Site>;
+};
+
+export type Site = {
+    areas: Map<string, Area>;
+};
+
+export type Area = {
+    productionLines: Map<string, ProductionLine>;
+};
+
+export type ProductionLine = {
+    workCells: Map<string, WorkCell>;
+};
+
+export type WorkCell = {
+    kpi: string[];
+    tables: Map<string, Table>;
+    tags: Tags;
+};
+
+export type Table = {
+    id: number;
+};
+
+export type Tags = {
+    standard: string[];
+    custom: Map<string, string[]>;
+};
