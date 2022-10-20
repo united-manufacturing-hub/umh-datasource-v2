@@ -456,7 +456,7 @@ export class QueryEditor extends PureComponent<Props> {
                             options={this.objectStructure}
                             onSelect={this.onObjectChange}
                             displayAllSelectedLevels={true}
-                            //value={this.selectedObject}
+                            initialValue={this.selectedObject}
                             width={60}
                         />
                     </div>
@@ -469,7 +469,7 @@ export class QueryEditor extends PureComponent<Props> {
                             options={this.valueStructure}
                             onSelect={this.onValueChange}
                             displayAllSelectedLevels={true}
-                            //value={this.selectedValue}
+                            initialValue={this.selectedValue}
                             width={60}
                         />
                     </div>
