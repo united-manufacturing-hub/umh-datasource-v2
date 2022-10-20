@@ -28,5 +28,7 @@ e2e-results/
 
 # Editor
 .idea
-*.zip
 
+# Compilation
+*.zip
+/umh-datasource-v2
