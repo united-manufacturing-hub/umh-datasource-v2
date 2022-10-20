@@ -13,7 +13,7 @@ import {isString, isUndefined} from 'lodash';
 import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
 import {lastValueFrom} from 'rxjs';
-
+import {Buffer} from 'buffer';
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
     baseUrl: string; // baseUrl is the url to factoryinsight
