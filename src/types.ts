@@ -90,46 +90,15 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
  * These are options configured for each DataSource instance
  */
 export interface FactoryinsightDataSourceOptions extends DataSourceJsonData {
-    baseURL?: string;
-    customerID?: string;
+    baseURL: string;
+    customerID: string;
+    apiKey: string;
+    apiKeyConfigured: boolean,
 }
 
-/**
- * Value that is used in the backend, but never sent over HTTP to the frontend
- */
-export interface FactoryinsightSecureJsonData {
-    apiKey?: string;
-}
 
-export type TreeStructure = Map<string, Enterprise>;
-
-export type Enterprise = {
-    sites: Map<string, Site>;
-};
-
-export type Site = {
-    areas: Map<string, Area>;
-};
-
-export type Area = {
-    productionLines: Map<string, ProductionLine>;
-};
-
-export type ProductionLine = {
-    workCells: Map<string, WorkCell>;
-};
-
-export type WorkCell = {
-    kpi: string[];
-    tables: Map<string, Table>;
-    tags: Tags;
-};
-
-export type Table = {
-    id: number;
-};
-
-export type Tags = {
-    standard: string[];
-    custom: Map<string, string[]>;
+export const defaultOptions: Partial<FactoryinsightDataSourceOptions> = {
+    customerID: 'factoryinsight',
+    apiKey: '',
+    apiKeyConfigured: false,
 };
