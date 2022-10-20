@@ -79,7 +79,7 @@ export const defaultFactoryinsightQuery: Partial<FactoryinsightQuery> = {
 
     configurationTagGapfilling: '',
     configurationTagAggregates: [],
-    configurationTimeBucket: '1 hour',
+    configurationTimeBucket: '1 minute',
     configurationIncludeLastDatapoint: true,
     configurationIncludeNextDatapoint: true,
     configurationIncludeRunningProcesses: true,
