@@ -314,7 +314,14 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         if (options.headers === undefined) {
             options.headers = {};
         }
-        const b64encodedAuth = Buffer.from(`${this.enterpriseName}:${this.apiKey}`).toString('base64');
+        let b64encodedAuth: string;
+        if (Buffer !== undefined) {
+            b64encodedAuth = Buffer.from(`${this.enterpriseName}:${this.apiKey}`).toString('base64');
+        } else if (btoa !== undefined) {
+            b64encodedAuth = btoa(`${this.enterpriseName}:${this.apiKey}`);
+        } else {
+            throw new Error('No Buffer or btoa function available');
+        }
         options.headers['Authorization'] = `Basic ${b64encodedAuth}`;
         options.headers['Content-Type'] = `application/json`;
 
