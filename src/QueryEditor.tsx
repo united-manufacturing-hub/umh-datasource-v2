@@ -260,6 +260,9 @@ export class QueryEditor extends PureComponent<Props> {
                 // the response is weird. it's an object array, of which the first item (index 0) contains
                 // another object array, of which the second item (index 1) contains the actual payload
                 // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
+                if (response[2][1] === null){
+                    response[2][1] = []
+                }
                 newValues.push({
                     // 'tables' CascaderOption.
                     label: 'tables',
@@ -277,6 +280,9 @@ export class QueryEditor extends PureComponent<Props> {
                         return v;
                     }),
                 });
+                if (response[3][1] === null){
+                    response[3][1] = []
+                }
                 newValues.push({
                     label: 'kpi',
                     value: 'kpi',
@@ -293,12 +299,18 @@ export class QueryEditor extends PureComponent<Props> {
                         return v;
                     }),
                 });
+                if (response[4][1] === null){
+                    response[4][1] = []
+                }
                 newValues.push({
                     label: 'tags',
                     value: 'tags',
                     items: response[4][1].map((groupTags: any) => {
                         console.log(groupTags);
                         // map the actual tags
+                        if (groupTags.entries === null){
+                            groupTags.entries = []
+                        }
                         let vx = {
                             label: groupTags.label,
                             value: groupTags.value,
