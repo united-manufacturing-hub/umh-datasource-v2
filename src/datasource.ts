@@ -19,6 +19,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     baseUrl: string; // baseUrl is the url to factoryinsight
     apiPath: string;
     enterpriseName: string;
+    apiKey: string;
 
     constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
         console.log('constructor');
@@ -32,6 +33,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         this.enterpriseName =
             instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
         this.apiPath = `/api/v2/`;
+        this.apiKey = instanceSettings.jsonData.apiKey === undefined ? '' : instanceSettings.jsonData.apiKey;
 
     }
 
@@ -309,9 +311,17 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     /// Replacement for deprecated fetchAPIRequest, using fetch api
     fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
         console.log('fetchAPIRequest: ' + JSON.stringify(options));
+        if (options.headers === undefined) {
+            options.headers = {};
+        }
+        const b64encodedAuth = Buffer.from(`${this.enterpriseName}:${this.apiKey}`).toString('base64');
+        options.headers['Authorization'] = `Basic ${b64encodedAuth}`;
+        options.headers['Content-Type'] = `application/json`;
+
         const response = getBackendSrv().fetch({
             url: options.url,
             method: options.method || 'GET',
+            headers: options.headers,
         });
         return lastValueFrom(response);
 

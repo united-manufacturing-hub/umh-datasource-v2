@@ -93,7 +93,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
                             isConfigured={jsonData.apiKeyConfigured !== undefined && jsonData.apiKeyConfigured}
                             value={jsonData.apiKey || ''}
                             label="API Key"
-                            placeholder="Basic xxxxxxxxx"
+                            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                             labelWidth={10}
                             inputWidth={20}
                             tooltip="This can be found in Lens --> Secrets --> factoryinsight-secret --> apiKey"
