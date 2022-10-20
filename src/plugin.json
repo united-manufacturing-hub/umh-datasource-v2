@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "datasource",
   "name": "datasource-v2",
-  "id": "umh-datasource-v2",
+  "id": "umh-v2-datasource",
   "metrics": true,
   "info": {
     "description": "This plugin provides a datasource for connecting with factoryinsight",
@@ -10,7 +10,9 @@
       "name": "UMH Systems GmbH",
       "url": "https://www.umh.app"
     },
-    "keywords": [],
+    "keywords": [
+      "umh"
+    ],
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
@@ -18,11 +20,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://github.com/grafana/grafana-starter-datasource"
+        "url": "https://github.com/united-manufacturing-hub/umh-datasource-v2"
       },
       {
         "name": "License",
-        "url": "https://github.com/grafana/grafana-starter-datasource/blob/master/LICENSE"
+        "url": "https://github.com/united-manufacturing-hub/umh-datasource-v2/blob/main/LICENSE"
       }
     ],
     "screenshots": [],
