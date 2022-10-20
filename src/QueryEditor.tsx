@@ -104,6 +104,10 @@ export class QueryEditor extends PureComponent<Props> {
         this.selectedObject = this.props.query.fullTagName || '';
         this.selectedValue = this.props.query.value || '';
 
+        console.log("Query Editor constructor");
+        console.log("Saved selectedObject: " + this.selectedObject);
+        console.log("Saved selectedValue: " + this.selectedValue);
+
         // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
         const currentConfigurationAggregates = this.props.query.configurationTagAggregates || [
             this.defaultConfigurationAggregates,
@@ -140,8 +144,18 @@ export class QueryEditor extends PureComponent<Props> {
     }
 
     isObjectSelected = () => {
+        console.log("isObjectSelected?", this.selectedObject !== '');
+        console.log(this.selectedObject);
         return this.selectedObject !== '';
     };
+
+
+    isObjectDataReady = () => {
+        console.log("isObjectDataReady", this.valueStructure.length !== 0)
+        console.log("valueStructure", JSON.parse(JSON.stringify(this.valueStructure)))
+        console.log("Selected value", this.selectedValue)
+        return this.valueStructure.length !== 0
+    }
 
     isValidValueSelected = () => {
         console.log('isValidValueSelected');
@@ -240,6 +254,7 @@ export class QueryEditor extends PureComponent<Props> {
         // check if the query is correct. it should have enterprise/site/area/productionline/workcell for a total of 4 '/'
         if (this.selectedObject.split('/').length === 5) {
             const newValues: CascaderOption[] = [];
+            let sVal: CascaderOption | null = null;
             this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
                 console.log(response);
                 // the response is weird. it's an object array, of which the first item (index 0) contains
@@ -252,10 +267,14 @@ export class QueryEditor extends PureComponent<Props> {
                     items: response[2][1].map((tables: any) => {
                         console.log(tables);
                         // map the actual tables
-                        return {
+                        let v = {
                             label: tables.label,
                             value: tables.value,
                         };
+                        if (this.selectedValue === tables.value) {
+                            sVal = v;
+                        }
+                        return v;
                     }),
                 });
                 newValues.push({
@@ -264,10 +283,14 @@ export class QueryEditor extends PureComponent<Props> {
                     items: response[3][1].map((kpis: any) => {
                         console.log(kpis);
                         // map the actual kpis
-                        return {
+                        let v = {
                             label: kpis.label,
                             value: kpis.value,
                         };
+                        if (this.selectedValue === kpis.value) {
+                            sVal = v;
+                        }
+                        return v;
                     }),
                 });
                 newValues.push({
@@ -276,19 +299,32 @@ export class QueryEditor extends PureComponent<Props> {
                     items: response[4][1].map((groupTags: any) => {
                         console.log(groupTags);
                         // map the actual tags
-                        return {
+                        let vx = {
                             label: groupTags.label,
                             value: groupTags.value,
                             items: groupTags.entries.map((tags: any) => {
-                                return {
+                                let v = {
                                     label: tags.label,
                                     value: tags.value,
                                 };
+                                if (this.selectedValue === tags.value) {
+                                    sVal = v;
+                                }
+                                return v;
                             }),
                         };
+                        if (this.selectedValue === groupTags.value) {
+                            sVal = vx;
+                        }
+                        return vx;
                     }),
                 });
                 this.valueStructure = newValues;
+                if (sVal !== null) {
+                    console.log('sVal: ', sVal);
+                    this.selectedValue = sVal.value;
+                }
+                console.log("Updated valueStructure");
                 this.forceUpdate();
             });
         } else {
@@ -324,6 +360,7 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedObject = val;
+        console.log("Object changed to : " + val);
 
         // reset value and configuration
         this.selectedValue = '';
@@ -341,6 +378,7 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedValue = val;
+        console.log("Value changed to :" + val);
 
         // reset configuration
         this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
@@ -433,8 +471,28 @@ export class QueryEditor extends PureComponent<Props> {
         this.forceUpdate();
     }
 
+    delayedForceUpdate() {
+        if (this.selectedObject === '') {
+            console.log("Skip delayed force update (no selectedObject)");
+            return;
+        }
+        if (this.selectedValue === '') {
+            console.log("Skip delayed force update (no selectedValue)");
+            return;
+        }
+
+        if (this.valueStructure.length > 0 && this.objectStructure.length > 0) {
+            console.log("delayed forceUpdate");
+            this.forceUpdate();
+            return
+        }
+        setTimeout(this.delayedForceUpdate.bind(this), 100)
+    }
+
     componentDidMount() {
         this.getObjectStructure();
+        this.getValueStructure();
+        setTimeout(this.delayedForceUpdate.bind(this), 1000)
     }
 
     render() {
@@ -442,6 +500,10 @@ export class QueryEditor extends PureComponent<Props> {
             return <div>Loading data, please wait...</div>;
         }
         console.log("rendering");
+        console.log("this.selectedValue is: ", this.selectedValue);
+        console.log("this.selectedObject is: ", this.selectedObject);
+        console.log("this.valueStructure is: ", this.valueStructure);
+        console.log("this.objectStructure is: ", this.objectStructure);
         return (
             <div className="gf-form-group">
                 <FieldSet>
@@ -460,7 +522,7 @@ export class QueryEditor extends PureComponent<Props> {
                             width={60}
                         />
                     </div>
-                    <div className="gf-form" hidden={!this.isObjectSelected() || this.valueStructure.length === 0}>
+                    <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
                         <InlineLabel width={10}
                                      tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
                             Value

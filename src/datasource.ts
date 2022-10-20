@@ -21,6 +21,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     enterpriseName: string;
 
     constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
+        console.log('constructor');
         instanceSettings.access = 'proxy'; // always set access to proxy
 
         super(instanceSettings);
@@ -35,6 +36,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
+        console.log('query');
         console.log('options: ', options);
         const {range} = options;
         const from: string = range.from.utc().toISOString();
@@ -56,6 +58,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
 
     private async GetMappedValues(target: FactoryinsightQuery, from: string, to: string, options: DataQueryRequest<FactoryinsightQuery>, queryIndex: number) {
+        console.log('GetMappedValues');
         const query = defaults(target, defaultFactoryinsightQuery);
 
         if (query.value === undefined) {
@@ -143,6 +146,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     async getDatapoints(from: string, to: string, path: string, queries: FactoryinsightQuery[]): Promise<{ datapoints: number[][][]; columnNames: string[][] } | null> {
+        console.log('getDatapoints');
         console.log('path: ', path);
         console.log('from: ', from);
         console.log('to: ', to);
@@ -246,6 +250,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     };
 
     async GetResourceTree() {
+        console.log('GetResourceTree');
         return this.fetchAPIRequest({
             url: this.baseUrl + this.apiPath + 'treeStructure',
         })
@@ -259,6 +264,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     async GetValuesTree(queryPath: string) {
+        console.log('GetValuesTree');
         return this.fetchAPIRequest({
             url: this.baseUrl + this.apiPath + queryPath + '/getValues',
         })
@@ -272,6 +278,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     async testDatasource() {
+        console.log('testDatasource');
         console.log(this.baseUrl);// Implement a health check for your data source.
         let testResult = {
             status: 'success',
