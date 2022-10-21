@@ -162,49 +162,10 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
 
         for (let i = 0; i < queries.length; i += 1) {
-            const target = queries[i];
-            // Include optional parameters
-            if (target.configurationIncludeNext !== undefined) {
-                url = url + '&includeNext=' + target.configurationIncludeNext;
-            }
-            if (target.configurationIncludePrevious !== undefined) {
-                url = url + '&includePrevious=' + target.configurationIncludePrevious;
-            }
-            if (target.configurationTagGapfilling !== undefined && target.configurationTagGapfilling.length > 0) {
-                url = url + '&gapFilling=' + target.configurationTagGapfilling;
-            } else {
-                url = url + '&gapFilling=null';
-            }
-            if (target.configurationTagAggregates !== undefined && target.configurationTagAggregates.length > 0) {
-                // join array to string separated by comma
-                url = url + '&tagAggregates=' + target.configurationTagAggregates.join(',');
-            } else {
-                url = url + '&tagAggregates=avg';
-            }
-            if (target.configurationTimeBucket !== undefined) {
-                url = url + '&timeBucket=' + target.configurationTimeBucket;
-            }
-            if (target.configurationIncludeLastDatapoint !== undefined) {
-                url = url + '&includePrevious=' + target.configurationIncludeLastDatapoint;
-            }
-            if (target.configurationIncludeNextDatapoint !== undefined) {
-                url = url + '&includeNext=' + target.configurationIncludeNextDatapoint;
-            }
-            if (target.configurationIncludeRunningProcesses !== undefined) {
-                url = url + '&includeRunning=' + target.configurationIncludeRunningProcesses;
-            } else {
-                url = url + '&includeRunning=true';
-            }
-            if (target.configurationKeepStates !== undefined) {
-                url = url + '&keepStatesInteger=' + target.configurationKeepStates;
-            } else {
-                url = url + '&keepStatesInteger=true';
-            }
-
-            console.log('url: ', url);
+            const urlX = this.ConstructURL(queries, i, url);
 
             await this.fetchAPIRequest({
-                url: url
+                url: urlX
             }).then((res: any) => {
                 // Handle empty responses
                 if (res.data.datapoints !== null) {
@@ -221,6 +182,51 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         return {datapoints: datapoints, columnNames: columnNames};
     }
 
+
+    private ConstructURL(queries: FactoryinsightQuery[], i: number, url: string) {
+        let url2 = url;
+        const target = queries[i];
+        // Include optional parameters
+        if (target.configurationIncludeNext !== undefined) {
+            url2 = url2 + '&includeNext=' + target.configurationIncludeNext;
+        }
+        if (target.configurationIncludePrevious !== undefined) {
+            url2 = url2 + '&includePrevious=' + target.configurationIncludePrevious;
+        }
+        if (target.configurationTagGapfilling !== undefined && target.configurationTagGapfilling.length > 0) {
+            url2 = url2 + '&gapFilling=' + target.configurationTagGapfilling;
+        } else {
+            url2 = url2 + '&gapFilling=null';
+        }
+        if (target.configurationTagAggregates !== undefined && target.configurationTagAggregates.length > 0) {
+            // join array to string separated by comma
+            url2 = url2 + '&tagAggregates=' + target.configurationTagAggregates.join(',');
+        } else {
+            url2 = url2 + '&tagAggregates=avg';
+        }
+        if (target.configurationTimeBucket !== undefined) {
+            url2 = url2 + '&timeBucket=' + target.configurationTimeBucket;
+        }
+        if (target.configurationIncludeLastDatapoint !== undefined) {
+            url2 = url2 + '&includePrevious=' + target.configurationIncludeLastDatapoint;
+        }
+        if (target.configurationIncludeNextDatapoint !== undefined) {
+            url2 = url2 + '&includeNext=' + target.configurationIncludeNextDatapoint;
+        }
+        if (target.configurationIncludeRunningProcesses !== undefined) {
+            url2 = url2 + '&includeRunning=' + target.configurationIncludeRunningProcesses;
+        } else {
+            url2 = url2 + '&includeRunning=true';
+        }
+        if (target.configurationKeepStates !== undefined) {
+            url2 = url2 + '&keepStatesInteger=' + target.configurationKeepStates;
+        } else {
+            url2 = url2 + '&keepStatesInteger=true';
+        }
+
+        console.log('url2: ', url2);
+        return url2;
+    }
 
     transpose = (a: number[][]): number[][] | any[] => {
         // Calculate the width and height of the Array
