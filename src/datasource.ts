@@ -164,6 +164,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         for (let i = 0; i < queries.length; i += 1) {
             const query = queries[i];
             const urlX = this.ConstructURL(query, url);
+            console.log('urlX: ', urlX);
 
             await this.fetchAPIRequest({
                 url: urlX
@@ -185,7 +186,9 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
 
     private ConstructURL(target: FactoryinsightQuery, url: string) {
-        let url2 = url;
+        console.log("constructing url from target and url:", target, url);
+        // force deep copy of string
+        let url2 = (' ' + url).slice(1);
         // Include optional parameters
         if (target.configurationIncludeNext !== undefined) {
             url2 = url2 + '&includeNext=' + target.configurationIncludeNext;
