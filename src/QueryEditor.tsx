@@ -36,7 +36,7 @@ export class QueryEditor extends PureComponent<Props> {
         {label: 'Count', value: 'count', description: 'The number of values in the time bucket'},
     ];
     defaultConfigurationAggregates: SelectableValue = this.tagAggregatesOptions[0];
-    selectedConfigurationAggregates: SelectableValue[] = [this.defaultConfigurationAggregates];
+    selectedConfigurationAggregates: SelectableValue[] = [];
 
     // time bucket configuration
     tagTimeBucketOptions = [
@@ -122,6 +122,10 @@ export class QueryEditor extends PureComponent<Props> {
                     this.selectedConfigurationAggregates.push(currentOption);
                 }
             }
+        }
+        // Only push default if no other values are selected
+        if (this.selectedConfigurationAggregates.length === 0) {
+            this.selectedConfigurationAggregates.push(this.defaultConfigurationAggregates);
         }
 
         // check this.props.query.configurationTagGapfilling and add to selectedConfigurationGapfilling
@@ -260,7 +264,7 @@ export class QueryEditor extends PureComponent<Props> {
                 // the response is weird. it's an object array, of which the first item (index 0) contains
                 // another object array, of which the second item (index 1) contains the actual payload
                 // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
-                if (response[2][1] === null){
+                if (response[2][1] === null) {
                     response[2][1] = []
                 }
                 newValues.push({
@@ -280,7 +284,7 @@ export class QueryEditor extends PureComponent<Props> {
                         return v;
                     }),
                 });
-                if (response[3][1] === null){
+                if (response[3][1] === null) {
                     response[3][1] = []
                 }
                 newValues.push({
@@ -299,7 +303,7 @@ export class QueryEditor extends PureComponent<Props> {
                         return v;
                     }),
                 });
-                if (response[4][1] === null){
+                if (response[4][1] === null) {
                     response[4][1] = []
                 }
                 newValues.push({
@@ -308,7 +312,7 @@ export class QueryEditor extends PureComponent<Props> {
                     items: response[4][1].map((groupTags: any) => {
                         console.log(groupTags);
                         // map the actual tags
-                        if (groupTags.entries === null){
+                        if (groupTags.entries === null) {
                             groupTags.entries = []
                         }
                         let vx = {
