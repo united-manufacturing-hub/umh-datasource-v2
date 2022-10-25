@@ -509,7 +509,7 @@ export class QueryEditor extends PureComponent<Props> {
       this.forceUpdate();
       return;
     }
-    setTimeout(this.delayedForceUpdate.bind(this), 100);
+    setTimeout(this.delayedForceUpdate.bind(this), 500);
   }
 
   componentDidMount() {
