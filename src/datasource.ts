@@ -64,13 +64,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     queryIndex: number
   ) {
     console.log('GetMappedValues');
-    //const query = defaults(target, defaultFactoryinsightQuery);
+    const query = defaults(target, defaultFactoryinsightQuery);
 
-    if (target.value === undefined) {
+    if (query.value === undefined) {
       throw new Error('No value selected');
     }
 
-    const resultArray = await this.getDatapoints(from, to, target.value, options.targets);
+    const resultArray = await this.getDatapoints(from, to, query.value, options.targets);
 
     if (resultArray === null) {
       console.log('resultArray is null');
@@ -84,7 +84,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
     // Return and empty frame if no location, asset or value has been specified
     const frame = new MutableDataFrame({
-      refId: target.refId,
+      refId: query.refId,
       fields: [],
     });
 
@@ -94,11 +94,11 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
     // Turn rows into fields if defined by user
-    if (target.labelsField !== undefined && target.labelsField !== '') {
-      const fieldNameIndex = columnNames[queryIndex].indexOf(target.labelsField);
+    if (query.labelsField !== undefined && query.labelsField !== '') {
+      const fieldNameIndex = columnNames[queryIndex].indexOf(query.labelsField);
 
       if (fieldNameIndex === -1) {
-        console.error(`ERROR: Column ${target.labelsField} not found. Using default format.`);
+        console.error(`ERROR: Column ${query.labelsField} not found. Using default format.`);
       } else {
         // These are the new column names
         const newColumnNames = datapoints[queryIndex][fieldNameIndex];
