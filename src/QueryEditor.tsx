@@ -164,11 +164,11 @@ export class QueryEditor extends PureComponent<Props> {
       return false;
     } else {
       console.log('isValidValueSelected: true selectedValue: ' + this.selectedValue);
-      return !(
+      return (
         this.selectedValue === this.kpisQueryParameter ||
-        this.selectedValue === this.tagsQueryParameter ||
+        this.selectedValue === this.tablesQueryParameter ||
         this.selectedValue === this.tagsQueryParameter + '/custom' ||
-        this.selectedValue === this.tagsQueryParameter + '/automated'
+        this.selectedValue === this.tagsQueryParameter + '/standard'
       );
     }
   };
