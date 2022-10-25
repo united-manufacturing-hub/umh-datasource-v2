@@ -98,8 +98,16 @@ export class QueryEditor extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
 
-    this.selectedObject = this.props.query.fullTagName || '';
-    this.selectedValue = this.props.query.value || '';
+    if (this.props.query.fullTagName === undefined) {
+      this.props.query.fullTagName = '';
+    } else {
+      this.selectedObject = this.props.query.fullTagName;
+    }
+    if (this.props.query.value === undefined) {
+      this.selectedValue = '';
+    } else {
+      this.selectedValue = this.props.query.value;
+    }
 
     console.log('Query Editor constructor');
     console.log('Saved selectedObject: ' + this.selectedObject);
