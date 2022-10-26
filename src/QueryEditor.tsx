@@ -50,19 +50,19 @@ export class QueryEditor extends PureComponent<Props> {
 
   // time bucket configuration
   tagTimeBucketUnitOptions = [
-    { label: 'Minute', value: 'minute' },
-    { label: 'Hour', value: 'hour' },
-    { label: 'Day', value: 'day' },
-    { label: 'Week', value: 'week' },
-    { label: 'Month', value: 'month' },
-    { label: 'Year', value: 'year' },
+    { label: 'Minute', value: 'm' },
+    { label: 'Hour', value: 'h' },
+    { label: 'Day', value: 'd' },
+    { label: 'Week', value: 'w' },
+    { label: 'Month', value: 'M' },
+    { label: 'Year', value: 'y' },
   ];
   timeBucketEnabled = true;
   defaultTimeBucketSize = '1';
   selectedTimeBucketSize: string = this.defaultTimeBucketSize;
-  defaultTimeBucketUnit: string = this.tagTimeBucketUnitOptions[0].value;
+  defaultTimeBucketUnit: SelectableValue = this.tagTimeBucketUnitOptions[0];
   selectedTimeBucketUnit: SelectableValue = this.tagTimeBucketUnitOptions[0];
-  defaultConfigurationTimeBucket: string = this.defaultTimeBucketSize + ' ' + this.defaultTimeBucketUnit;
+  defaultConfigurationTimeBucket: string = this.defaultTimeBucketSize + this.defaultTimeBucketUnit.value;
   selectedConfigurationTimeBucket: string = this.defaultConfigurationTimeBucket;
 
   // Gapfilling configuration
@@ -163,12 +163,16 @@ export class QueryEditor extends PureComponent<Props> {
     for (let i = 0; i < this.tagTimeBucketUnitOptions.length; i++) {
       const currentOption = this.tagTimeBucketUnitOptions[i];
       if (currentTimeBucket.includes(currentOption.value)) {
-        const currentTimeBucketSize = currentTimeBucket.split(' ')[0];
+        const currentTimeBucketSize = currentTimeBucket.slice(0, -1);
         if (this.isStringValidNumber(currentTimeBucketSize)) {
           this.selectedTimeBucketSize = currentTimeBucketSize;
           this.selectedTimeBucketUnit = currentOption;
           this.selectedConfigurationTimeBucket = currentTimeBucket;
         }
+      }
+      if (currentTimeBucket === 'none') {
+        this.timeBucketEnabled = false;
+        this.selectedConfigurationTimeBucket = currentTimeBucket;
       }
     }
   }
@@ -503,11 +507,12 @@ export class QueryEditor extends PureComponent<Props> {
       const parsedValue = parseInt(rawValue, 10);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
-      const configurationTimeBucket = stringValue + ' ' + this.selectedTimeBucketUnit.value;
+      const configurationTimeBucket = stringValue + this.selectedTimeBucketUnit.value;
       onChange({ ...query, configurationTimeBucket });
 
       // and also in QueryEditor
       this.selectedTimeBucketSize = stringValue;
+      this.selectedConfigurationTimeBucket = configurationTimeBucket;
 
       // force render
       this.forceUpdate();
@@ -520,11 +525,12 @@ export class QueryEditor extends PureComponent<Props> {
 
   onTimeBucketUnitChange = (value: SelectableValue) => {
     const { onChange, query } = this.props;
-    const configurationTimeBucket = this.selectedTimeBucketSize + ' ' + value.value;
+    const configurationTimeBucket = this.selectedTimeBucketSize + value.value;
     onChange({ ...query, configurationTimeBucket });
 
     // and also in QueryEditor
-    this.selectedTimeBucketUnit = value.value;
+    this.selectedTimeBucketUnit = value;
+    this.selectedConfigurationTimeBucket = configurationTimeBucket;
 
     // force render
     this.forceUpdate();
@@ -691,7 +697,7 @@ export class QueryEditor extends PureComponent<Props> {
               />
               <InlineField
                 label={'Size'}
-                invalid={this.selectedTimeBucketSize === ''}
+                invalid={this.isStringValidNumber(this.selectedTimeBucketSize)}
                 error={'This input is required and must be a valid number'}
                 disabled={!this.timeBucketEnabled}
               >
@@ -701,7 +707,7 @@ export class QueryEditor extends PureComponent<Props> {
                 <Select
                   options={this.tagTimeBucketUnitOptions}
                   width={30}
-                  defaultValue={this.defaultTimeBucketUnit}
+                  defaultValue={this.defaultTimeBucketUnit.value}
                   value={this.selectedTimeBucketUnit}
                   onChange={this.onTimeBucketUnitChange}
                 />
