@@ -513,6 +513,8 @@ export class QueryEditor extends PureComponent<Props> {
       this.forceUpdate();
     } else {
       this.selectedTimeBucketSize = rawValue;
+      // force render
+      this.forceUpdate();
     }
   };
 
