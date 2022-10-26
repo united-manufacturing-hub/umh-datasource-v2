@@ -689,8 +689,8 @@ export class QueryEditor extends PureComponent<Props> {
               />
               <InlineField
                 label={'Size'}
-                invalid={this.isStringValidNumber(this.selectedTimeBucketSize)}
-                error={'This input is required and must be a valid number'}
+                // invalid={this.isStringValidNumber(this.selectedTimeBucketSize)}
+                // error={'This input is required and must be a valid number'}
                 disabled={!this.timeBucketEnabled}
               >
                 <Input label={'Size'} value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange} />
