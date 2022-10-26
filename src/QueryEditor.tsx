@@ -10,7 +10,6 @@ import React, { PureComponent } from 'react';
 import {
   Cascader,
   CascaderOption,
-  Checkbox,
   FieldSet,
   InlineField,
   InlineFieldRow,
