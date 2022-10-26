@@ -164,7 +164,7 @@ export class QueryEditor extends PureComponent<Props> {
       const currentOption = this.tagTimeBucketUnitOptions[i];
       if (currentTimeBucket.includes(currentOption.value)) {
         const currentTimeBucketSize = currentTimeBucket.split(' ')[0];
-        if (this.isStringValidNumberOrEmpty(currentTimeBucketSize)) {
+        if (this.isStringValidNumber(currentTimeBucketSize)) {
           this.selectedTimeBucketSize = currentTimeBucketSize;
           this.selectedTimeBucketUnit = currentOption;
           this.selectedConfigurationTimeBucket = currentTimeBucket;
@@ -499,7 +499,7 @@ export class QueryEditor extends PureComponent<Props> {
   onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
     const rawValue = event.currentTarget.value;
     // change query only if the value is a valid number
-    if (this.isStringValidNumberOrEmpty(rawValue) && rawValue !== '') {
+    if (this.isStringValidNumber(rawValue)) {
       const parsedValue = parseInt(rawValue, 10);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
@@ -511,9 +511,6 @@ export class QueryEditor extends PureComponent<Props> {
 
       // force render
       this.forceUpdate();
-    } else if (rawValue === '') {
-      // update in QueryEditor to show the error
-      this.selectedTimeBucketSize = '';
     } else {
       this.selectedTimeBucketSize = rawValue;
     }
@@ -591,8 +588,8 @@ export class QueryEditor extends PureComponent<Props> {
     setTimeout(this.delayedForceUpdate.bind(this), 1000);
   }
 
-  isStringValidNumberOrEmpty(input: string): boolean {
-    const numberRegEx = /^\d+$|^$/;
+  isStringValidNumber(input: string): boolean {
+    const numberRegEx = /^\d+$/;
     return numberRegEx.test(input);
   }
 
