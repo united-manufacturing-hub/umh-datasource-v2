@@ -497,16 +497,23 @@ export class QueryEditor extends PureComponent<Props> {
   };
 
   onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const value = event.currentTarget.value;
-    const { onChange, query } = this.props;
-    const configurationTimeBucket = value + ' ' + this.selectedTimeBucketUnit;
-    onChange({ ...query, configurationTimeBucket });
+    const rawValue = event.currentTarget.value;
+    if (this.isStringValidNumber(rawValue)) {
+      const parsedValue = parseInt(rawValue);
+      const stringValue = parsedValue.toString();
+      const { onChange, query } = this.props;
+      const configurationTimeBucket = stringValue + ' ' + this.selectedTimeBucketUnit;
+      onChange({ ...query, configurationTimeBucket });
 
-    // and also in QueryEditor
-    this.selectedTimeBucketSize = value;
+      // and also in QueryEditor
+      this.selectedTimeBucketSize = stringValue;
 
-    // force render
-    this.forceUpdate();
+      // force render
+      this.forceUpdate();
+    } else {
+      // update in QueryEditor to show the error
+      this.selectedTimeBucketSize = rawValue;
+    }
   };
 
   onTimeBucketUnitChange = (value: SelectableValue) => {
@@ -579,6 +586,11 @@ export class QueryEditor extends PureComponent<Props> {
     this.getObjectStructure();
     this.getValueStructure();
     setTimeout(this.delayedForceUpdate.bind(this), 1000);
+  }
+
+  isStringValidNumber(input: string): boolean {
+    const numberRegEx: RegExp = /^\d+$/;
+    return numberRegEx.test(input);
   }
 
   render() {
@@ -677,7 +689,7 @@ export class QueryEditor extends PureComponent<Props> {
               />
               <InlineField
                 label={'Size'}
-                invalid={/*isNaN(this.timeBucketSize) &&*/ isNaN(parseFloat(this.selectedTimeBucketSize))}
+                invalid={this.isStringValidNumber(this.selectedTimeBucketSize)}
                 error={'This input is required and must be a valid number'}
                 disabled={!this.timeBucketEnabled}
               >
