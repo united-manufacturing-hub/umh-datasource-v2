@@ -57,13 +57,13 @@ export class QueryEditor extends PureComponent<Props> {
     { label: 'Month', value: 'month' },
     { label: 'Year', value: 'year' },
   ];
-  timeBucketEnabled = true;
-  defaultTimeBucketSize = '1';
-  selectedTimeBucketSize = this.defaultTimeBucketSize;
-  defaultTimeBucketUnit = this.tagTimeBucketUnitOptions[0].value;
+  timeBucketEnabled: boolean = true;
+  defaultTimeBucketSize: string = '1';
+  selectedTimeBucketSize: string = this.defaultTimeBucketSize;
+  defaultTimeBucketUnit: string = this.tagTimeBucketUnitOptions[0].value;
   selectedTimeBucketUnit: SelectableValue = this.tagTimeBucketUnitOptions[0];
-  defaultConfigurationTimeBucket = this.defaultTimeBucketSize + ' ' + this.defaultTimeBucketUnit;
-  selectedConfigurationTimeBucket = this.defaultConfigurationTimeBucket;
+  defaultConfigurationTimeBucket: string = this.defaultTimeBucketSize + ' ' + this.defaultTimeBucketUnit;
+  selectedConfigurationTimeBucket: string = this.defaultConfigurationTimeBucket;
 
   // Gapfilling configuration
   tagGapfillingOptions = [
@@ -164,7 +164,7 @@ export class QueryEditor extends PureComponent<Props> {
       const currentOption = this.tagTimeBucketUnitOptions[i];
       if (currentTimeBucket.includes(currentOption.value)) {
         const currentTimeBucketSize = currentTimeBucket.split(' ')[0];
-        if (isNaN(parseFloat(currentTimeBucketSize))) {
+        if (this.isStringValidNumber(currentTimeBucketSize)) {
           this.selectedTimeBucketSize = currentTimeBucketSize;
           this.selectedTimeBucketUnit = currentOption;
           this.selectedConfigurationTimeBucket = currentTimeBucket;
@@ -502,7 +502,7 @@ export class QueryEditor extends PureComponent<Props> {
       const parsedValue = parseInt(rawValue);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
-      const configurationTimeBucket = stringValue + ' ' + this.selectedTimeBucketUnit;
+      const configurationTimeBucket = stringValue + ' ' + this.selectedTimeBucketUnit.value;
       onChange({ ...query, configurationTimeBucket });
 
       // and also in QueryEditor
