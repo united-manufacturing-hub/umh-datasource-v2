@@ -7,7 +7,19 @@
 // Export REST call to get data TODO
 
 import React, { PureComponent } from 'react';
-import { Cascader, CascaderOption, FieldSet, InlineLabel, MultiSelect, Select } from '@grafana/ui';
+import {
+  Cascader,
+  CascaderOption,
+  Checkbox,
+  FieldSet,
+  InlineField,
+  InlineFieldRow,
+  InlineLabel,
+  InlineSwitch,
+  Input,
+  MultiSelect,
+  Select,
+} from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
 import { FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
@@ -38,16 +50,21 @@ export class QueryEditor extends PureComponent<Props> {
   selectedConfigurationAggregates: SelectableValue[] = [];
 
   // time bucket configuration
-  tagTimeBucketOptions = [
-    { label: '1 minute', value: '1 minute', description: 'Aggregate data from the last minute' },
-    { label: '1 hour', value: '1 hour', description: 'Aggregate data from the last hour' },
-    { label: '1 day', value: '1 day', description: 'Aggregate data from the last day' },
-    { label: '1 week', value: '1 week', description: 'Aggregate data from the last week' },
-    { label: '1 month', value: '1 month', description: 'Aggregate data from the last month' },
-    { label: '1 year', value: '1 year', description: 'Aggregate data from the last year' },
+  tagTimeBucketUnitOptions = [
+    { label: 'Minute', value: 'minute' },
+    { label: 'Hour', value: 'hour' },
+    { label: 'Day', value: 'day' },
+    { label: 'Week', value: 'week' },
+    { label: 'Month', value: 'month' },
+    { label: 'Year', value: 'year' },
   ];
-  defaultConfigurationTimeBucket: SelectableValue = this.tagTimeBucketOptions[0];
-  selectedConfigurationTimeBucket: SelectableValue = this.defaultConfigurationTimeBucket;
+  timeBucketEnabled = true;
+  defaultTimeBucketSize = '1';
+  selectedTimeBucketSize = this.defaultTimeBucketSize;
+  defaultTimeBucketUnit = this.tagTimeBucketUnitOptions[0].value;
+  selectedTimeBucketUnit: SelectableValue = this.tagTimeBucketUnitOptions[0];
+  defaultConfigurationTimeBucket = this.defaultTimeBucketSize + ' ' + this.defaultTimeBucketUnit;
+  selectedConfigurationTimeBucket = this.defaultConfigurationTimeBucket;
 
   // Gapfilling configuration
   tagGapfillingOptions = [
@@ -143,11 +160,16 @@ export class QueryEditor extends PureComponent<Props> {
     }
 
     // check this.props.query.configurationTagTimeBucket and add to selectedConfigurationTimeBucket
-    const currentTimeBucket = this.props.query.configurationTimeBucket || this.defaultConfigurationTimeBucket.value;
-    for (let i = 0; i < this.tagTimeBucketOptions.length; i++) {
-      const currentOption = this.tagTimeBucketOptions[i];
-      if (currentTimeBucket === currentOption.value) {
-        this.selectedConfigurationTimeBucket = currentOption;
+    const currentTimeBucket = this.props.query.configurationTimeBucket || this.defaultConfigurationTimeBucket;
+    for (let i = 0; i < this.tagTimeBucketUnitOptions.length; i++) {
+      const currentOption = this.tagTimeBucketUnitOptions[i];
+      if (currentTimeBucket.includes(currentOption.value)) {
+        const currentTimeBucketSize = currentTimeBucket.split(' ')[0];
+        if (isNaN(parseFloat(currentTimeBucketSize))) {
+          this.selectedTimeBucketSize = currentTimeBucketSize;
+          this.selectedTimeBucketUnit = currentOption;
+          this.selectedConfigurationTimeBucket = currentTimeBucket;
+        }
       }
     }
   }
@@ -458,6 +480,48 @@ export class QueryEditor extends PureComponent<Props> {
     this.forceUpdate();
   };
 
+  onTimeBucketEnabledChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.checked;
+    const { onChange, query } = this.props;
+    if (!value) {
+      onChange({ ...query, configurationTimeBucket: 'none' });
+    } else {
+      const configurationTimeBucket = this.selectedConfigurationTimeBucket;
+      onChange({ ...query, configurationTimeBucket });
+    }
+
+    // and also in QueryEditor
+    this.timeBucketEnabled = value;
+
+    // force render
+    this.forceUpdate();
+  };
+
+  onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    const { onChange, query } = this.props;
+    const configurationTimeBucket = value + ' ' + this.selectedTimeBucketUnit;
+    onChange({ ...query, configurationTimeBucket });
+
+    // and also in QueryEditor
+    this.selectedTimeBucketSize = value;
+
+    // force render
+    this.forceUpdate();
+  };
+
+  onTimeBucketUnitChange = (value: SelectableValue) => {
+    const { onChange, query } = this.props;
+    const configurationTimeBucket = this.selectedTimeBucketSize + ' ' + value.value;
+    onChange({ ...query, configurationTimeBucket });
+
+    // and also in QueryEditor
+    this.selectedTimeBucketUnit = value.value;
+
+    // force render
+    this.forceUpdate();
+  };
+
   onConfigurationTimeBucketChange = (value: SelectableValue) => {
     const { onChange, query } = this.props;
     const configurationTimeBucket = value.value;
@@ -542,7 +606,7 @@ export class QueryEditor extends PureComponent<Props> {
               onSelect={this.onObjectChange}
               displayAllSelectedLevels={true}
               initialValue={this.selectedObject}
-              width={80}
+              width={100}
             />
           </div>
           <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
@@ -554,7 +618,7 @@ export class QueryEditor extends PureComponent<Props> {
               onSelect={this.onValueChange}
               displayAllSelectedLevels={true}
               initialValue={this.selectedValue}
-              width={80}
+              width={100}
             />
           </div>
         </FieldSet>
@@ -601,16 +665,43 @@ export class QueryEditor extends PureComponent<Props> {
             />
           </div>
           <div className={'gf-form'}>
-            <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
-              Time Bucket
-            </InlineLabel>
-            <Select
+            <InlineFieldRow>
+              <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
+                Time Bucket
+              </InlineLabel>
+              <InlineSwitch
+                label="Enable"
+                showLabel={true}
+                value={this.timeBucketEnabled}
+                onClick={this.onTimeBucketEnabledChange}
+                /*onChange={this.onTimeBucketEnabledChange}*/
+              />
+              <InlineField
+                label={'Size'}
+                invalid={/*isNaN(this.timeBucketSize) &&*/ isNaN(parseFloat(this.selectedTimeBucketSize))}
+                error={'This input is required and must be a valid number'}
+                disabled={!this.timeBucketEnabled}
+              >
+                <Input label={'Size'} value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange} />
+              </InlineField>
+              <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
+                <Select
+                  options={this.tagTimeBucketUnitOptions}
+                  width={30}
+                  defaultValue={this.defaultTimeBucketUnit}
+                  value={this.selectedTimeBucketUnit}
+                  onChange={this.onTimeBucketUnitChange}
+                />
+              </InlineField>
+            </InlineFieldRow>
+
+            {/* <Select
               options={this.tagTimeBucketOptions}
               width={30}
               defaultValue={this.defaultConfigurationTimeBucket}
               value={this.selectedConfigurationTimeBucket}
               onChange={this.onConfigurationTimeBucketChange}
-            />
+            /> */}
           </div>
           <div className={'gf-form'}>
             <InlineLabel
