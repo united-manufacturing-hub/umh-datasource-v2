@@ -57,8 +57,8 @@ export class QueryEditor extends PureComponent<Props> {
     { label: 'Month', value: 'month' },
     { label: 'Year', value: 'year' },
   ];
-  timeBucketEnabled: boolean = true;
-  defaultTimeBucketSize: string = '1';
+  timeBucketEnabled = true;
+  defaultTimeBucketSize = '1';
   selectedTimeBucketSize: string = this.defaultTimeBucketSize;
   defaultTimeBucketUnit: string = this.tagTimeBucketUnitOptions[0].value;
   selectedTimeBucketUnit: SelectableValue = this.tagTimeBucketUnitOptions[0];
@@ -499,7 +499,7 @@ export class QueryEditor extends PureComponent<Props> {
   onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
     const rawValue = event.currentTarget.value;
     if (this.isStringValidNumber(rawValue)) {
-      const parsedValue = parseInt(rawValue);
+      const parsedValue = parseInt(rawValue, 10);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
       const configurationTimeBucket = stringValue + ' ' + this.selectedTimeBucketUnit.value;
@@ -589,7 +589,7 @@ export class QueryEditor extends PureComponent<Props> {
   }
 
   isStringValidNumber(input: string): boolean {
-    const numberRegEx: RegExp = /^\d+$/;
+    const numberRegEx = /^\d+$/;
     return numberRegEx.test(input);
   }
 
