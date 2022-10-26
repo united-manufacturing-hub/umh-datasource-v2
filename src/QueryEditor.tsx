@@ -164,7 +164,7 @@ export class QueryEditor extends PureComponent<Props> {
       const currentOption = this.tagTimeBucketUnitOptions[i];
       if (currentTimeBucket.includes(currentOption.value)) {
         const currentTimeBucketSize = currentTimeBucket.split(' ')[0];
-        if (this.isStringValidNumber(currentTimeBucketSize)) {
+        if (this.isStringValidNumberOrEmpty(currentTimeBucketSize)) {
           this.selectedTimeBucketSize = currentTimeBucketSize;
           this.selectedTimeBucketUnit = currentOption;
           this.selectedConfigurationTimeBucket = currentTimeBucket;
@@ -498,7 +498,8 @@ export class QueryEditor extends PureComponent<Props> {
 
   onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
     const rawValue = event.currentTarget.value;
-    if (this.isStringValidNumber(rawValue)) {
+    // change query only if the value is a valid number
+    if (this.isStringValidNumberOrEmpty(rawValue) || rawValue !== '') {
       const parsedValue = parseInt(rawValue, 10);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
@@ -588,8 +589,8 @@ export class QueryEditor extends PureComponent<Props> {
     setTimeout(this.delayedForceUpdate.bind(this), 1000);
   }
 
-  isStringValidNumber(input: string): boolean {
-    const numberRegEx = /^\d+$/;
+  isStringValidNumberOrEmpty(input: string): boolean {
+    const numberRegEx = /^\d+$|^$/;
     return numberRegEx.test(input);
   }
 
@@ -689,8 +690,8 @@ export class QueryEditor extends PureComponent<Props> {
               />
               <InlineField
                 label={'Size'}
-                // invalid={this.isStringValidNumber(this.selectedTimeBucketSize)}
-                // error={'This input is required and must be a valid number'}
+                invalid={this.selectedTimeBucketSize === ''}
+                error={'This input is required and must be a valid number'}
                 disabled={!this.timeBucketEnabled}
               >
                 <Input label={'Size'} value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange} />
