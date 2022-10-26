@@ -499,7 +499,7 @@ export class QueryEditor extends PureComponent<Props> {
   onTimeBucketSizeChange = (event: React.FormEvent<HTMLInputElement>) => {
     const rawValue = event.currentTarget.value;
     // change query only if the value is a valid number
-    if (this.isStringValidNumberOrEmpty(rawValue) || rawValue !== '') {
+    if (this.isStringValidNumberOrEmpty(rawValue) && rawValue !== '') {
       const parsedValue = parseInt(rawValue, 10);
       const stringValue = parsedValue.toString();
       const { onChange, query } = this.props;
