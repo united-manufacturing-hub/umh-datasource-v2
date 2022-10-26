@@ -511,8 +511,10 @@ export class QueryEditor extends PureComponent<Props> {
 
       // force render
       this.forceUpdate();
-    } else {
+    } else if (rawValue === '') {
       // update in QueryEditor to show the error
+      this.selectedTimeBucketSize = '';
+    } else {
       this.selectedTimeBucketSize = rawValue;
     }
   };
