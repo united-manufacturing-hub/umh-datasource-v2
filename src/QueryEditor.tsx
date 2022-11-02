@@ -700,7 +700,7 @@ export class QueryEditor extends PureComponent<Props> {
           <FieldSet hidden={!this.timeBucketEnabled}>
             <div className={'gf-form'}>
               <InlineLabel
-                width={60}
+                width={31}
                 tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
               >
                 Handling missing values
@@ -714,7 +714,7 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </div>
             <div className={'gf-form'}>
-              <InlineLabel width={60} tooltip={'Include last datapoint before time interval'}>
+              <InlineLabel width={31} tooltip={'Include last datapoint before time interval'}>
                 Include last datapoint before time interval
               </InlineLabel>
               <InlineSwitch
@@ -723,7 +723,7 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </div>
             <div className={'gf-form'}>
-              <InlineLabel width={60} tooltip={'Include next datapoint after time interval'}>
+              <InlineLabel width={31} tooltip={'Include next datapoint after time interval'}>
                 Include next datapoint after time interval
               </InlineLabel>
               <InlineSwitch
