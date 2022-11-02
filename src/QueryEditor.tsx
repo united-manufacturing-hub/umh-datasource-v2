@@ -487,7 +487,13 @@ export class QueryEditor extends PureComponent<Props> {
     const value = event.currentTarget.checked;
     const { onChange, query } = this.props;
     if (!value) {
-      onChange({ ...query, configurationTimeBucket: 'none' });
+      onChange({
+        ...query,
+        configurationTimeBucket: 'none',
+        configurationTagGapfilling: this.defaultConfigurationGapfilling.value,
+        configurationIncludeLastDatapoint: this.defaultConfigurationIncludeLastDatapoint.value,
+        configurationIncludeNextDatapoint: this.defaultConfigurationIncludeNextDatapoint.value,
+      });
     } else {
       const configurationTimeBucket = this.selectedConfigurationTimeBucket;
       onChange({ ...query, configurationTimeBucket });
@@ -693,7 +699,6 @@ export class QueryEditor extends PureComponent<Props> {
                 showLabel={true}
                 value={this.timeBucketEnabled}
                 onClick={this.onTimeBucketEnabledChange}
-                /*onChange={this.onTimeBucketEnabledChange}*/
               />
               <InlineField
                 label={'Size'}
@@ -713,14 +718,6 @@ export class QueryEditor extends PureComponent<Props> {
                 />
               </InlineField>
             </InlineFieldRow>
-
-            {/* <Select
-              options={this.tagTimeBucketOptions}
-              width={30}
-              defaultValue={this.defaultConfigurationTimeBucket}
-              value={this.selectedConfigurationTimeBucket}
-              onChange={this.onConfigurationTimeBucketChange}
-            /> */}
           </div>
           <div className={'gf-form'}>
             <InlineLabel
@@ -735,6 +732,7 @@ export class QueryEditor extends PureComponent<Props> {
               defaultValue={this.tagGapfillingOptions[0]}
               value={this.selectedConfigurationGapfilling}
               onChange={this.onConfigurationGapfillingChange}
+              disabled={!this.timeBucketEnabled}
             />
           </div>
           <div className={'gf-form'}>
@@ -747,6 +745,7 @@ export class QueryEditor extends PureComponent<Props> {
               defaultValue={this.tagIncludeLastDatapointOptions[0]}
               value={this.selectedConfigurationIncludeLastDatapoint}
               onChange={this.onConfigurationIncludeLastDatapointChange}
+              disabled={!this.timeBucketEnabled}
             />
           </div>
           <div className={'gf-form'}>
@@ -759,6 +758,7 @@ export class QueryEditor extends PureComponent<Props> {
               defaultValue={this.tagIncludeNextDatapointOptions[0]}
               value={this.selectedConfigurationIncludeNextDatapoint}
               onChange={this.onConfigurationIncludeNextDatapointChange}
+              disabled={!this.timeBucketEnabled}
             />
           </div>
         </FieldSet>

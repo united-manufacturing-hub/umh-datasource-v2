@@ -217,7 +217,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     if (target.configurationTimeBucket !== undefined) {
       url2 = url2 + '&timeBucket=' + target.configurationTimeBucket;
     } else {
-      url2 = url2 + '&timeBucket=1 minute';
+      url2 = url2 + '&timeBucket=1m';
     }
     if (target.configurationIncludeLastDatapoint !== undefined) {
       url2 = url2 + '&includePrevious=' + target.configurationIncludeLastDatapoint;
