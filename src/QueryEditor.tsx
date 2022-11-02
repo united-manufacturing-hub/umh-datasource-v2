@@ -461,8 +461,8 @@ export class QueryEditor extends PureComponent<Props> {
   //   this.forceUpdate();
   // };
 
-  onConfigurationIncludeLastDatapointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const configurationIncludeLastDatapoint = event.target.checked;
+  onConfigurationIncludeLastDatapointChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const configurationIncludeLastDatapoint = event.currentTarget.checked;
     const { onChange, query } = this.props;
     onChange({ ...query, configurationIncludeLastDatapoint });
 
@@ -485,8 +485,8 @@ export class QueryEditor extends PureComponent<Props> {
   //   this.forceUpdate();
   // };
 
-  onConfigurationIncludeNextDatapointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const configurationIncludeNextDatapoint = event.target.checked;
+  onConfigurationIncludeNextDatapointChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const configurationIncludeNextDatapoint = event.currentTarget.checked;
     const { onChange, query } = this.props;
     onChange({ ...query, configurationIncludeNextDatapoint });
 
@@ -517,8 +517,8 @@ export class QueryEditor extends PureComponent<Props> {
         ...query,
         configurationTimeBucket: 'none',
         configurationTagGapfilling: this.defaultConfigurationGapfilling.value,
-        configurationIncludeLastDatapoint: this.defaultConfigurationIncludeLastDatapoint.value,
-        configurationIncludeNextDatapoint: this.defaultConfigurationIncludeNextDatapoint.value,
+        configurationIncludeLastDatapoint: this.selectedConfigurationIncludeLastDatapoint,
+        configurationIncludeNextDatapoint: this.selectedConfigurationIncludeNextDatapoint,
       });
     } else {
       this.selectedConfigurationTimeBucket = this.selectedTimeBucketSize + this.selectedTimeBucketUnit.value;
