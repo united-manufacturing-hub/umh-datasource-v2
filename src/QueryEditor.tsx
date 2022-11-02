@@ -495,6 +495,7 @@ export class QueryEditor extends PureComponent<Props> {
         configurationIncludeNextDatapoint: this.defaultConfigurationIncludeNextDatapoint.value,
       });
     } else {
+      this.selectedConfigurationTimeBucket = this.selectedTimeBucketSize + this.selectedTimeBucketUnit.value;
       const configurationTimeBucket = this.selectedConfigurationTimeBucket;
       onChange({ ...query, configurationTimeBucket });
     }
