@@ -83,30 +83,32 @@ export class QueryEditor extends PureComponent<Props> {
   defaultConfigurationGapfilling: SelectableValue = this.tagGapfillingOptions[0];
   selectedConfigurationGapfilling: SelectableValue = this.defaultConfigurationGapfilling;
 
-  tagIncludeLastDatapointOptions = [
-    { label: 'Yes', value: 'yes', description: 'Include last datapoint' },
-    { label: 'No', value: 'no', description: 'Do not include last datapoint' },
-  ];
-  defaultConfigurationIncludeLastDatapoint: SelectableValue = this.tagIncludeLastDatapointOptions[0];
-  selectedConfigurationIncludeLastDatapoint: SelectableValue = this.defaultConfigurationIncludeLastDatapoint;
+  // tagIncludeLastDatapointOptions = [
+  //   { label: 'Yes', value: 'true', description: 'Include last datapoint' },
+  //   { label: 'No', value: 'false', description: 'Do not include last datapoint' },
+  // ];
+  // defaultConfigurationIncludeLastDatapoint: SelectableValue = this.tagIncludeLastDatapointOptions[0];
+  //selectedConfigurationIncludeLastDatapoint: SelectableValue = this.defaultConfigurationIncludeLastDatapoint;
+  selectedConfigurationIncludeLastDatapoint = true;
 
-  tagIncludeNextDatapointOptions = [
-    { label: 'Yes', value: 'yes', description: 'Include next datapoint' },
-    { label: 'No', value: 'no', description: 'Do not include next datapoint' },
-  ];
-  defaultConfigurationIncludeNextDatapoint: SelectableValue = this.tagIncludeNextDatapointOptions[0];
-  selectedConfigurationIncludeNextDatapoint: SelectableValue = this.defaultConfigurationIncludeNextDatapoint;
+  // tagIncludeNextDatapointOptions = [
+  //   { label: 'Yes', value: 'true', description: 'Include next datapoint' },
+  //   { label: 'No', value: 'false', description: 'Do not include next datapoint' },
+  // ];
+  // defaultConfigurationIncludeNextDatapoint: SelectableValue = this.tagIncludeNextDatapointOptions[0];
+  // selectedConfigurationIncludeNextDatapoint: SelectableValue = this.defaultConfigurationIncludeNextDatapoint;
+  selectedConfigurationIncludeNextDatapoint = true;
 
   tagIncludeRunningProcessesOptions = [
-    { label: 'Yes', value: 'yes', description: 'Include running' },
-    { label: 'No', value: 'no', description: 'Do not include running' },
+    { label: 'Yes', value: 'true', description: 'Include running' },
+    { label: 'No', value: 'false', description: 'Do not include running' },
   ];
   defaultConfigurationIncludeRunningProcesses: SelectableValue = this.tagIncludeRunningProcessesOptions[0];
   selectedConfigurationIncludeRunningProcesses: SelectableValue = this.defaultConfigurationIncludeRunningProcesses;
 
   tagKeepStatesOptions = [
-    { label: 'Yes', value: 'yes', description: 'Keep states' },
-    { label: 'No', value: 'no', description: 'Do not keep states' },
+    { label: 'Yes', value: 'true', description: 'Keep states' },
+    { label: 'No', value: 'false', description: 'Do not keep states' },
   ];
   defaultConfigurationKeepStates: SelectableValue = this.tagKeepStatesOptions[0];
   selectedConfigurationKeepStates: SelectableValue = this.defaultConfigurationKeepStates;
@@ -447,25 +449,49 @@ export class QueryEditor extends PureComponent<Props> {
     this.forceUpdate();
   };
 
-  onConfigurationIncludeLastDatapointChange = (value: SelectableValue) => {
+  // onConfigurationIncludeLastDatapointChange = (value: SelectableValue) => {
+  //   const { onChange, query } = this.props;
+  //   const configurationIncludeLastDatapoint = value.value;
+  //   onChange({ ...query, configurationIncludeLastDatapoint });
+
+  //   // and also in QueryEditor
+  //   this.selectedConfigurationIncludeLastDatapoint = value;
+
+  //   // force render
+  //   this.forceUpdate();
+  // };
+
+  onConfigurationIncludeLastDatapointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const configurationIncludeLastDatapoint = event.target.checked;
     const { onChange, query } = this.props;
-    const configurationIncludeLastDatapoint = value.value;
     onChange({ ...query, configurationIncludeLastDatapoint });
 
     // and also in QueryEditor
-    this.selectedConfigurationIncludeLastDatapoint = value;
+    this.selectedConfigurationIncludeLastDatapoint = configurationIncludeLastDatapoint;
 
     // force render
     this.forceUpdate();
   };
 
-  onConfigurationIncludeNextDatapointChange = (value: SelectableValue) => {
+  // onConfigurationIncludeNextDatapointChange = (value: SelectableValue) => {
+  //   const { onChange, query } = this.props;
+  //   const configurationIncludeNextDatapoint = value.value;
+  //   onChange({ ...query, configurationIncludeNextDatapoint });
+
+  //   // and also in QueryEditor
+  //   this.selectedConfigurationIncludeNextDatapoint = value;
+
+  //   // force render
+  //   this.forceUpdate();
+  // };
+
+  onConfigurationIncludeNextDatapointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const configurationIncludeNextDatapoint = event.target.checked;
     const { onChange, query } = this.props;
-    const configurationIncludeNextDatapoint = value.value;
     onChange({ ...query, configurationIncludeNextDatapoint });
 
     // and also in QueryEditor
-    this.selectedConfigurationIncludeNextDatapoint = value;
+    this.selectedConfigurationIncludeNextDatapoint = configurationIncludeNextDatapoint;
 
     // force render
     this.forceUpdate();
@@ -740,27 +766,35 @@ export class QueryEditor extends PureComponent<Props> {
             <InlineLabel width={'auto'} tooltip={'Include last datapoint before time interval'}>
               Include last datapoint before time interval
             </InlineLabel>
-            <Select
+            <InlineSwitch
+              value={this.selectedConfigurationIncludeLastDatapoint}
+              onClick={this.onConfigurationIncludeLastDatapointChange}
+              disabled={!this.timeBucketEnabled}
+            />
+            {/* <Select
               options={this.tagIncludeLastDatapointOptions}
               width={30}
               defaultValue={this.tagIncludeLastDatapointOptions[0]}
               value={this.selectedConfigurationIncludeLastDatapoint}
               onChange={this.onConfigurationIncludeLastDatapointChange}
               disabled={!this.timeBucketEnabled}
-            />
-          </div>
-          <div className={'gf-form'}>
+            /> */}
             <InlineLabel width={'auto'} tooltip={'Include next datapoint after time interval'}>
               Include next datapoint after time interval
             </InlineLabel>
-            <Select
+            <InlineSwitch
+              value={this.selectedConfigurationIncludeNextDatapoint}
+              onClick={this.onConfigurationIncludeNextDatapointChange}
+              disabled={!this.timeBucketEnabled}
+            />
+            {/* <Select
               options={this.tagIncludeNextDatapointOptions}
               width={30}
               defaultValue={this.tagIncludeNextDatapointOptions[0]}
               value={this.selectedConfigurationIncludeNextDatapoint}
               onChange={this.onConfigurationIncludeNextDatapointChange}
               disabled={!this.timeBucketEnabled}
-            />
+            /> */}
           </div>
         </FieldSet>
       </div>
