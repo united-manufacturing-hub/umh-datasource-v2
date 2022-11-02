@@ -679,12 +679,17 @@ export class QueryEditor extends PureComponent<Props> {
                 error={'This input is required and must be a valid number'}
                 disabled={!this.timeBucketEnabled}
               >
-                <Input label={'Size'} value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange} />
+                <Input
+                  label={'Size'}
+                  value={this.selectedTimeBucketSize}
+                  onChange={this.onTimeBucketSizeChange}
+                  width={20}
+                />
               </InlineField>
               <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
                 <Select
                   options={this.tagTimeBucketUnitOptions}
-                  width={30}
+                  width={20}
                   defaultValue={this.defaultTimeBucketUnit.value}
                   value={this.selectedTimeBucketUnit}
                   onChange={this.onTimeBucketUnitChange}
@@ -692,42 +697,41 @@ export class QueryEditor extends PureComponent<Props> {
               </InlineField>
             </InlineFieldRow>
           </div>
-          <div className={'gf-form'}>
-            <InlineLabel
-              width={'auto'}
-              tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-            >
-              Handling missing values
-            </InlineLabel>
-            <Select
-              options={this.tagGapfillingOptions}
-              width={30}
-              defaultValue={this.tagGapfillingOptions[0]}
-              value={this.selectedConfigurationGapfilling}
-              onChange={this.onConfigurationGapfillingChange}
-              disabled={!this.timeBucketEnabled}
-            />
-          </div>
-          <div className={'gf-form'}>
-            <InlineLabel width={'auto'} tooltip={'Include last datapoint before time interval'}>
-              Include last datapoint before time interval
-            </InlineLabel>
-            <InlineSwitch
-              value={this.selectedConfigurationIncludeLastDatapoint}
-              onClick={this.onConfigurationIncludeLastDatapointChange}
-              disabled={!this.timeBucketEnabled}
-            />
-          </div>
-          <div className={'gf-form'}>
-            <InlineLabel width={'auto'} tooltip={'Include next datapoint after time interval'}>
-              Include next datapoint after time interval
-            </InlineLabel>
-            <InlineSwitch
-              value={this.selectedConfigurationIncludeNextDatapoint}
-              onClick={this.onConfigurationIncludeNextDatapointChange}
-              disabled={!this.timeBucketEnabled}
-            />
-          </div>
+          <FieldSet hidden={!this.timeBucketEnabled}>
+            <div className={'gf-form'}>
+              <InlineLabel
+                width={60}
+                tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+              >
+                Handling missing values
+              </InlineLabel>
+              <Select
+                options={this.tagGapfillingOptions}
+                width={30}
+                defaultValue={this.tagGapfillingOptions[0]}
+                value={this.selectedConfigurationGapfilling}
+                onChange={this.onConfigurationGapfillingChange}
+              />
+            </div>
+            <div className={'gf-form'}>
+              <InlineLabel width={60} tooltip={'Include last datapoint before time interval'}>
+                Include last datapoint before time interval
+              </InlineLabel>
+              <InlineSwitch
+                value={this.selectedConfigurationIncludeLastDatapoint}
+                onClick={this.onConfigurationIncludeLastDatapointChange}
+              />
+            </div>
+            <div className={'gf-form'}>
+              <InlineLabel width={60} tooltip={'Include next datapoint after time interval'}>
+                Include next datapoint after time interval
+              </InlineLabel>
+              <InlineSwitch
+                value={this.selectedConfigurationIncludeNextDatapoint}
+                onClick={this.onConfigurationIncludeNextDatapointChange}
+              />
+            </div>
+          </FieldSet>
         </FieldSet>
       </div>
     );
