@@ -651,18 +651,6 @@ export class QueryEditor extends PureComponent<Props> {
           // Configure the tag. If you are unsure, leave the defaults
         >
           <div className={'gf-form'}>
-            <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
-              Aggregates
-            </InlineLabel>
-            <MultiSelect
-              options={this.tagAggregatesOptions}
-              width={30}
-              defaultValue={this.defaultConfigurationAggregates}
-              value={this.selectedConfigurationAggregates}
-              onChange={this.onConfigurationAggregatesChange}
-            />
-          </div>
-          <div className={'gf-form'}>
             <InlineFieldRow>
               <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
                 Time Bucket
@@ -698,6 +686,18 @@ export class QueryEditor extends PureComponent<Props> {
             </InlineFieldRow>
           </div>
           <FieldSet hidden={!this.timeBucketEnabled}>
+            <div className={'gf-form'}>
+              <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
+                Aggregates
+              </InlineLabel>
+              <MultiSelect
+                options={this.tagAggregatesOptions}
+                width={30}
+                defaultValue={this.defaultConfigurationAggregates}
+                value={this.selectedConfigurationAggregates}
+                onChange={this.onConfigurationAggregatesChange}
+              />
+            </div>
             <div className={'gf-form'}>
               <InlineLabel
                 width={35}
