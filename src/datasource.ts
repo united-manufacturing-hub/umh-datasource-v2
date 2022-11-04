@@ -169,6 +169,9 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
 
     for (let i = 0; i < queries.length; i += 1) {
       const query = queries[i];
+      if (query.hide) {
+        continue;
+      }
       const urlX = this.ConstructURL(query, url);
       console.log('urlX: ', urlX);
 
