@@ -9,11 +9,11 @@ import {
   MutableDataFrame,
 } from '@grafana/data';
 
-import { isString, isUndefined } from 'lodash';
-import { defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery } from './types';
-import { BackendSrvRequest, FetchResponse, getBackendSrv } from '@grafana/runtime';
-import { lastValueFrom } from 'rxjs';
-import { Buffer } from 'buffer';
+import {isString, isUndefined} from 'lodash';
+import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
+import {BackendSrvRequest, FetchResponse, getBackendSrv} from '@grafana/runtime';
+import {lastValueFrom} from 'rxjs';
+import {Buffer} from 'buffer';
 
 export class DataSource extends DataSourceApi<FactoryinsightQuery, FactoryinsightDataSourceOptions> {
   baseUrl: string; // baseUrl is the url to factoryinsight
@@ -22,25 +22,25 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   apiKey: string;
 
   constructor(instanceSettings: DataSourceInstanceSettings<FactoryinsightDataSourceOptions>) {
-    console.log('constructor');
+
     instanceSettings.access = 'proxy'; // always set access to proxy
 
     super(instanceSettings);
 
     this.baseUrl =
-      instanceSettings.url === undefined
-        ? 'http://united-manufacturing-hub-factoryinsight-service/'
-        : instanceSettings.url;
+        instanceSettings.url === undefined
+            ? 'http://united-manufacturing-hub-factoryinsight-service/'
+            : instanceSettings.url;
     this.enterpriseName =
-      instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
+        instanceSettings.jsonData.customerID === undefined ? 'factoryinsight' : instanceSettings.jsonData.customerID;
     this.apiPath = `/api/v2/`;
     this.apiKey = instanceSettings.jsonData.apiKey === undefined ? '' : instanceSettings.jsonData.apiKey;
   }
 
   async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {
-    console.log('query');
-    console.log('options: ', options);
-    const { range } = options;
+
+
+    const {range} = options;
     const from: string = range.from.utc().toISOString();
     const to: string = range.to.utc().toISOString();
 
@@ -53,17 +53,17 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       data.push(await this.GetMappedValues(target, from, to, options, queryIndex));
     }
 
-    return { data };
+    return {data};
   }
 
   private async GetMappedValues(
-    target: FactoryinsightQuery,
-    from: string,
-    to: string,
-    options: DataQueryRequest<FactoryinsightQuery>,
-    queryIndex: number
+      target: FactoryinsightQuery,
+      from: string,
+      to: string,
+      options: DataQueryRequest<FactoryinsightQuery>,
+      queryIndex: number
   ) {
-    console.log('GetMappedValues');
+
     const query = defaults(target, defaultFactoryinsightQuery);
 
     if (query.value === undefined) {
@@ -73,8 +73,8 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     const resultArray = await this.getDatapoints(from, to, query.value, options.targets);
 
     if (resultArray === null) {
-      console.log('resultArray is null');
-      return { data: [] };
+
+      return {data: []};
     }
 
     // Temporary space for the requested data points, data format and requested value
@@ -104,9 +104,9 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         const newColumnNames = datapoints[queryIndex][fieldNameIndex];
         // Filter out the column names from the table and transpose it for easier assignment
         const newDatapoints = this.transpose(
-          datapoints[queryIndex].filter((element, eIndex) => {
-            return eIndex !== fieldNameIndex;
-          })
+            datapoints[queryIndex].filter((element, eIndex) => {
+              return eIndex !== fieldNameIndex;
+            })
         );
         // Create a new field with the corresponding data
         newColumnNames.map((columnName, columnIndex) => {
@@ -135,7 +135,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       } else if (columnName === 'fieldName') {
         // TODO Special case
         // Edit from 2022: I have no idea what this special case is about
-        console.log('TODO: Special case for fieldName');
+
       } else {
         // Check data type
         const sampleValue = datapoints[queryIndex][columnIndex][0];
@@ -151,15 +151,12 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   }
 
   async getDatapoints(
-    from: string,
-    to: string,
-    path: string,
-    queries: FactoryinsightQuery[]
+      from: string,
+      to: string,
+      path: string,
+      queries: FactoryinsightQuery[]
   ): Promise<{ datapoints: number[][][]; columnNames: string[][] } | null> {
-    console.log('getDatapoints');
-    console.log('path: ', path);
-    console.log('from: ', from);
-    console.log('to: ', to);
+
 
     let url = this.baseUrl + this.apiPath + path;
     url = url + '?from=' + from + '&to=' + to;
@@ -173,30 +170,30 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         continue;
       }
       const urlX = this.ConstructURL(query, url);
-      console.log('urlX: ', urlX);
+
 
       await this.fetchAPIRequest({
         url: urlX,
       })
-        .then((res: any) => {
-          // Handle empty responses
-          if (res.data.datapoints !== null) {
-            // Push datapoints
-            columnNames.push(res.data.columnNames);
-            datapoints.push(this.transpose(res.data.datapoints));
-          }
-        })
-        .catch((error: any) => {
-          console.error(error);
-          throw new Error('Failed to fetch datapoints');
-        });
+          .then((res: any) => {
+            // Handle empty responses
+            if (res.data.datapoints !== null) {
+              // Push datapoints
+              columnNames.push(res.data.columnNames);
+              datapoints.push(this.transpose(res.data.datapoints));
+            }
+          })
+          .catch((error: any) => {
+            console.error(error);
+            throw new Error('Failed to fetch datapoints');
+          });
     }
 
-    return { datapoints: datapoints, columnNames: columnNames };
+    return {datapoints: datapoints, columnNames: columnNames};
   }
 
   private ConstructURL(target: FactoryinsightQuery, url: string) {
-    console.log('constructing url from target and url:', target, url);
+
     // force deep copy of string
     let url2 = (' ' + url).slice(1);
     // Include optional parameters
@@ -243,7 +240,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       url2 = url2 + '&keepStatesInteger=true';
     }
 
-    console.log('url2: ', url2);
+
     return url2;
   }
 
@@ -277,36 +274,36 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
   };
 
   async GetResourceTree() {
-    console.log('GetResourceTree');
+
     return this.fetchAPIRequest({
       url: this.baseUrl + this.apiPath + 'treeStructure',
     })
-      .then((res: any) => {
-        return Object.entries(res.data);
-      })
-      .catch((error: any) => {
-        console.error(error);
-        throw new Error('Failed to fetch resource tree');
-      });
+        .then((res: any) => {
+          return Object.entries(res.data);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          throw new Error('Failed to fetch resource tree');
+        });
   }
 
   async GetValuesTree(queryPath: string) {
-    console.log('GetValuesTree');
+
     return this.fetchAPIRequest({
       url: this.baseUrl + this.apiPath + queryPath + '/getValues',
     })
-      .then((res: any) => {
-        return Object.entries(res.data);
-      })
-      .catch((error: any) => {
-        console.error(error);
-        throw new Error('Failed to fetch value tree');
-      });
+        .then((res: any) => {
+          return Object.entries(res.data);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          throw new Error('Failed to fetch value tree');
+        });
   }
 
   async testDatasource() {
-    console.log('testDatasource');
-    console.log(this.baseUrl); // Implement a health check for your data source.
+
+
     let testResult = {
       status: 'success',
       message: 'Data source works.',
@@ -316,25 +313,25 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     await this.fetchAPIRequest({
       url: this.baseUrl, // no API path as health check is on path /
     })
-      .then((res: any) => {
-        if (res === undefined || res.status !== 200 || res.data !== 'online') {
-          console.log(JSON.stringify(res));
+        .then((res: any) => {
+          if (res === undefined || res.status !== 200 || res.data !== 'online') {
+
+            testResult.status = 'error';
+            testResult.message = `Wrong response from server: ${res}`;
+            testResult.title = `Data source connection error`;
+          }
+        })
+        .catch((error: any) => {
           testResult.status = 'error';
-          testResult.message = `Wrong response from server: ${res}`;
-          testResult.title = `Data source connection error`;
-        }
-      })
-      .catch((error: any) => {
-        testResult.status = 'error';
-        testResult.message = `Caught error in datasource test: ${JSON.stringify(error)}`;
-        testResult.title = `Data source exception`;
-      });
+          testResult.message = `Caught error in datasource test: ${JSON.stringify(error)}`;
+          testResult.title = `Data source exception`;
+        });
     return testResult;
   }
 
   /// Replacement for deprecated fetchAPIRequest, using fetch api
   fetchAPIRequest(options: BackendSrvRequest): Promise<FetchResponse<unknown>> {
-    console.log('fetchAPIRequest: ' + JSON.stringify(options));
+
     if (options.headers === undefined) {
       options.headers = {};
     }
