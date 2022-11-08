@@ -51,7 +51,7 @@ jobs:
           steps.cache-node-modules.outputs.cache-hit != 'true'
 
       - name: Build and test frontend
-        run: yarn build
+        run: yarn dev
 
       - name: Check for backend
         id: check-for-backend

@@ -44,7 +44,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build and test frontend
-        run: yarn build
+        run: yarn dev
 
       - name: Check for backend
         id: check-for-backend
