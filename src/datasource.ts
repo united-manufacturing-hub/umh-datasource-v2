@@ -1,12 +1,12 @@
 import defaults from 'lodash/defaults';
 
 import {
-  DataQueryRequest,
-  DataQueryResponse,
-  DataSourceApi,
-  DataSourceInstanceSettings,
-  FieldType,
-  MutableDataFrame,
+    DataQueryRequest,
+    DataQueryResponse,
+    DataSourceApi,
+    DataSourceInstanceSettings,
+    FieldType,
+    MutableDataFrame,
 } from '@grafana/data';
 
 import {isString, isUndefined} from 'lodash';
@@ -72,7 +72,21 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             throw new Error('No value selected');
         }
 
-        const resultArray = await this.getDatapoints(from, to, query.value, options.targets);
+        //factoryinsight/testLocation/DefaultArea/DefaultProductionLine/testMachine
+        //factoryinsight/testLocation/DefaultArea/DefaultProductionLine/ABC/tags/custom/Pressure
+
+        let fTNX = "";
+        if (query.fullTagName === undefined) {
+            fTNX = query.value
+        } else {
+            const fTN = query.fullTagName;
+            const q = query.value;
+            const ftnSplits = fTN.split("/");
+            const qSplits = q.split("/");
+            fTNX = fTN + "/" + (qSplits.slice(ftnSplits.length, qSplits.length)).join("/");
+        }
+
+        const resultArray = await this.getDatapoints(from, to, fTNX, options.targets);
 
         // Return and empty frame if no location, asset or value has been specified
         const frame = new MutableDataFrame({
