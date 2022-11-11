@@ -246,8 +246,6 @@ export class QueryEditor extends PureComponent<Props> {
         for (const key in response) {
           if (response.hasOwnProperty(key)) {
             const element = response[key];
-            console.log('key: ', key);
-            console.log('element: ', element);
             // for (const elementKey in element) {
             //   if (element.hasOwnProperty(elementKey)) {
             //     const elementValue = element[elementKey];
@@ -267,6 +265,8 @@ export class QueryEditor extends PureComponent<Props> {
                       value: kpi.value,
                     };
                     if (this.selectedValue === kpi.value) {
+                      console.log('kpi: sVal: ', sVal);
+                      console.log('kpi: this.selectedValue: ', this.selectedValue);
                       sVal = v;
                     }
                     return v;
@@ -284,6 +284,8 @@ export class QueryEditor extends PureComponent<Props> {
                       value: table.value,
                     };
                     if (this.selectedValue === table.value) {
+                      console.log('tables: sVal: ', sVal);
+                      console.log('tables: this.selectedValue: ', this.selectedValue);
                       sVal = v;
                     }
                     return v;
@@ -316,6 +318,8 @@ export class QueryEditor extends PureComponent<Props> {
                       // }),
                     };
                     if (this.selectedValue === groupTag.value) {
+                      console.log('groupTag: sVal: ', sVal);
+                      console.log('groupTag: this.selectedValue: ', this.selectedValue);
                       sVal = vx;
                     }
                     return vx;
@@ -402,6 +406,8 @@ export class QueryEditor extends PureComponent<Props> {
         // });
         this.valueStructure = newValues;
         if (sVal !== null) {
+          console.log('sVal: ', sVal);
+          console.log('this.selectedValue: ', this.selectedValue);
           this.selectedValue = sVal.value;
         }
 
