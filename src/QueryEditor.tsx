@@ -203,7 +203,7 @@ export class QueryEditor extends PureComponent<Props> {
         newObject.push({
           label: payload.label,
           value: payload.value,
-          items: this.mapToCascaderOptions(payload.entries),
+          items: this.mapToCascaderOptions(payload.entries, false),
         });
         this.objectStructure = newObject;
         this.forceUpdate();
@@ -212,7 +212,7 @@ export class QueryEditor extends PureComponent<Props> {
   };
 
   // funtion to map a map of objects to an array of CascaderOptions
-  mapToCascaderOptions = (map: any) => {
+  mapToCascaderOptions = (map: any, isValueStructure: boolean) => {
     if (map === undefined || map === null) {
       return undefined;
     }
@@ -220,10 +220,15 @@ export class QueryEditor extends PureComponent<Props> {
     for (const key in map) {
       if (map.hasOwnProperty(key)) {
         const element = map[key];
+        if (isValueStructure) {
+          if (this.selectedValue === element.value) {
+            this.selectedValue = element.value;
+          }
+        }
         array.push({
           label: element.label,
           value: element.value,
-          items: this.mapToCascaderOptions(element.entries),
+          items: this.mapToCascaderOptions(element.entries, isValueStructure),
         });
       }
     }
@@ -298,7 +303,7 @@ export class QueryEditor extends PureComponent<Props> {
                     let vx = {
                       label: groupTag.label,
                       value: groupTag.value,
-                      items: this.mapToCascaderOptions(groupTag.entries),
+                      items: this.mapToCascaderOptions(groupTag.entries, true),
                       //  {
                       //   let v = {
                       //     label: tags.label,
@@ -443,8 +448,7 @@ export class QueryEditor extends PureComponent<Props> {
 
   onValueChange = (val: string) => {
     const { onChange, query } = this.props;
-    const value = val;
-    onChange({ ...query, value });
+    onChange({ ...query, value: val });
 
     // and also in QueryEditor
     this.selectedValue = val;
