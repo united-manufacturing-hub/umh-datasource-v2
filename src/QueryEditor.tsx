@@ -237,14 +237,17 @@ export class QueryEditor extends PureComponent<Props> {
       const newValues: CascaderOption[] = [];
       let sVal: CascaderOption | null = null;
       this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
+        console.log('response: ', response);
         for (const key in response) {
           if (response.hasOwnProperty(key)) {
             const element = response[key];
-            console.log(element);
+            console.log('key: ', key);
+            console.log('element: ', element);
             for (const elementKey in element) {
               if (element.hasOwnProperty(elementKey)) {
                 const elementValue = element[elementKey];
-                console.log(elementValue);
+                console.log('elementKey: ', elementKey);
+                console.log('elementValue: ', elementValue);
                 switch (elementKey) {
                   case 'kpis':
                     newValues.push({
