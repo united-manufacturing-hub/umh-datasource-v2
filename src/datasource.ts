@@ -299,7 +299,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       url: this.baseUrl + this.apiPath + queryPath + '/getValues',
     })
       .then((res: any) => {
-        console.log(res.data);
         return Object.entries(res.data);
       })
       .catch((error: any) => {

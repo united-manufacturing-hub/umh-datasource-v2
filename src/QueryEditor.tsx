@@ -289,6 +289,89 @@ export class QueryEditor extends PureComponent<Props> {
       const newValues: CascaderOption[] = [];
       let sVal: CascaderOption | null = null;
       this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
+        for (const key in response) {
+          if (response.hasOwnProperty(key)) {
+            const element = response[key];
+            for (const elementKey in element) {
+              if (element.hasOwnProperty(elementKey)) {
+                const elementValue = element[elementKey];
+                switch (elementKey) {
+                  case 'kpis':
+                    newValues.push({
+                      label: 'kpi',
+                      value: 'kpi',
+                      items: elementValue.map((kpi: any) => {
+                        // map the actual kpis
+                        let v = {
+                          label: kpi.label,
+                          value: kpi.value,
+                        };
+                        if (this.selectedValue === kpi.value) {
+                          sVal = v;
+                        }
+                        return v;
+                      }),
+                    });
+                    break;
+                  case 'tables':
+                    newValues.push({
+                      label: 'table',
+                      value: 'table',
+                      items: elementValue.map((table: any) => {
+                        let v = {
+                          label: table.label,
+                          value: table.value,
+                        };
+                        if (this.selectedValue === table.value) {
+                          sVal = v;
+                        }
+                        return v;
+                      }),
+                    });
+                    break;
+                  case 'tags':
+                    newValues.push({
+                      label: 'tags',
+                      value: 'tags',
+                      items: elementValue.map((groupTag: any) => {
+                        // map the actual tags
+                        if (groupTag.entries === null) {
+                          groupTag.entries = [];
+                        }
+                        let vx = {
+                          label: groupTag.label,
+                          value: groupTag.value,
+                          items: this.mapToCascaderOptions(groupTag.entries),
+                          //  {
+                          //   let v = {
+                          //     label: tags.label,
+                          //     value: tags.value,
+                          //   };
+                          //   if (this.selectedValue === tags.value) {
+                          //     sVal = v;
+                          //   }
+                          //   return v;
+                          // }),
+                        };
+                        if (this.selectedValue === groupTag.value) {
+                          sVal = vx;
+                        }
+                        return vx;
+                        // return {
+                        //   label: groupTag.label,
+                        //   value: groupTag.value,
+                        //   items: this.mapToCascaderOptions(groupTag.entries),
+                        // };
+                      }),
+                    });
+                    break;
+                  default:
+                    break;
+                }
+              }
+            }
+          }
+        }
         // the response is weird. it's an object array, of which the first item (index 0) contains
         // another object array, of which the second item (index 1) contains the actual payload
         // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
