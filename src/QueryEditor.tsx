@@ -243,80 +243,84 @@ export class QueryEditor extends PureComponent<Props> {
             const element = response[key];
             console.log('key: ', key);
             console.log('element: ', element);
-            for (const elementKey in element) {
-              if (element.hasOwnProperty(elementKey)) {
-                const elementValue = element[elementKey];
-                console.log('elementKey: ', elementKey);
-                console.log('elementValue: ', elementValue);
-                switch (elementKey) {
-                  case 'kpis':
-                    newValues.push({
-                      label: 'kpi',
-                      value: 'kpi',
-                      items: elementValue.map((kpi: any) => {
-                        // map the actual kpis
-                        let v = {
-                          label: kpi.label,
-                          value: kpi.value,
-                        };
-                        if (this.selectedValue === kpi.value) {
-                          sVal = v;
-                        }
-                        return v;
-                      }),
-                    });
-                    break;
-                  case 'tables':
-                    newValues.push({
-                      label: 'table',
-                      value: 'table',
-                      items: elementValue.map((table: any) => {
-                        let v = {
-                          label: table.label,
-                          value: table.value,
-                        };
-                        if (this.selectedValue === table.value) {
-                          sVal = v;
-                        }
-                        return v;
-                      }),
-                    });
-                    break;
-                  case 'tags':
-                    newValues.push({
-                      label: 'tags',
-                      value: 'tags',
-                      items: elementValue.map((groupTag: any) => {
-                        // map the actual tags
-                        if (groupTag.entries === null) {
-                          groupTag.entries = [];
-                        }
-                        let vx = {
-                          label: groupTag.label,
-                          value: groupTag.value,
-                          items: this.mapToCascaderOptions(groupTag.entries),
-                          //  {
-                          //   let v = {
-                          //     label: tags.label,
-                          //     value: tags.value,
-                          //   };
-                          //   if (this.selectedValue === tags.value) {
-                          //     sVal = v;
-                          //   }
-                          //   return v;
-                          // }),
-                        };
-                        if (this.selectedValue === groupTag.value) {
-                          sVal = vx;
-                        }
-                        return vx;
-                      }),
-                    });
-                    break;
-                  default:
-                    break;
-                }
-              }
+            // for (const elementKey in element) {
+            //   if (element.hasOwnProperty(elementKey)) {
+            //     const elementValue = element[elementKey];
+            //     console.log('elementKey: ', elementKey);
+            //     console.log('elementValue: ', elementValue);
+            switch (element[0]) {
+              // switch (elementKey) {
+              case 'kpis':
+                newValues.push({
+                  label: 'kpi',
+                  value: 'kpi',
+                  items: element[1].map((kpi: any) => {
+                    // items: elementValue.map((kpi: any) => {
+                    // map the actual kpis
+                    let v = {
+                      label: kpi.label,
+                      value: kpi.value,
+                    };
+                    if (this.selectedValue === kpi.value) {
+                      sVal = v;
+                    }
+                    return v;
+                  }),
+                });
+                break;
+              case 'tables':
+                newValues.push({
+                  label: 'table',
+                  value: 'table',
+                  items: element[1].map((table: any) => {
+                    // items: elementValue.map((table: any) => {
+                    let v = {
+                      label: table.label,
+                      value: table.value,
+                    };
+                    if (this.selectedValue === table.value) {
+                      sVal = v;
+                    }
+                    return v;
+                  }),
+                });
+                break;
+              case 'tags':
+                newValues.push({
+                  label: 'tags',
+                  value: 'tags',
+                  items: element[1].map((groupTag: any) => {
+                    // items: elementValue.map((groupTag: any) => {
+                    // map the actual tags
+                    if (groupTag.entries === null) {
+                      groupTag.entries = [];
+                    }
+                    let vx = {
+                      label: groupTag.label,
+                      value: groupTag.value,
+                      items: this.mapToCascaderOptions(groupTag.entries),
+                      //  {
+                      //   let v = {
+                      //     label: tags.label,
+                      //     value: tags.value,
+                      //   };
+                      //   if (this.selectedValue === tags.value) {
+                      //     sVal = v;
+                      //   }
+                      //   return v;
+                      // }),
+                    };
+                    if (this.selectedValue === groupTag.value) {
+                      sVal = vx;
+                    }
+                    return vx;
+                  }),
+                });
+                break;
+              default:
+                break;
+              //   }
+              // }
             }
           }
         }
