@@ -200,64 +200,26 @@ export class QueryEditor extends PureComponent<Props> {
         // the response is weird. it's an object array, of which the first item (index 0) contains
         // another object array, of which the second item (index 1) contains the actual payload
         const payload = response[0][1];
-        // the one and only CascaderOption at the top of the tree is the enterprise one
-        // newObject.push({
-        //   label: payload.label,
-        //   value: payload.value,
-        //   items: payload.entries.map((sites: any) => {
-        //     // map all the sites relative to the enterprise
-        //     return {
-        //       label: sites.label,
-        //       value: sites.value,
-        //       items: sites.entries.map((areas: any) => {
-        //         // map all the areas relative to all the sites
-        //         return {
-        //           label: areas.label,
-        //           value: areas.value,
-        //           items: areas.entries.map((productionLines: any) => {
-        //             // map all the production lines relative to all the areas
-        //             return {
-        //               label: productionLines.label,
-        //               value: productionLines.value,
-        //               items: productionLines.entries.map((workCells: any) => {
-        //                 // map all the work cells relative to all the production lines
-        //                 return {
-        //                   label: workCells.label,
-        //                   value: workCells.value,
-        //                 };
-        //               }),
-        //             };
-        //           }),
-        //         };
-        //       }),
-        //     };
-        //   }),
-        // });
         newObject.push({
           label: payload.label,
           value: payload.value,
           items: this.mapToCascaderOptions(payload.entries),
         });
-        console.log(newObject);
         this.objectStructure = newObject;
         this.forceUpdate();
       });
     }
   };
 
-  // Array.from(productionLines.entries, ([_, val]) => ({ val }))
-
   // funtion to map a map of objects to an array of CascaderOptions
   mapToCascaderOptions = (map: any) => {
     if (map === undefined || map === null) {
       return undefined;
     }
-    console.log(map);
     var array: CascaderOption[] = [];
     for (const key in map) {
       if (map.hasOwnProperty(key)) {
         const element = map[key];
-        console.log(element);
         array.push({
           label: element.label,
           value: element.value,
@@ -265,20 +227,6 @@ export class QueryEditor extends PureComponent<Props> {
         });
       }
     }
-    // for (const [_, value] of map) {
-    //   console.log(value);
-    //   array.push({
-    //     label: value.label,
-    //     value: value.value,
-    //     // items: this.mapToCascaderOptions(value.entries),
-    //   });
-    // }
-    // array = Array.from(map, ([_, value]) => ({
-    //   label: value.label,
-    //   value: value.value,
-    //   // items: this.mapToCascaderOptions(value.entries),
-    // }));
-    console.log(array);
     return array;
   };
 
@@ -292,9 +240,11 @@ export class QueryEditor extends PureComponent<Props> {
         for (const key in response) {
           if (response.hasOwnProperty(key)) {
             const element = response[key];
+            console.log(element);
             for (const elementKey in element) {
               if (element.hasOwnProperty(elementKey)) {
                 const elementValue = element[elementKey];
+                console.log(elementValue);
                 switch (elementKey) {
                   case 'kpis':
                     newValues.push({
@@ -357,11 +307,6 @@ export class QueryEditor extends PureComponent<Props> {
                           sVal = vx;
                         }
                         return vx;
-                        // return {
-                        //   label: groupTag.label,
-                        //   value: groupTag.value,
-                        //   items: this.mapToCascaderOptions(groupTag.entries),
-                        // };
                       }),
                     });
                     break;
