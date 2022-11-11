@@ -238,7 +238,7 @@ export class QueryEditor extends PureComponent<Props> {
           value: payload.value,
           items: this.mapToCascaderOptions(payload.entries),
         });
-
+        console.log(newObject);
         this.objectStructure = newObject;
         this.forceUpdate();
       });
@@ -254,16 +254,21 @@ export class QueryEditor extends PureComponent<Props> {
     }
     console.log(map);
     var array: CascaderOption[] = [];
-    array = Array.from(map, ([_, value]) => ({
-      label: value.label,
-      value: value.value,
-      // items: this.mapToCascaderOptions(value.entries),
-    }));
+    for (const [_, value] of map) {
+      console.log(value);
+      array.push({
+        label: value.label,
+        value: value.value,
+        // items: this.mapToCascaderOptions(value.entries),
+      });
+    }
+    // array = Array.from(map, ([_, value]) => ({
+    //   label: value.label,
+    //   value: value.value,
+    //   // items: this.mapToCascaderOptions(value.entries),
+    // }));
     console.log(array);
     return array;
-    // for (const [_, value] of map) {
-    //   array.push({ label: value.label, value: value.value, items: this.mapToArray(value.entries) });
-    // }
   };
 
   getValueStructure = () => {
