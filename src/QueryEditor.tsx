@@ -292,74 +292,74 @@ export class QueryEditor extends PureComponent<Props> {
         // the response is weird. it's an object array, of which the first item (index 0) contains
         // another object array, of which the second item (index 1) contains the actual payload
         // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
-        if (response[2][1] === null) {
-          response[2][1] = [];
-        }
-        newValues.push({
-          // 'tables' CascaderOption.
-          label: 'tables',
-          value: 'tables',
-          items: response[2][1].map((tables: any) => {
-            // map the actual tables
-            let v = {
-              label: tables.label,
-              value: tables.value,
-            };
-            if (this.selectedValue === tables.value) {
-              sVal = v;
-            }
-            return v;
-          }),
-        });
-        if (response[3][1] === null) {
-          response[3][1] = [];
-        }
-        newValues.push({
-          label: 'kpi',
-          value: 'kpi',
-          items: response[3][1].map((kpis: any) => {
-            // map the actual kpis
-            let v = {
-              label: kpis.label,
-              value: kpis.value,
-            };
-            if (this.selectedValue === kpis.value) {
-              sVal = v;
-            }
-            return v;
-          }),
-        });
-        if (response[4][1] === null) {
-          response[4][1] = [];
-        }
-        newValues.push({
-          label: 'tags',
-          value: 'tags',
-          items: response[4][1].map((groupTags: any) => {
-            // map the actual tags
-            if (groupTags.entries === null) {
-              groupTags.entries = [];
-            }
-            let vx = {
-              label: groupTags.label,
-              value: groupTags.value,
-              items: groupTags.entries.map((tags: any) => {
-                let v = {
-                  label: tags.label,
-                  value: tags.value,
-                };
-                if (this.selectedValue === tags.value) {
-                  sVal = v;
-                }
-                return v;
-              }),
-            };
-            if (this.selectedValue === groupTags.value) {
-              sVal = vx;
-            }
-            return vx;
-          }),
-        });
+        // if (response[2][1] === null) {
+        //   response[2][1] = [];
+        // }
+        // newValues.push({
+        //   // 'tables' CascaderOption.
+        //   label: 'tables',
+        //   value: 'tables',
+        //   items: response[2][1].map((tables: any) => {
+        //     // map the actual tables
+        //     let v = {
+        //       label: tables.label,
+        //       value: tables.value,
+        //     };
+        //     if (this.selectedValue === tables.value) {
+        //       sVal = v;
+        //     }
+        //     return v;
+        //   }),
+        // });
+        // if (response[3][1] === null) {
+        //   response[3][1] = [];
+        // }
+        // newValues.push({
+        //   label: 'kpi',
+        //   value: 'kpi',
+        //   items: response[3][1].map((kpis: any) => {
+        //     // map the actual kpis
+        //     let v = {
+        //       label: kpis.label,
+        //       value: kpis.value,
+        //     };
+        //     if (this.selectedValue === kpis.value) {
+        //       sVal = v;
+        //     }
+        //     return v;
+        //   }),
+        // });
+        // if (response[4][1] === null) {
+        //   response[4][1] = [];
+        // }
+        // newValues.push({
+        //   label: 'tags',
+        //   value: 'tags',
+        //   items: response[4][1].map((groupTags: any) => {
+        //     // map the actual tags
+        //     if (groupTags.entries === null) {
+        //       groupTags.entries = [];
+        //     }
+        //     let vx = {
+        //       label: groupTags.label,
+        //       value: groupTags.value,
+        //       items: groupTags.entries.map((tags: any) => {
+        //         let v = {
+        //           label: tags.label,
+        //           value: tags.value,
+        //         };
+        //         if (this.selectedValue === tags.value) {
+        //           sVal = v;
+        //         }
+        //         return v;
+        //       }),
+        //     };
+        //     if (this.selectedValue === groupTags.value) {
+        //       sVal = vx;
+        //     }
+        //     return vx;
+        //   }),
+        // });
         this.valueStructure = newValues;
         if (sVal !== null) {
           this.selectedValue = sVal.value;
