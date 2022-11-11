@@ -249,12 +249,14 @@ export class QueryEditor extends PureComponent<Props> {
 
   // funtion to map a map of objects to an array of CascaderOptions
   mapToCascaderOptions = (map: any) => {
+    console.log(map);
     var array: CascaderOption[] = [];
     array = Array.from(map, ([_, value]) => ({
       label: value.label,
       value: value.value,
       items: this.mapToCascaderOptions(value.entries),
     }));
+    console.log(array);
     return array;
     // for (const [_, value] of map) {
     //   array.push({ label: value.label, value: value.value, items: this.mapToArray(value.entries) });
