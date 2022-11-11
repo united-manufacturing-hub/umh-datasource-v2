@@ -257,7 +257,7 @@ export class QueryEditor extends PureComponent<Props> {
     array = Array.from(map, ([_, value]) => ({
       label: value.label,
       value: value.value,
-      items: this.mapToCascaderOptions(value.entries),
+      // items: this.mapToCascaderOptions(value.entries),
     }));
     console.log(array);
     return array;
