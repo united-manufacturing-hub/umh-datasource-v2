@@ -254,14 +254,25 @@ export class QueryEditor extends PureComponent<Props> {
     }
     console.log(map);
     var array: CascaderOption[] = [];
-    for (const [_, value] of map) {
-      console.log(value);
-      array.push({
-        label: value.label,
-        value: value.value,
-        // items: this.mapToCascaderOptions(value.entries),
-      });
+    for (const key in map) {
+      if (map.hasOwnProperty(key)) {
+        const element = map[key];
+        console.log(element);
+        array.push({
+          label: element.label,
+          value: element.value,
+          items: this.mapToCascaderOptions(element.entries),
+        });
+      }
     }
+    // for (const [_, value] of map) {
+    //   console.log(value);
+    //   array.push({
+    //     label: value.label,
+    //     value: value.value,
+    //     // items: this.mapToCascaderOptions(value.entries),
+    //   });
+    // }
     // array = Array.from(map, ([_, value]) => ({
     //   label: value.label,
     //   value: value.value,
