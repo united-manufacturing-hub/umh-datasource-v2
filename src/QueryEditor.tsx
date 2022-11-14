@@ -21,6 +21,8 @@ import {
   LoadingPlaceholder,
   MultiSelect,
   Select,
+  Switch,
+  VerticalGroup,
 } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
@@ -585,19 +587,17 @@ export class QueryEditor extends PureComponent<Props> {
           </Field>
           <Field>
             <HorizontalGroup>
-              <div className="gf-form">
-                <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-                  Value
-                </InlineLabel>
-                <Cascader
-                  separator=" / "
-                  options={this.valueStructure}
-                  onSelect={this.onValueChange}
-                  displayAllSelectedLevels={true}
-                  initialValue={this.selectedValue}
-                  width={100}
-                />
-              </div>
+              <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+                Select value
+              </InlineLabel>
+              <Cascader
+                separator=" / "
+                options={this.valueStructure}
+                onSelect={this.onValueChange}
+                displayAllSelectedLevels={true}
+                initialValue={this.selectedValue}
+                width={100}
+              />
             </HorizontalGroup>
           </Field>
         </FieldSet>
@@ -626,17 +626,20 @@ export class QueryEditor extends PureComponent<Props> {
           </Field>
         </FieldSet>
         <FieldSet label="Transformations" hidden={!this.isCurrentSelectedValueACustomTag()}>
-          <FieldSet>
+          <Field>
             <InlineFieldRow>
-              <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
-                Time Bucket
-              </InlineLabel>
-              <InlineSwitch
-                label="Enable"
-                showLabel={true}
-                value={this.timeBucketEnabled}
-                onClick={this.onTimeBucketEnabledChange}
-              />
+              <InlineField
+                label="Time bucket"
+                labelWidth={'auto'}
+                tooltip="a time interval for how long each bucket is"
+              >
+                <InlineSwitch
+                  label="Enable"
+                  showLabel={true}
+                  value={this.timeBucketEnabled}
+                  onClick={this.onTimeBucketEnabledChange}
+                />
+              </InlineField>
               <InlineField
                 label={'Size'}
                 invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
@@ -660,54 +663,53 @@ export class QueryEditor extends PureComponent<Props> {
                 />
               </InlineField>
             </InlineFieldRow>
-          </FieldSet>
-          <FieldSet hidden={!this.timeBucketEnabled}>
-            <div className={'gf-form'}>
-              <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
-                Aggregates
-              </InlineLabel>
-              <MultiSelect
-                options={this.tagAggregatesOptions}
-                width={30}
-                defaultValue={this.defaultConfigurationAggregates}
-                value={this.selectedConfigurationAggregates}
-                onChange={this.onConfigurationAggregatesChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel
-                width={35}
+          </Field>
+          <Field hidden={!this.timeBucketEnabled}>
+            <VerticalGroup align="flex-start">
+              <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
+                <MultiSelect
+                  options={this.tagAggregatesOptions}
+                  width={30}
+                  defaultValue={this.defaultConfigurationAggregates}
+                  value={this.selectedConfigurationAggregates}
+                  onChange={this.onConfigurationAggregatesChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Handling missing values"
+                labelWidth={35}
                 tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
               >
-                Handling missing values
-              </InlineLabel>
-              <Select
-                options={this.tagGapfillingOptions}
-                width={30}
-                defaultValue={this.tagGapfillingOptions[0]}
-                value={this.selectedConfigurationGapfilling}
-                onChange={this.onConfigurationGapfillingChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel width={35} tooltip={'Include last datapoint before time interval'}>
-                Include last datapoint before time interval
-              </InlineLabel>
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeLastDatapoint}
-                onClick={this.onConfigurationIncludeLastDatapointChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel width={35} tooltip={'Include next datapoint after time interval'}>
-                Include next datapoint after time interval
-              </InlineLabel>
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeNextDatapoint}
-                onClick={this.onConfigurationIncludeNextDatapointChange}
-              />
-            </div>
-          </FieldSet>
+                <Select
+                  options={this.tagGapfillingOptions}
+                  width={30}
+                  defaultValue={this.tagGapfillingOptions[0]}
+                  value={this.selectedConfigurationGapfilling}
+                  onChange={this.onConfigurationGapfillingChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Include last datapoint before time interval"
+                labelWidth={35}
+                tooltip={'Include last datapoint before time interval'}
+              >
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeLastDatapoint}
+                  onClick={this.onConfigurationIncludeLastDatapointChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Include next datapoint after time interval"
+                labelWidth={35}
+                tooltip={'Include next datapoint after time interval'}
+              >
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeNextDatapoint}
+                  onClick={this.onConfigurationIncludeNextDatapointChange}
+                />
+              </InlineField>
+            </VerticalGroup>
+          </Field>
         </FieldSet>
       </div>
     );
