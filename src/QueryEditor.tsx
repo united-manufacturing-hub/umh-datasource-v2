@@ -211,7 +211,7 @@ export class QueryEditor extends PureComponent<Props> {
     }
   };
 
-  // funtion to map a map of objects to an array of CascaderOptions
+  // funtion to map JSON objects to an array of CascaderOptions
   mapToCascaderOptions = (map: any, isValueStructure: boolean) => {
     if (map === undefined || map === null) {
       return undefined;
@@ -242,31 +242,20 @@ export class QueryEditor extends PureComponent<Props> {
       const newValues: CascaderOption[] = [];
       let sVal: CascaderOption | null = null;
       this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
-        console.log('response: ', response);
         for (const key in response) {
           if (response.hasOwnProperty(key)) {
             const element = response[key];
-            // for (const elementKey in element) {
-            //   if (element.hasOwnProperty(elementKey)) {
-            //     const elementValue = element[elementKey];
-            //     console.log('elementKey: ', elementKey);
-            //     console.log('elementValue: ', elementValue);
             switch (element[0]) {
-              // switch (elementKey) {
               case 'kpis':
                 newValues.push({
                   label: 'kpi',
                   value: 'kpi',
                   items: element[1].map((kpi: any) => {
-                    // items: elementValue.map((kpi: any) => {
-                    // map the actual kpis
                     let v = {
                       label: kpi.label,
                       value: kpi.value,
                     };
                     if (this.selectedValue === kpi.value) {
-                      console.log('kpi: sVal: ', sVal);
-                      console.log('kpi: this.selectedValue: ', this.selectedValue);
                       sVal = v;
                     }
                     return v;
@@ -278,14 +267,11 @@ export class QueryEditor extends PureComponent<Props> {
                   label: 'table',
                   value: 'table',
                   items: element[1].map((table: any) => {
-                    // items: elementValue.map((table: any) => {
                     let v = {
                       label: table.label,
                       value: table.value,
                     };
                     if (this.selectedValue === table.value) {
-                      console.log('tables: sVal: ', sVal);
-                      console.log('tables: this.selectedValue: ', this.selectedValue);
                       sVal = v;
                     }
                     return v;
@@ -297,8 +283,6 @@ export class QueryEditor extends PureComponent<Props> {
                   label: 'tags',
                   value: 'tags',
                   items: element[1].map((groupTag: any) => {
-                    // items: elementValue.map((groupTag: any) => {
-                    // map the actual tags
                     if (groupTag.entries === null) {
                       groupTag.entries = [];
                     }
@@ -306,20 +290,8 @@ export class QueryEditor extends PureComponent<Props> {
                       label: groupTag.label,
                       value: groupTag.value,
                       items: this.mapToCascaderOptions(groupTag.entries, true),
-                      //  {
-                      //   let v = {
-                      //     label: tags.label,
-                      //     value: tags.value,
-                      //   };
-                      //   if (this.selectedValue === tags.value) {
-                      //     sVal = v;
-                      //   }
-                      //   return v;
-                      // }),
                     };
                     if (this.selectedValue === groupTag.value) {
-                      console.log('groupTag: sVal: ', sVal);
-                      console.log('groupTag: this.selectedValue: ', this.selectedValue);
                       sVal = vx;
                     }
                     return vx;
@@ -328,86 +300,11 @@ export class QueryEditor extends PureComponent<Props> {
                 break;
               default:
                 break;
-              //   }
-              // }
             }
           }
         }
-        // the response is weird. it's an object array, of which the first item (index 0) contains
-        // another object array, of which the second item (index 1) contains the actual payload
-        // the payload should have tree arrays of CascaderOptions, each named after 'tables' 'kpi' and 'tags'
-        // if (response[2][1] === null) {
-        //   response[2][1] = [];
-        // }
-        // newValues.push({
-        //   // 'tables' CascaderOption.
-        //   label: 'tables',
-        //   value: 'tables',
-        //   items: response[2][1].map((tables: any) => {
-        //     // map the actual tables
-        //     let v = {
-        //       label: tables.label,
-        //       value: tables.value,
-        //     };
-        //     if (this.selectedValue === tables.value) {
-        //       sVal = v;
-        //     }
-        //     return v;
-        //   }),
-        // });
-        // if (response[3][1] === null) {
-        //   response[3][1] = [];
-        // }
-        // newValues.push({
-        //   label: 'kpi',
-        //   value: 'kpi',
-        //   items: response[3][1].map((kpis: any) => {
-        //     // map the actual kpis
-        //     let v = {
-        //       label: kpis.label,
-        //       value: kpis.value,
-        //     };
-        //     if (this.selectedValue === kpis.value) {
-        //       sVal = v;
-        //     }
-        //     return v;
-        //   }),
-        // });
-        // if (response[4][1] === null) {
-        //   response[4][1] = [];
-        // }
-        // newValues.push({
-        //   label: 'tags',
-        //   value: 'tags',
-        //   items: response[4][1].map((groupTags: any) => {
-        //     // map the actual tags
-        //     if (groupTags.entries === null) {
-        //       groupTags.entries = [];
-        //     }
-        //     let vx = {
-        //       label: groupTags.label,
-        //       value: groupTags.value,
-        //       items: groupTags.entries.map((tags: any) => {
-        //         let v = {
-        //           label: tags.label,
-        //           value: tags.value,
-        //         };
-        //         if (this.selectedValue === tags.value) {
-        //           sVal = v;
-        //         }
-        //         return v;
-        //       }),
-        //     };
-        //     if (this.selectedValue === groupTags.value) {
-        //       sVal = vx;
-        //     }
-        //     return vx;
-        //   }),
-        // });
         this.valueStructure = newValues;
         if (sVal !== null) {
-          console.log('sVal: ', sVal);
-          console.log('this.selectedValue: ', this.selectedValue);
           this.selectedValue = sVal.value;
         }
 
@@ -652,6 +549,7 @@ export class QueryEditor extends PureComponent<Props> {
               Object
             </InlineLabel>
             <Cascader
+              separator=" / "
               options={this.objectStructure}
               onSelect={this.onObjectChange}
               displayAllSelectedLevels={true}
@@ -664,6 +562,7 @@ export class QueryEditor extends PureComponent<Props> {
               Value
             </InlineLabel>
             <Cascader
+              separator=" / "
               options={this.valueStructure}
               onSelect={this.onValueChange}
               displayAllSelectedLevels={true}

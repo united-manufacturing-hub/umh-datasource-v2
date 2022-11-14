@@ -246,7 +246,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
       url2 = url2 + '&keepStatesInteger=true';
     }
 
-    console.log('ConstructURL (FactoryinsightQuery + string) => url', target, url, url2);
     return url2;
   }
 
@@ -275,8 +274,6 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
         t[i][j] = a[j][i];
       }
     }
-
-    console.log('transpose (number[][]) => number[][]', a, t);
 
     return t;
   };
