@@ -8,6 +8,7 @@
 
 import React, { PureComponent } from 'react';
 import {
+  Card,
   Cascader,
   CascaderOption,
   FieldSet,
@@ -16,7 +17,10 @@ import {
   InlineLabel,
   InlineSwitch,
   Input,
+  LoadingPlaceholder,
   MultiSelect,
+  PanelChrome,
+  PanelContainer,
   Select,
 } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
@@ -535,42 +539,65 @@ export class QueryEditor extends PureComponent<Props> {
 
   render() {
     if (this.objectStructure.length === 0) {
-      return <div>Loading data, please wait...</div>;
+      return <LoadingPlaceholder text="Loading data, please wait..." />;
     }
 
     return (
       <div className="gf-form-group">
-        <FieldSet>
-          <div className="gf-form">
-            <InlineLabel
-              width={10}
-              tooltip={'Select site, area, production line and work cell you want to see the data of'}
-            >
-              Object
-            </InlineLabel>
-            <Cascader
-              separator=" / "
-              options={this.objectStructure}
-              onSelect={this.onObjectChange}
-              displayAllSelectedLevels={true}
-              initialValue={this.selectedObject}
-              width={100}
-            />
-          </div>
-          <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-            <InlineLabel width={10} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-              Value
-            </InlineLabel>
-            <Cascader
-              separator=" / "
-              options={this.valueStructure}
-              onSelect={this.onValueChange}
-              displayAllSelectedLevels={true}
-              initialValue={this.selectedValue}
-              width={100}
-            />
-          </div>
-        </FieldSet>
+        <Card>
+          <Card.Heading>Object to query</Card.Heading>
+          <Card.Meta>
+            <div className="gf-form-inline">
+              <InlineLabel width={17}>Selected object</InlineLabel>
+              <Input
+                width={100}
+                value={this.selectedObject != '' ? this.selectedObject : 'No selected object'}
+                placeholder="No selected object"
+                disabled={true}
+              />
+            </div>
+            <div className="gf-form">
+              <InlineLabel width={17} tooltip={'Select the specific work cell you want to see the data of'}>
+                Select work cell
+              </InlineLabel>
+              <Cascader
+                separator=" / "
+                options={this.objectStructure}
+                onSelect={this.onObjectChange}
+                displayAllSelectedLevels={true}
+                initialValue={this.selectedObject}
+                width={100}
+              />
+            </div>
+          </Card.Meta>
+        </Card>
+        <Card>
+          <Card.Heading>Value to query</Card.Heading>
+          <Card.Meta>
+            <div className="gf-form-inline">
+              <InlineLabel width={17}>Selected value</InlineLabel>
+              <Input
+                width={100}
+                value={this.selectedValue != '' ? this.selectedValue : 'No selected value'}
+                placeholder="No selected value"
+                disabled={true}
+              />
+            </div>
+            <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+              <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+                Value
+              </InlineLabel>
+              <Cascader
+                separator=" / "
+                options={this.valueStructure}
+                onSelect={this.onValueChange}
+                displayAllSelectedLevels={true}
+                initialValue={this.selectedValue}
+                width={100}
+              />
+            </div>
+          </Card.Meta>
+        </Card>
         <FieldSet hidden={!this.isCurrentSelectedValueAvailability()}>
           <div className="gf-form">
             <InlineLabel width={'auto'} tooltip={'Include running processes'}>
