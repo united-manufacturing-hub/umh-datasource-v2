@@ -574,32 +574,28 @@ export class QueryEditor extends PureComponent<Props> {
           </Field>
         </FieldSet>
         <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-          <Field>
-            <HorizontalGroup>
-              <InlineLabel width={17}>Selected value</InlineLabel>
-              <Input
-                width={100}
-                value={this.selectedValue !== '' ? this.selectedValue : 'No selected value'}
-                placeholder="No selected value"
-                disabled={true}
-              />
-            </HorizontalGroup>
-          </Field>
-          <Field>
-            <HorizontalGroup>
-              <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-                Select value
-              </InlineLabel>
-              <Cascader
-                separator=" / "
-                options={this.valueStructure}
-                onSelect={this.onValueChange}
-                displayAllSelectedLevels={true}
-                initialValue={this.selectedValue}
-                width={100}
-              />
-            </HorizontalGroup>
-          </Field>
+          <HorizontalGroup>
+            <InlineLabel width={17}>Selected value</InlineLabel>
+            <Input
+              width={100}
+              value={this.selectedValue !== '' ? this.selectedValue : 'No selected value'}
+              placeholder="No selected value"
+              disabled={true}
+            />
+          </HorizontalGroup>
+          <HorizontalGroup>
+            <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+              Select value
+            </InlineLabel>
+            <Cascader
+              separator=" / "
+              options={this.valueStructure}
+              onSelect={this.onValueChange}
+              displayAllSelectedLevels={true}
+              initialValue={this.selectedValue}
+              width={100}
+            />
+          </HorizontalGroup>
         </FieldSet>
         <FieldSet label="Tranformations" hidden={!this.isCurrentSelectedValueAvailability()}>
           <Field>
