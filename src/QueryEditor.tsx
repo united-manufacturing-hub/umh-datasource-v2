@@ -549,7 +549,7 @@ export class QueryEditor extends PureComponent<Props> {
               <InlineLabel width={17}>Selected object</InlineLabel>
               <Input
                 width={100}
-                value={this.selectedObject != '' ? this.selectedObject : 'No selected object'}
+                value={this.selectedObject !== '' ? this.selectedObject : 'No selected object'}
                 placeholder="No selected object"
                 disabled={true}
               />
@@ -576,7 +576,7 @@ export class QueryEditor extends PureComponent<Props> {
               <InlineLabel width={17}>Selected value</InlineLabel>
               <Input
                 width={100}
-                value={this.selectedValue != '' ? this.selectedValue : 'No selected value'}
+                value={this.selectedValue !== '' ? this.selectedValue : 'No selected value'}
                 placeholder="No selected value"
                 disabled={true}
               />
