@@ -19,8 +19,6 @@ import {
   Input,
   LoadingPlaceholder,
   MultiSelect,
-  PanelChrome,
-  PanelContainer,
   Select,
 } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
