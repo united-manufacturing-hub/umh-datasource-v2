@@ -545,7 +545,7 @@ export class QueryEditor extends PureComponent<Props> {
         <Card>
           <Card.Heading>Object to query</Card.Heading>
           <Card.Meta>
-            <div className="gf-form-inline">
+            <div className="gf-form">
               <InlineLabel width={17}>Selected object</InlineLabel>
               <Input
                 width={100}
@@ -569,7 +569,7 @@ export class QueryEditor extends PureComponent<Props> {
             </div>
           </Card.Meta>
         </Card>
-        <Card>
+        <Card hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
           <Card.Heading>Value to query</Card.Heading>
           <Card.Meta>
             <div className="gf-form-inline">
@@ -581,7 +581,7 @@ export class QueryEditor extends PureComponent<Props> {
                 disabled={true}
               />
             </div>
-            <div className="gf-form" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+            <div className="gf-form">
               <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
                 Value
               </InlineLabel>
@@ -596,7 +596,8 @@ export class QueryEditor extends PureComponent<Props> {
             </div>
           </Card.Meta>
         </Card>
-        <FieldSet hidden={!this.isCurrentSelectedValueAvailability()}>
+        <Card hidden={!this.isCurrentSelectedValueAvailability()}>
+          <Card.Heading>Transformations</Card.Heading>
           <div className="gf-form">
             <InlineLabel width={'auto'} tooltip={'Include running processes'}>
               Include running processes
@@ -615,11 +616,12 @@ export class QueryEditor extends PureComponent<Props> {
               onChange={this.onConfigurationKeepStatesChange}
             />
           </div>
-        </FieldSet>
-        <FieldSet
+        </Card>
+        <Card
           hidden={!this.isCurrentSelectedValueACustomTag()}
           // Configure the tag. If you are unsure, leave the defaults
         >
+          <Card.Heading>Transformations</Card.Heading>
           <div className={'gf-form'}>
             <InlineFieldRow>
               <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
@@ -702,7 +704,7 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </div>
           </FieldSet>
-        </FieldSet>
+        </Card>
       </div>
     );
   }
