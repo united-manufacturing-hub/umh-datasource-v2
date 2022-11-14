@@ -11,7 +11,9 @@ import {
   Card,
   Cascader,
   CascaderOption,
+  Field,
   FieldSet,
+  HorizontalGroup,
   InlineField,
   InlineFieldRow,
   InlineLabel,
@@ -542,10 +544,9 @@ export class QueryEditor extends PureComponent<Props> {
 
     return (
       <div className="gf-form-group">
-        <Card>
-          <Card.Heading>Object to query</Card.Heading>
-          <Card.Meta>
-            <div className="gf-form">
+        <FieldSet label="Object to query">
+          <Field>
+            <HorizontalGroup>
               <InlineLabel width={17}>Selected object</InlineLabel>
               <Input
                 width={100}
@@ -553,8 +554,10 @@ export class QueryEditor extends PureComponent<Props> {
                 placeholder="No selected object"
                 disabled={true}
               />
-            </div>
-            <div className="gf-form">
+            </HorizontalGroup>
+          </Field>
+          <Field>
+            <HorizontalGroup>
               <InlineLabel width={17} tooltip={'Select the specific work cell you want to see the data of'}>
                 Select work cell
               </InlineLabel>
@@ -566,13 +569,12 @@ export class QueryEditor extends PureComponent<Props> {
                 initialValue={this.selectedObject}
                 width={100}
               />
-            </div>
-          </Card.Meta>
-        </Card>
-        <Card hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-          <Card.Heading>Value to query</Card.Heading>
-          <Card.Meta>
-            <div className="gf-form-inline">
+            </HorizontalGroup>
+          </Field>
+        </FieldSet>
+        <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+          <Field>
+            <HorizontalGroup>
               <InlineLabel width={17}>Selected value</InlineLabel>
               <Input
                 width={100}
@@ -580,130 +582,138 @@ export class QueryEditor extends PureComponent<Props> {
                 placeholder="No selected value"
                 disabled={true}
               />
+            </HorizontalGroup>
+          </Field>
+          <Field>
+            <HorizontalGroup>
+              <div className="gf-form">
+                <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
+                  Value
+                </InlineLabel>
+                <Cascader
+                  separator=" / "
+                  options={this.valueStructure}
+                  onSelect={this.onValueChange}
+                  displayAllSelectedLevels={true}
+                  initialValue={this.selectedValue}
+                  width={100}
+                />
+              </div>
+            </HorizontalGroup>
+          </Field>
+        </FieldSet>
+        <Card hidden={!this.isCurrentSelectedValueAvailability()}>
+          <Card.Heading>Transformations</Card.Heading>
+          <Card.Meta>
+            <div className="gf-form">
+              <InlineLabel width={'auto'} tooltip={'Include running processes'}>
+                Include running processes
+              </InlineLabel>
+              <InlineSwitch
+                value={this.selectedConfigurationIncludeRunningProcesses}
+                onChange={this.onConfigurationIncludeRunningProcessesChange}
+              />
             </div>
             <div className="gf-form">
-              <InlineLabel width={17} tooltip={'Select an automatic calculated KPI or a tag for the selected object'}>
-                Value
+              <InlineLabel width={'auto'} tooltip={'Keep states'}>
+                Keep states
               </InlineLabel>
-              <Cascader
-                separator=" / "
-                options={this.valueStructure}
-                onSelect={this.onValueChange}
-                displayAllSelectedLevels={true}
-                initialValue={this.selectedValue}
-                width={100}
+              <InlineSwitch
+                value={this.selectedConfigurationKeepStates}
+                onChange={this.onConfigurationKeepStatesChange}
               />
             </div>
           </Card.Meta>
-        </Card>
-        <Card hidden={!this.isCurrentSelectedValueAvailability()}>
-          <Card.Heading>Transformations</Card.Heading>
-          <div className="gf-form">
-            <InlineLabel width={'auto'} tooltip={'Include running processes'}>
-              Include running processes
-            </InlineLabel>
-            <InlineSwitch
-              value={this.selectedConfigurationIncludeRunningProcesses}
-              onChange={this.onConfigurationIncludeRunningProcessesChange}
-            />
-          </div>
-          <div className="gf-form">
-            <InlineLabel width={'auto'} tooltip={'Keep states'}>
-              Keep states
-            </InlineLabel>
-            <InlineSwitch
-              value={this.selectedConfigurationKeepStates}
-              onChange={this.onConfigurationKeepStatesChange}
-            />
-          </div>
         </Card>
         <Card
           hidden={!this.isCurrentSelectedValueACustomTag()}
           // Configure the tag. If you are unsure, leave the defaults
         >
           <Card.Heading>Transformations</Card.Heading>
-          <div className={'gf-form'}>
-            <InlineFieldRow>
-              <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
-                Time Bucket
-              </InlineLabel>
-              <InlineSwitch
-                label="Enable"
-                showLabel={true}
-                value={this.timeBucketEnabled}
-                onClick={this.onTimeBucketEnabledChange}
-              />
-              <InlineField
-                label={'Size'}
-                invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
-                error={'This input is required and must be a valid number'}
-                disabled={!this.timeBucketEnabled}
-              >
-                <Input
+          <Card.Meta>
+            <div className={'gf-form'}>
+              <InlineFieldRow>
+                <InlineLabel width={'auto'} tooltip={'A time interval for how long each bucket is'}>
+                  Time Bucket
+                </InlineLabel>
+                <InlineSwitch
+                  label="Enable"
+                  showLabel={true}
+                  value={this.timeBucketEnabled}
+                  onClick={this.onTimeBucketEnabledChange}
+                />
+                <InlineField
                   label={'Size'}
-                  value={this.selectedTimeBucketSize}
-                  onChange={this.onTimeBucketSizeChange}
-                  width={20}
+                  invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
+                  error={'This input is required and must be a valid number'}
+                  disabled={!this.timeBucketEnabled}
+                >
+                  <Input
+                    label={'Size'}
+                    value={this.selectedTimeBucketSize}
+                    onChange={this.onTimeBucketSizeChange}
+                    width={20}
+                  />
+                </InlineField>
+                <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
+                  <Select
+                    options={this.tagTimeBucketUnitOptions}
+                    width={20}
+                    defaultValue={this.defaultTimeBucketUnit.value}
+                    value={this.selectedTimeBucketUnit}
+                    onChange={this.onTimeBucketUnitChange}
+                  />
+                </InlineField>
+              </InlineFieldRow>
+            </div>
+            <FieldSet hidden={!this.timeBucketEnabled}>
+              <div className={'gf-form'}>
+                <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
+                  Aggregates
+                </InlineLabel>
+                <MultiSelect
+                  options={this.tagAggregatesOptions}
+                  width={30}
+                  defaultValue={this.defaultConfigurationAggregates}
+                  value={this.selectedConfigurationAggregates}
+                  onChange={this.onConfigurationAggregatesChange}
                 />
-              </InlineField>
-              <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
+              </div>
+              <div className={'gf-form'}>
+                <InlineLabel
+                  width={35}
+                  tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+                >
+                  Handling missing values
+                </InlineLabel>
                 <Select
-                  options={this.tagTimeBucketUnitOptions}
-                  width={20}
-                  defaultValue={this.defaultTimeBucketUnit.value}
-                  value={this.selectedTimeBucketUnit}
-                  onChange={this.onTimeBucketUnitChange}
+                  options={this.tagGapfillingOptions}
+                  width={30}
+                  defaultValue={this.tagGapfillingOptions[0]}
+                  value={this.selectedConfigurationGapfilling}
+                  onChange={this.onConfigurationGapfillingChange}
                 />
-              </InlineField>
-            </InlineFieldRow>
-          </div>
-          <FieldSet hidden={!this.timeBucketEnabled}>
-            <div className={'gf-form'}>
-              <InlineLabel width={'auto'} tooltip={'Common statistical aggregates'}>
-                Aggregates
-              </InlineLabel>
-              <MultiSelect
-                options={this.tagAggregatesOptions}
-                width={30}
-                defaultValue={this.defaultConfigurationAggregates}
-                value={this.selectedConfigurationAggregates}
-                onChange={this.onConfigurationAggregatesChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel
-                width={35}
-                tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-              >
-                Handling missing values
-              </InlineLabel>
-              <Select
-                options={this.tagGapfillingOptions}
-                width={30}
-                defaultValue={this.tagGapfillingOptions[0]}
-                value={this.selectedConfigurationGapfilling}
-                onChange={this.onConfigurationGapfillingChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel width={35} tooltip={'Include last datapoint before time interval'}>
-                Include last datapoint before time interval
-              </InlineLabel>
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeLastDatapoint}
-                onClick={this.onConfigurationIncludeLastDatapointChange}
-              />
-            </div>
-            <div className={'gf-form'}>
-              <InlineLabel width={35} tooltip={'Include next datapoint after time interval'}>
-                Include next datapoint after time interval
-              </InlineLabel>
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeNextDatapoint}
-                onClick={this.onConfigurationIncludeNextDatapointChange}
-              />
-            </div>
-          </FieldSet>
+              </div>
+              <div className={'gf-form'}>
+                <InlineLabel width={35} tooltip={'Include last datapoint before time interval'}>
+                  Include last datapoint before time interval
+                </InlineLabel>
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeLastDatapoint}
+                  onClick={this.onConfigurationIncludeLastDatapointChange}
+                />
+              </div>
+              <div className={'gf-form'}>
+                <InlineLabel width={35} tooltip={'Include next datapoint after time interval'}>
+                  Include next datapoint after time interval
+                </InlineLabel>
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeNextDatapoint}
+                  onClick={this.onConfigurationIncludeNextDatapointChange}
+                />
+              </div>
+            </FieldSet>
+          </Card.Meta>
         </Card>
       </div>
     );
