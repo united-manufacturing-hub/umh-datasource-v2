@@ -100,11 +100,14 @@ export class QueryEditor extends PureComponent<Props> {
       this.props.query.fullTagName = '';
     } else {
       this.selectedObject = this.props.query.fullTagName;
+      this.selectedObjectDisplayed = this.selectedObject !== '' ? this.selectedObject : 'No selected object';
     }
     if (this.props.query.value === undefined) {
       this.selectedValue = '';
     } else {
       this.selectedValue = this.props.query.value;
+      this.selectedValueDisplayed =
+        this.selectedValue !== '' ? this.selectedValue.replace(this.selectedObject + '/', '') : 'No selected object';
     }
 
     // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
