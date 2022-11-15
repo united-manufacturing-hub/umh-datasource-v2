@@ -10,6 +10,7 @@ import React, { PureComponent } from 'react';
 import {
   Cascader,
   CascaderOption,
+  Field,
   FieldSet,
   HorizontalGroup,
   InlineField,
@@ -38,7 +39,9 @@ export class QueryEditor extends PureComponent<Props> {
   tablesQueryParameter = 'tables';
 
   selectedObject = '';
+  selectedObjectDisplayed = '';
   selectedValue = '';
+  selectedValueDisplayed = '';
 
   // Aggregates configuration
   tagAggregatesOptions = [
@@ -342,6 +345,7 @@ export class QueryEditor extends PureComponent<Props> {
 
     // and also in QueryEditor
     this.selectedObject = val;
+    this.selectedObjectDisplayed = val !== '' ? val.replace('/', ' / ') : 'No selected object';
 
     // reset value and configuration
     this.selectedValue = '';
@@ -358,6 +362,7 @@ export class QueryEditor extends PureComponent<Props> {
 
     // and also in QueryEditor
     this.selectedValue = val;
+    this.selectedValueDisplayed = val !== '' ? val.replace('/', ' / ') : 'No selected object';
 
     // reset configuration
     this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
@@ -544,13 +549,8 @@ export class QueryEditor extends PureComponent<Props> {
     return (
       <div className="gf-form-group">
         <FieldSet label="Object to query">
-          <InlineField label="Selected object" labelWidth={17}>
-            <Input
-              width={100}
-              value={this.selectedObject !== '' ? this.selectedObject : 'No selected object'}
-              placeholder="No selected object"
-              disabled={true}
-            />
+          <InlineField label="Selected object" labelWidth={17} disabled={true}>
+            <Input width={100} value={this.selectedObjectDisplayed} placeholder="No selected object" />
           </InlineField>
           <InlineField
             label="Select work cell"
@@ -561,20 +561,15 @@ export class QueryEditor extends PureComponent<Props> {
               separator=" / "
               options={this.objectStructure}
               onSelect={this.onObjectChange}
-              displayAllSelectedLevels={true}
+              displayAllSelectedLevels={false}
               initialValue={this.selectedObject}
               width={100}
             />
           </InlineField>
         </FieldSet>
         <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-          <InlineField label="Selected value" labelWidth={17}>
-            <Input
-              width={100}
-              value={this.selectedValue !== '' ? this.selectedValue : 'No selected value'}
-              placeholder="No selected value"
-              disabled={true}
-            />
+          <InlineField label="Selected value" labelWidth={17} disabled={true}>
+            <Input width={100} value={this.selectedValueDisplayed} placeholder="No selected value" />
           </InlineField>
           <InlineField
             label="Select value"
@@ -585,7 +580,7 @@ export class QueryEditor extends PureComponent<Props> {
               separator=" / "
               options={this.valueStructure}
               onSelect={this.onValueChange}
-              displayAllSelectedLevels={true}
+              displayAllSelectedLevels={false}
               initialValue={this.selectedValue}
               width={100}
             />
@@ -644,50 +639,52 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </InlineField>
           </InlineFieldRow>
-          <VerticalGroup align="flex-start" hidden={!this.timeBucketEnabled}>
-            <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
-              <MultiSelect
-                options={this.tagAggregatesOptions}
-                width={30}
-                defaultValue={this.defaultConfigurationAggregates}
-                value={this.selectedConfigurationAggregates}
-                onChange={this.onConfigurationAggregatesChange}
-              />
-            </InlineField>
-            <InlineField
-              label="Handling missing values"
-              labelWidth={35}
-              tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-            >
-              <Select
-                options={this.tagGapfillingOptions}
-                width={30}
-                defaultValue={this.tagGapfillingOptions[0]}
-                value={this.selectedConfigurationGapfilling}
-                onChange={this.onConfigurationGapfillingChange}
-              />
-            </InlineField>
-            <InlineField
-              label="Include last datapoint before time interval"
-              labelWidth={35}
-              tooltip={'Include last datapoint before time interval'}
-            >
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeLastDatapoint}
-                onClick={this.onConfigurationIncludeLastDatapointChange}
-              />
-            </InlineField>
-            <InlineField
-              label="Include next datapoint after time interval"
-              labelWidth={35}
-              tooltip={'Include next datapoint after time interval'}
-            >
-              <InlineSwitch
-                value={this.selectedConfigurationIncludeNextDatapoint}
-                onClick={this.onConfigurationIncludeNextDatapointChange}
-              />
-            </InlineField>
-          </VerticalGroup>
+          <Field hidden={!this.timeBucketEnabled}>
+            <VerticalGroup align="flex-start" spacing="xs">
+              <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
+                <MultiSelect
+                  options={this.tagAggregatesOptions}
+                  width={30}
+                  defaultValue={this.defaultConfigurationAggregates}
+                  value={this.selectedConfigurationAggregates}
+                  onChange={this.onConfigurationAggregatesChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Handling missing values"
+                labelWidth={35}
+                tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+              >
+                <Select
+                  options={this.tagGapfillingOptions}
+                  width={30}
+                  defaultValue={this.tagGapfillingOptions[0]}
+                  value={this.selectedConfigurationGapfilling}
+                  onChange={this.onConfigurationGapfillingChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Include last datapoint before time interval"
+                labelWidth={35}
+                tooltip={'Include last datapoint before time interval'}
+              >
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeLastDatapoint}
+                  onClick={this.onConfigurationIncludeLastDatapointChange}
+                />
+              </InlineField>
+              <InlineField
+                label="Include next datapoint after time interval"
+                labelWidth={35}
+                tooltip={'Include next datapoint after time interval'}
+              >
+                <InlineSwitch
+                  value={this.selectedConfigurationIncludeNextDatapoint}
+                  onClick={this.onConfigurationIncludeNextDatapointChange}
+                />
+              </InlineField>
+            </VerticalGroup>
+          </Field>
         </FieldSet>
       </div>
     );
