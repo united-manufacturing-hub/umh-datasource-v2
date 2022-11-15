@@ -639,52 +639,50 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </InlineField>
           </InlineFieldRow>
-          <Field hidden={!this.timeBucketEnabled}>
-            <VerticalGroup align="flex-start" spacing="xs">
-              <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
-                <MultiSelect
-                  options={this.tagAggregatesOptions}
-                  width={30}
-                  defaultValue={this.defaultConfigurationAggregates}
-                  value={this.selectedConfigurationAggregates}
-                  onChange={this.onConfigurationAggregatesChange}
-                />
-              </InlineField>
-              <InlineField
-                label="Handling missing values"
-                labelWidth={35}
-                tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-              >
-                <Select
-                  options={this.tagGapfillingOptions}
-                  width={30}
-                  defaultValue={this.tagGapfillingOptions[0]}
-                  value={this.selectedConfigurationGapfilling}
-                  onChange={this.onConfigurationGapfillingChange}
-                />
-              </InlineField>
-              <InlineField
-                label="Include last datapoint before time interval"
-                labelWidth={35}
-                tooltip={'Include last datapoint before time interval'}
-              >
-                <InlineSwitch
-                  value={this.selectedConfigurationIncludeLastDatapoint}
-                  onClick={this.onConfigurationIncludeLastDatapointChange}
-                />
-              </InlineField>
-              <InlineField
-                label="Include next datapoint after time interval"
-                labelWidth={35}
-                tooltip={'Include next datapoint after time interval'}
-              >
-                <InlineSwitch
-                  value={this.selectedConfigurationIncludeNextDatapoint}
-                  onClick={this.onConfigurationIncludeNextDatapointChange}
-                />
-              </InlineField>
-            </VerticalGroup>
-          </Field>
+          <FieldSet hidden={!this.timeBucketEnabled}>
+            <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
+              <MultiSelect
+                options={this.tagAggregatesOptions}
+                width={30}
+                defaultValue={this.defaultConfigurationAggregates}
+                value={this.selectedConfigurationAggregates}
+                onChange={this.onConfigurationAggregatesChange}
+              />
+            </InlineField>
+            <InlineField
+              label="Handling missing values"
+              labelWidth={35}
+              tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+            >
+              <Select
+                options={this.tagGapfillingOptions}
+                width={30}
+                defaultValue={this.tagGapfillingOptions[0]}
+                value={this.selectedConfigurationGapfilling}
+                onChange={this.onConfigurationGapfillingChange}
+              />
+            </InlineField>
+            <InlineField
+              label="Include last datapoint before time interval"
+              labelWidth={35}
+              tooltip={'Include last datapoint before time interval'}
+            >
+              <InlineSwitch
+                value={this.selectedConfigurationIncludeLastDatapoint}
+                onClick={this.onConfigurationIncludeLastDatapointChange}
+              />
+            </InlineField>
+            <InlineField
+              label="Include next datapoint after time interval"
+              labelWidth={35}
+              tooltip={'Include next datapoint after time interval'}
+            >
+              <InlineSwitch
+                value={this.selectedConfigurationIncludeNextDatapoint}
+                onClick={this.onConfigurationIncludeNextDatapointChange}
+              />
+            </InlineField>
+          </FieldSet>
         </FieldSet>
       </div>
     );
