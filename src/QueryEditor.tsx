@@ -10,7 +10,6 @@ import React, { PureComponent } from 'react';
 import {
   Cascader,
   CascaderOption,
-  Field,
   FieldSet,
   HorizontalGroup,
   InlineField,
@@ -21,7 +20,6 @@ import {
   LoadingPlaceholder,
   MultiSelect,
   Select,
-  VerticalGroup,
 } from '@grafana/ui';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './datasource';
