@@ -345,7 +345,7 @@ export class QueryEditor extends PureComponent<Props> {
 
     // and also in QueryEditor
     this.selectedObject = val;
-    this.selectedObjectDisplayed = val !== '' ? val.replace('/', ' / ') : 'No selected object';
+    this.selectedObjectDisplayed = val !== '' ? val : 'No selected object';
 
     // reset value and configuration
     this.selectedValue = '';
@@ -362,7 +362,7 @@ export class QueryEditor extends PureComponent<Props> {
 
     // and also in QueryEditor
     this.selectedValue = val;
-    this.selectedValueDisplayed = val !== '' ? val.replace('/', ' / ') : 'No selected object';
+    this.selectedValueDisplayed = val !== '' ? val.replace(this.selectedObject + '/', '') : 'No selected object';
 
     // reset configuration
     this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
