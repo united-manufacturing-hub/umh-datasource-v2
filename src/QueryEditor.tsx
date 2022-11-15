@@ -549,8 +549,13 @@ export class QueryEditor extends PureComponent<Props> {
 
     return (
       <div className="gf-form-group">
-        <FieldSet label="Object to query">
-          <InlineField label="Selected object" labelWidth={17} disabled={true}>
+        <FieldSet label="Work cell to query">
+          <InlineField
+            label="Selected work cell"
+            labelWidth={17}
+            disabled={true}
+            tooltip="This is the currently selected object, even if in the menu below is empty"
+          >
             <Input width={100} value={this.selectedObjectDisplayed} placeholder="No selected object" />
           </InlineField>
           <InlineField
@@ -569,13 +574,18 @@ export class QueryEditor extends PureComponent<Props> {
           </InlineField>
         </FieldSet>
         <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-          <InlineField label="Selected value" labelWidth={17} disabled={true}>
+          <InlineField
+            label="Selected value"
+            labelWidth={17}
+            disabled={true}
+            tooltip="This is the currently selected value, even if in the menu below is empty"
+          >
             <Input width={100} value={this.selectedValueDisplayed} placeholder="No selected value" />
           </InlineField>
           <InlineField
             label="Select value"
             labelWidth={17}
-            tooltip={'Select an automatic calculated KPI or a tag for the selected object'}
+            tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
           >
             <Cascader
               separator=" / "
@@ -587,7 +597,7 @@ export class QueryEditor extends PureComponent<Props> {
             />
           </InlineField>
         </FieldSet>
-        <FieldSet label="Transformations" hidden={!this.isCurrentSelectedValueAvailability()}>
+        <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
           <HorizontalGroup>
             <InlineLabel width={'auto'} tooltip={'Include running processes'}>
               Include running processes
@@ -607,9 +617,13 @@ export class QueryEditor extends PureComponent<Props> {
             />
           </HorizontalGroup>
         </FieldSet>
-        <FieldSet label="Transformations" hidden={!this.isCurrentSelectedValueACustomTag()}>
+        <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
           <InlineFieldRow>
-            <InlineField label="Time bucket" labelWidth={'auto'} tooltip="a time interval for how long each bucket is">
+            <InlineField
+              label="Time bucket"
+              labelWidth={'auto'}
+              tooltip="Enable if you want to group data in a time bucket"
+            >
               <InlineSwitch
                 label="Enable"
                 showLabel={true}
@@ -623,12 +637,7 @@ export class QueryEditor extends PureComponent<Props> {
               error={'This input is required and must be a valid number'}
               disabled={!this.timeBucketEnabled}
             >
-              <Input
-                label={'Size'}
-                value={this.selectedTimeBucketSize}
-                onChange={this.onTimeBucketSizeChange}
-                width={20}
-              />
+              <Input value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange} width={20} />
             </InlineField>
             <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
               <Select
