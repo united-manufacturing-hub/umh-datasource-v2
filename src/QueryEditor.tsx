@@ -11,10 +11,8 @@ import {
   Cascader,
   CascaderOption,
   FieldSet,
-  HorizontalGroup,
   InlineField,
   InlineFieldRow,
-  InlineLabel,
   InlineSwitch,
   Input,
   LoadingPlaceholder,
@@ -610,24 +608,15 @@ export class QueryEditor extends PureComponent<Props> {
           </InlineField>
         </FieldSet>
         <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
-          <HorizontalGroup>
-            <InlineLabel width={'auto'} tooltip={'Include running processes'}>
-              Include running processes
-            </InlineLabel>
+          <InlineField label="Include running processes" labelWidth={'auto'} tooltip={'Include running processes'}>
             <InlineSwitch
               value={this.selectedConfigurationIncludeRunningProcesses}
-              onChange={this.onConfigurationIncludeRunningProcessesChange}
+              onClick={this.onConfigurationIncludeRunningProcessesChange}
             />
-          </HorizontalGroup>
-          <HorizontalGroup>
-            <InlineLabel width={'auto'} tooltip={'Keep states'}>
-              Keep states
-            </InlineLabel>
-            <InlineSwitch
-              value={this.selectedConfigurationKeepStates}
-              onChange={this.onConfigurationKeepStatesChange}
-            />
-          </HorizontalGroup>
+          </InlineField>
+          <InlineField label="Keep states" labelWidth={'auto'} tooltip={'Keep states'}>
+            <InlineSwitch value={this.selectedConfigurationKeepStates} onClick={this.onConfigurationKeepStatesChange} />
+          </InlineField>
         </FieldSet>
         <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
           <InlineFieldRow>
