@@ -154,6 +154,24 @@ export class QueryEditor extends PureComponent<Props> {
         this.selectedConfigurationTimeBucket = currentTimeBucket;
       }
     }
+
+    // check this.props.query.configurationTagIncludeLastDatapoint and add to selectedConfigurationIncludeLastDatapoint
+    const currentIncludeLastDatapoint = this.props.query.configurationIncludeLastDatapoint;
+    if (currentIncludeLastDatapoint !== undefined) {
+      this.selectedConfigurationIncludeLastDatapoint = currentIncludeLastDatapoint;
+    }
+
+    // check this.props.query.configurationTagIncludeNextDatapoint and add to selectedConfigurationIncludeNextDatapoint
+    const currentIncludeNextDatapoint = this.props.query.configurationIncludeNextDatapoint;
+    if (currentIncludeNextDatapoint !== undefined) {
+      this.selectedConfigurationIncludeNextDatapoint = currentIncludeNextDatapoint;
+    }
+
+    // check this.props.query.configurationKeepStates and add to selectedConfigurationKeepStates
+    const currentKeepStates = this.props.query.configurationKeepStates;
+    if (currentKeepStates !== undefined) {
+      this.selectedConfigurationKeepStates = currentKeepStates;
+    }
   }
 
   isObjectSelected = () => {
