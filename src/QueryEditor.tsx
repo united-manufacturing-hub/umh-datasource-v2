@@ -190,6 +190,24 @@ export class QueryEditor extends PureComponent<Props> {
     }
   };
 
+  // isCurrentSelectedValueAStandardTag checks whether the current selected value is a tag and therefore, begins with tagsValueID
+  isCurrentSelectedValueAStandardTag = () => {
+    if (this.isValidValueSelected()) {
+      const startsWithQueryParamS = this.selectedValue.includes(this.tagsQueryParameter + '/standard/');
+      return startsWithQueryParamS;
+    } else {
+      return false;
+    }
+  };
+
+  // isStateTag checks whether the current selected standard tag is a state tag
+  isStandardTagState = () => {
+    if (this.isCurrentSelectedValueAStandardTag()) {
+      return this.selectedValue.includes(this.tagsQueryParameter + '/state');
+    }
+    return false;
+  };
+
   isCurrentSelectedValueAvailability = () => {
     if (this.isValidValueSelected()) {
       return this.selectedValue.includes(this.tablesQueryParameter + '/availability');
@@ -693,6 +711,11 @@ export class QueryEditor extends PureComponent<Props> {
               />
             </InlineField>
           </FieldSet>
+        </FieldSet>
+        <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAStandardTag()}>
+          <InlineField label="Keep state integer" labelWidth={'auto'} tooltip={'Keep state as integer instead of converting them to their string value'} hidden={!this.isStandardTagState}>
+            <InlineSwitch value={this.selectedConfigurationKeepStates} onClick={this.onConfigurationKeepStatesChange} />
+          </InlineField>
         </FieldSet>
       </div>
     );
