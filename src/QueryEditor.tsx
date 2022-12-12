@@ -214,7 +214,7 @@ export class QueryEditor extends PureComponent<Props> {
   // isStateTag checks whether the current selected standard tag is a state tag
   isStandardTagState = () => {
     if (this.isCurrentSelectedValueAStandardTag()) {
-      return this.selectedValue.includes(this.tagsQueryParameter + '/state');
+      return this.selectedValue.includes(this.tagsQueryParameter + '/standard/state');
     }
     return false;
   };
