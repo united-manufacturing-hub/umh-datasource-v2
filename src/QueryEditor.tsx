@@ -718,7 +718,7 @@ export class QueryEditor extends PureComponent<Props> {
             label="Keep state integer"
             labelWidth={'auto'}
             tooltip={'Keep state as integer instead of converting them to their string value'}
-            hidden={!this.isStandardTagState}
+            hidden={!this.isStandardTagState()}
           >
             <InlineSwitch value={this.selectedConfigurationKeepStates} onClick={this.onConfigurationKeepStatesChange} />
           </InlineField>
