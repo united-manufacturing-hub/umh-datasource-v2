@@ -1,6 +1,6 @@
 {
   "name": "umh-v2-datasource",
-  "version": "1.0.92",
+  "version": "1.0.93",
   "description": "This plugin provides a datasource for connecting with factoryinsight",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
