@@ -105,7 +105,7 @@ export class QueryEditor extends PureComponent<Props> {
         } else {
             this.selectedValue = this.props.query.value;
             this.selectedValueDisplayed =
-                this.selectedValue !== '' ? this.selectedValue.replace(this.selectedObject + '/', '') : 'No selected object';
+                this.selectedValue !== '' ? this.selectedValue.split("/").slice(4).join("/") : 'No selected object';
         }
 
         // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
@@ -398,7 +398,6 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedValue = val;
-        //this.selectedValueDisplayed = val !== '' ? val.replace(this.selectedObject + '/', '') : 'No selected object';
         this.selectedValueDisplayed = val !== '' ? val.split("/").slice(4).join("/") : 'No selected value';
 
         // reset configuration
@@ -595,7 +594,7 @@ export class QueryEditor extends PureComponent<Props> {
                         <Input width={100} value={this.selectedWorkCellDisplayed} placeholder="No selected work cell"/>
                     </InlineField>
                     <InlineField
-                        label="Select work cell"
+                        label="Select new work cell"
                         labelWidth={18}
                         tooltip={'Select the specific work cell you want to see the data of'}
                     >
@@ -619,7 +618,7 @@ export class QueryEditor extends PureComponent<Props> {
                         <Input width={100} value={this.selectedValueDisplayed} placeholder="No selected value"/>
                     </InlineField>
                     <InlineField
-                        label="Select value"
+                        label="Select new value"
                         labelWidth={18}
                         tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
                     >
