@@ -398,7 +398,8 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedValue = val;
-        this.selectedValueDisplayed = val !== '' ? val.replace(this.selectedObject + '/', '') : 'No selected object';
+        //this.selectedValueDisplayed = val !== '' ? val.replace(this.selectedObject + '/', '') : 'No selected object';
+        this.selectedValueDisplayed = val !== '' ? val.split("/").slice(4).join("/") : 'No selected value';
 
         // reset configuration
         this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
