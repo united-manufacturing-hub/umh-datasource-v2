@@ -35,7 +35,7 @@ export class QueryEditor extends PureComponent<Props> {
     tablesQueryParameter = 'tables';
 
     selectedObject = '';
-    selectedObjectDisplayed = '';
+    selectedWorkCellDisplayed = '';
     selectedValue = '';
     selectedValueDisplayed = '';
 
@@ -98,7 +98,7 @@ export class QueryEditor extends PureComponent<Props> {
             this.props.query.fullTagName = '';
         } else {
             this.selectedObject = this.props.query.fullTagName;
-            this.selectedObjectDisplayed = this.selectedObject !== '' ? this.selectedObject : 'No selected object';
+            this.selectedWorkCellDisplayed = this.selectedObject !== '' ? this.selectedObject : 'No selected work cell';
         }
         if (this.props.query.value === undefined) {
             this.selectedValue = '';
@@ -380,10 +380,11 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedObject = val;
-        this.selectedObjectDisplayed = val !== '' ? val : 'No selected object';
+        this.selectedWorkCellDisplayed = val !== '' ? val : 'No selected work cell';
 
         // reset value and configuration
         this.selectedValue = '';
+        this.selectedValueDisplayed = 'No selected value';
         this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
 
         // force render
@@ -590,7 +591,7 @@ export class QueryEditor extends PureComponent<Props> {
                         disabled={true}
                         tooltip="This is the currently selected object, even if in the menu below is empty"
                     >
-                        <Input width={100} value={this.selectedObjectDisplayed} placeholder="No selected object"/>
+                        <Input width={100} value={this.selectedWorkCellDisplayed} placeholder="No selected work cell"/>
                     </InlineField>
                     <InlineField
                         label="Select work cell"
