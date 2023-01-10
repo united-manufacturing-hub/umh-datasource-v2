@@ -105,7 +105,7 @@ export class QueryEditor extends PureComponent<Props> {
         } else {
             this.selectedValue = this.props.query.value;
             this.selectedValueDisplayed =
-                this.selectedValue !== '' ? this.selectedValue.split("/").slice(4).join("/") : 'No selected object';
+                this.selectedValue !== '' ? this.selectedValue.split("/").slice(5).join("/") : 'No selected object';
         }
 
         // loop through this.props.query.configurationTagAggregates and add to selectedConfigurationAggregates
@@ -398,7 +398,7 @@ export class QueryEditor extends PureComponent<Props> {
 
         // and also in QueryEditor
         this.selectedValue = val;
-        this.selectedValueDisplayed = val !== '' ? val.split("/").slice(4).join("/") : 'No selected value';
+        this.selectedValueDisplayed = val !== '' ? val.split("/").slice(5).join("/") : 'No selected value';
 
         // reset configuration
         this.selectedConfigurationGapfilling = this.defaultConfigurationGapfilling;
@@ -587,7 +587,7 @@ export class QueryEditor extends PureComponent<Props> {
                 <FieldSet label="Work cell to query">
                     <InlineField
                         label="Selected work cell"
-                        labelWidth={18}
+                        labelWidth={23}
                         disabled={true}
                         tooltip="This is the currently selected object, even if in the menu below is empty"
                     >
@@ -595,7 +595,7 @@ export class QueryEditor extends PureComponent<Props> {
                     </InlineField>
                     <InlineField
                         label="Select new work cell"
-                        labelWidth={18}
+                        labelWidth={23}
                         tooltip={'Select the specific work cell you want to see the data of'}
                     >
                         <Cascader
@@ -611,7 +611,7 @@ export class QueryEditor extends PureComponent<Props> {
                 <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
                     <InlineField
                         label="Selected value"
-                        labelWidth={18}
+                        labelWidth={23}
                         disabled={true}
                         tooltip="This is the currently selected value, even if in the menu below is empty"
                     >
@@ -619,7 +619,7 @@ export class QueryEditor extends PureComponent<Props> {
                     </InlineField>
                     <InlineField
                         label="Select new value"
-                        labelWidth={18}
+                        labelWidth={23}
                         tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
                     >
                         <Cascader
