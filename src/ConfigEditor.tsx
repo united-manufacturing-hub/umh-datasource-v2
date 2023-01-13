@@ -17,8 +17,10 @@ export class ConfigEditor extends PureComponent<Props, State> {
         const {onOptionsChange, options} = this.props;
         const jsonData = {
             ...options.jsonData,
+            url: event.target.value,
             baseURL: event.target.value,
         };
+        options.url = event.target.value;
         onOptionsChange({...options, jsonData});
     };
 
@@ -34,12 +36,24 @@ export class ConfigEditor extends PureComponent<Props, State> {
     // Secure field (only sent to the backend)
     onAPIKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
         const {onOptionsChange, options} = this.props;
+        console.log("SJD: ", options.secureJsonData)
+
         onOptionsChange({
             ...options,
             secureJsonData: {
                 apiKey: event.target.value,
             },
         });
+
+        const finishedAPIKeyRegex = new RegExp("^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$");
+        if (finishedAPIKeyRegex.test(event.target.value)) {
+            // Set apiKeyConfigured to true
+            const jsonData = {
+                ...options.jsonData,
+                apiKeyConfigured: true,
+            }
+            onOptionsChange({...options, jsonData});
+        }
     };
 
     onResetAPIKey = () => {
@@ -60,6 +74,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
     render() {
         const {options} = this.props;
         const {jsonData} = options;
+        console.log("Options: ", options);
         return (
             <div className="gf-form-group">
                 <div className="gf-form">
@@ -91,7 +106,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
                     <div className="gf-form">
                         <SecretFormField
                             isConfigured={jsonData.apiKeyConfigured !== undefined && jsonData.apiKeyConfigured}
-                            value={jsonData.apiKey || ''}
+                            value={options.secureJsonData ? ("apiKey" in options.secureJsonData ? options.secureJsonData["apiKey"] : '') : ''}
                             label="API Key"
                             placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                             labelWidth={10}
