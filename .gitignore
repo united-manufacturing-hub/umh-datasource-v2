@@ -32,3 +32,7 @@ e2e-results/
 # Compilation
 *.zip
 /umh-datasource-v2
+
+# Lint
+src/*.js
+src/*.js.map
