@@ -6,17 +6,18 @@ import {FactoryinsightDataSourceOptions} from './types';
 
 const {SecretFormField, FormField} = LegacyForms;
 
+
 interface Props
     extends DataSourcePluginOptionsEditorProps<FactoryinsightDataSourceOptions> {
 }
 
 interface State {
-    configurationAPIKey: string;
 }
 
 const finishedAPIKeyRegex = new RegExp("^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$");
 
 export class ConfigEditor extends PureComponent<Props, State> {
+
 
     onBaseURLChange = (event: ChangeEvent<HTMLInputElement>) => {
         const {onOptionsChange, options} = this.props;
@@ -76,36 +77,6 @@ export class ConfigEditor extends PureComponent<Props, State> {
         });
     };
 
-    onInputConfigurationAPIKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-        this.setState({
-            ...this.state,
-            configurationAPIKey: event.target.value,
-        })
-    };
-
-    componentDidMount() {
-        console.log("componentDidMount, state: ", this.state)
-    }
-
-    componentDidUpdate() {
-        if (this.state === null) {
-            return;
-        }
-        if (this.state.configurationAPIKey === null || this.state.configurationAPIKey === undefined) {
-            return;
-        }
-        // Check if API was configured
-        if (finishedAPIKeyRegex.test(this.state.configurationAPIKey)) {
-            const baseUrl = this.props.options.jsonData.baseURL;
-            const customerID = this.props.options.jsonData.customerID;
-            const url = baseUrl + "/api/v2/" + customerID + "/configuration";
-            fetchAPIRequest({
-                url: url,
-            })
-            console.log("API key configured, state: ", this.state)
-        }
-    }
-
 
     render() {
         const {options} = this.props;
@@ -153,22 +124,6 @@ export class ConfigEditor extends PureComponent<Props, State> {
                                     onReset={this.onResetAPIKey}
                                     onChange={this.onAPIKeyChange}
                                     required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="gf-form-group">
-                        <h1 className="page-heading">Configuration</h1>
-                        <h2>API Key</h2>
-                        <p>To see your configuration, you need to re-validate your API key.</p>
-                        <div className="gf-form-inline">
-                            <div className="gf-form">
-                                <FormField
-                                    label="API Key"
-                                    labelWidth={10}
-                                    inputWidth={20}
-                                    onChange={this.onInputConfigurationAPIKeyChange}
                                 />
                             </div>
                         </div>

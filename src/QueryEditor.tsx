@@ -584,156 +584,160 @@ export class QueryEditor extends PureComponent<Props> {
 
         return (
             <div className="gf-form-group">
-                <FieldSet label="Work cell to query">
-                    <InlineField
-                        label="Selected work cell"
-                        labelWidth={23}
-                        disabled={true}
-                        tooltip="This is the currently selected object, even if in the menu below is empty"
-                    >
-                        <Input width={100} value={this.selectedWorkCellDisplayed} placeholder="No selected work cell"/>
-                    </InlineField>
-                    <InlineField
-                        label="Select new work cell"
-                        labelWidth={23}
-                        tooltip={'Select the specific work cell you want to see the data of'}
-                    >
-                        <Cascader
-                            separator=" / "
-                            options={this.objectStructure}
-                            onSelect={this.onObjectChange}
-                            displayAllSelectedLevels={false}
-                            initialValue={this.selectedObject}
-                            width={100}
-                        />
-                    </InlineField>
-                </FieldSet>
-                <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-                    <InlineField
-                        label="Selected value"
-                        labelWidth={23}
-                        disabled={true}
-                        tooltip="This is the currently selected value, even if in the menu below is empty"
-                    >
-                        <Input width={100} value={this.selectedValueDisplayed} placeholder="No selected value"/>
-                    </InlineField>
-                    <InlineField
-                        label="Select new value"
-                        labelWidth={23}
-                        tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
-                    >
-                        <Cascader
-                            separator=" / "
-                            options={this.valueStructure}
-                            onSelect={this.onValueChange}
-                            displayAllSelectedLevels={false}
-                            initialValue={this.selectedValue}
-                            width={100}
-                        />
-                    </InlineField>
-                </FieldSet>
-                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
-                    <InlineField label="Include running processes" labelWidth={'auto'}
-                                 tooltip={'Include running processes'}>
-                        <InlineSwitch
-                            value={this.selectedConfigurationIncludeRunningProcesses}
-                            onClick={this.onConfigurationIncludeRunningProcessesChange}
-                        />
-                    </InlineField>
-                    <InlineField label="Keep states" labelWidth={'auto'} tooltip={'Keep states'}>
-                        <InlineSwitch value={this.selectedConfigurationKeepStates}
-                                      onClick={this.onConfigurationKeepStatesChange}/>
-                    </InlineField>
-                </FieldSet>
-                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
-                    <InlineFieldRow>
+                <React.StrictMode>
+                    <FieldSet label="Work cell to query">
                         <InlineField
-                            label="Time bucket"
-                            labelWidth={'auto'}
-                            tooltip="Enable if you want to group data in a time bucket"
+                            label="Selected work cell"
+                            labelWidth={23}
+                            disabled={true}
+                            tooltip="This is the currently selected object, even if in the menu below is empty"
                         >
-                            <InlineSwitch
-                                label="Enable"
-                                showLabel={true}
-                                value={this.timeBucketEnabled}
-                                onClick={this.onTimeBucketEnabledChange}
-                            />
+                            <Input width={100} value={this.selectedWorkCellDisplayed}
+                                   placeholder="No selected work cell"/>
                         </InlineField>
                         <InlineField
-                            label={'Size'}
-                            invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
-                            error={'This input is required and must be a valid number'}
-                            disabled={!this.timeBucketEnabled}
+                            label="Select new work cell"
+                            labelWidth={23}
+                            tooltip={'Select the specific work cell you want to see the data of'}
                         >
-                            <Input value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange}
-                                   width={20}/>
-                        </InlineField>
-                        <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
-                            <Select
-                                options={this.tagTimeBucketUnitOptions}
-                                width={20}
-                                defaultValue={this.defaultTimeBucketUnit.value}
-                                value={this.selectedTimeBucketUnit}
-                                onChange={this.onTimeBucketUnitChange}
-                            />
-                        </InlineField>
-                    </InlineFieldRow>
-                    <FieldSet hidden={!this.timeBucketEnabled}>
-                        <InlineField label="Aggregates" labelWidth={'auto'} tooltip={'Common statistical aggregates'}>
-                            <MultiSelect
-                                options={this.tagAggregatesOptions}
-                                width={30}
-                                defaultValue={this.defaultConfigurationAggregates}
-                                value={this.selectedConfigurationAggregates}
-                                onChange={this.onConfigurationAggregatesChange}
-                            />
-                        </InlineField>
-                        <InlineField
-                            label="Handling missing values"
-                            labelWidth={35}
-                            tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-                        >
-                            <Select
-                                options={this.tagGapfillingOptions}
-                                width={30}
-                                defaultValue={this.tagGapfillingOptions[0]}
-                                value={this.selectedConfigurationGapfilling}
-                                onChange={this.onConfigurationGapfillingChange}
-                            />
-                        </InlineField>
-                        <InlineField
-                            label="Include last datapoint before time interval"
-                            labelWidth={35}
-                            tooltip={'Include last datapoint before time interval'}
-                        >
-                            <InlineSwitch
-                                value={this.selectedConfigurationIncludeLastDatapoint}
-                                onClick={this.onConfigurationIncludeLastDatapointChange}
-                            />
-                        </InlineField>
-                        <InlineField
-                            label="Include next datapoint after time interval"
-                            labelWidth={35}
-                            tooltip={'Include next datapoint after time interval'}
-                        >
-                            <InlineSwitch
-                                value={this.selectedConfigurationIncludeNextDatapoint}
-                                onClick={this.onConfigurationIncludeNextDatapointChange}
+                            <Cascader
+                                separator=" / "
+                                options={this.objectStructure}
+                                onSelect={this.onObjectChange}
+                                displayAllSelectedLevels={false}
+                                initialValue={this.selectedObject}
+                                width={100}
                             />
                         </InlineField>
                     </FieldSet>
-                </FieldSet>
-                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAStandardTag()}>
-                    <InlineField
-                        label="Keep state integer"
-                        labelWidth={'auto'}
-                        tooltip={'Keep state as integer instead of converting them to their string value'}
-                        hidden={!this.isStandardTagState()}
-                    >
-                        <InlineSwitch value={this.selectedConfigurationKeepStates}
-                                      onClick={this.onConfigurationKeepStatesChange}/>
-                    </InlineField>
-                </FieldSet>
+                    <FieldSet label="Value to query" hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+                        <InlineField
+                            label="Selected value"
+                            labelWidth={23}
+                            disabled={true}
+                            tooltip="This is the currently selected value, even if in the menu below is empty"
+                        >
+                            <Input width={100} value={this.selectedValueDisplayed} placeholder="No selected value"/>
+                        </InlineField>
+                        <InlineField
+                            label="Select new value"
+                            labelWidth={23}
+                            tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
+                        >
+                            <Cascader
+                                separator=" / "
+                                options={this.valueStructure}
+                                onSelect={this.onValueChange}
+                                displayAllSelectedLevels={false}
+                                initialValue={this.selectedValue}
+                                width={100}
+                            />
+                        </InlineField>
+                    </FieldSet>
+                    <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
+                        <InlineField label="Include running processes" labelWidth={'auto'}
+                                     tooltip={'Include running processes'}>
+                            <InlineSwitch
+                                value={this.selectedConfigurationIncludeRunningProcesses}
+                                onClick={this.onConfigurationIncludeRunningProcessesChange}
+                            />
+                        </InlineField>
+                        <InlineField label="Keep states" labelWidth={'auto'} tooltip={'Keep states'}>
+                            <InlineSwitch value={this.selectedConfigurationKeepStates}
+                                          onClick={this.onConfigurationKeepStatesChange}/>
+                        </InlineField>
+                    </FieldSet>
+                    <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
+                        <InlineFieldRow>
+                            <InlineField
+                                label="Time bucket"
+                                labelWidth={'auto'}
+                                tooltip="Enable if you want to group data in a time bucket"
+                            >
+                                <InlineSwitch
+                                    label="Enable"
+                                    showLabel={true}
+                                    value={this.timeBucketEnabled}
+                                    onClick={this.onTimeBucketEnabledChange}
+                                />
+                            </InlineField>
+                            <InlineField
+                                label={'Size'}
+                                invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
+                                error={'This input is required and must be a valid number'}
+                                disabled={!this.timeBucketEnabled}
+                            >
+                                <Input value={this.selectedTimeBucketSize} onChange={this.onTimeBucketSizeChange}
+                                       width={20}/>
+                            </InlineField>
+                            <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
+                                <Select
+                                    options={this.tagTimeBucketUnitOptions}
+                                    width={20}
+                                    defaultValue={this.defaultTimeBucketUnit.value}
+                                    value={this.selectedTimeBucketUnit}
+                                    onChange={this.onTimeBucketUnitChange}
+                                />
+                            </InlineField>
+                        </InlineFieldRow>
+                        <FieldSet hidden={!this.timeBucketEnabled}>
+                            <InlineField label="Aggregates" labelWidth={'auto'}
+                                         tooltip={'Common statistical aggregates'}>
+                                <MultiSelect
+                                    options={this.tagAggregatesOptions}
+                                    width={30}
+                                    defaultValue={this.defaultConfigurationAggregates}
+                                    value={this.selectedConfigurationAggregates}
+                                    onChange={this.onConfigurationAggregatesChange}
+                                />
+                            </InlineField>
+                            <InlineField
+                                label="Handling missing values"
+                                labelWidth={35}
+                                tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+                            >
+                                <Select
+                                    options={this.tagGapfillingOptions}
+                                    width={30}
+                                    defaultValue={this.tagGapfillingOptions[0]}
+                                    value={this.selectedConfigurationGapfilling}
+                                    onChange={this.onConfigurationGapfillingChange}
+                                />
+                            </InlineField>
+                            <InlineField
+                                label="Include last datapoint before time interval"
+                                labelWidth={35}
+                                tooltip={'Include last datapoint before time interval'}
+                            >
+                                <InlineSwitch
+                                    value={this.selectedConfigurationIncludeLastDatapoint}
+                                    onClick={this.onConfigurationIncludeLastDatapointChange}
+                                />
+                            </InlineField>
+                            <InlineField
+                                label="Include next datapoint after time interval"
+                                labelWidth={35}
+                                tooltip={'Include next datapoint after time interval'}
+                            >
+                                <InlineSwitch
+                                    value={this.selectedConfigurationIncludeNextDatapoint}
+                                    onClick={this.onConfigurationIncludeNextDatapointChange}
+                                />
+                            </InlineField>
+                        </FieldSet>
+                    </FieldSet>
+                    <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAStandardTag()}>
+                        <InlineField
+                            label="Keep state integer"
+                            labelWidth={'auto'}
+                            tooltip={'Keep state as integer instead of converting them to their string value'}
+                            hidden={!this.isStandardTagState()}
+                        >
+                            <InlineSwitch value={this.selectedConfigurationKeepStates}
+                                          onClick={this.onConfigurationKeepStatesChange}/>
+                        </InlineField>
+                    </FieldSet>
+                </React.StrictMode>
             </div>
         );
     }
