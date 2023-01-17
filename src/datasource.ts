@@ -10,7 +10,13 @@ import {
 } from '@grafana/data';
 
 import {isString, isUndefined} from 'lodash';
-import {defaultFactoryinsightQuery, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
+import {
+    CustomerConfiguration,
+    DatabaseStatistics,
+    defaultFactoryinsightQuery,
+    FactoryinsightDataSourceOptions,
+    FactoryinsightQuery
+} from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from "@grafana/runtime";
 import {Buffer} from "buffer";
 import {lastValueFrom} from "rxjs";
@@ -358,4 +364,35 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
     }
 
 
+    async getCustomerConfiguration(): Promise<CustomerConfiguration | void> {
+        const urlX = this.baseUrl + this.apiPath + this.enterpriseName + '/configuration';
+        return await this.fetchAPIRequest({
+            url: urlX,
+        }, this.enterpriseName, this.apiKey).then((res: any) => {
+            // res is json, convert to CustomConfiguration
+
+            console.log("[c] res.data", res.data);
+            let cC: CustomerConfiguration = res.data;
+            return cC;
+        }).catch((error: any) => {
+            console.error(error);
+            throw new Error('Failed to fetch customer configuration');
+        });
+    }
+
+    async getDatabaseStatistics(): Promise<DatabaseStatistics | void> {
+        const urlX = this.baseUrl + this.apiPath + this.enterpriseName + '/database-stats';
+        return await this.fetchAPIRequest({
+            url: urlX,
+        }, this.enterpriseName, this.apiKey).then((res: any) => {
+            // res is json, convert to CustomConfiguration
+
+            console.log("[db] res.data", res.data);
+            let cC: DatabaseStatistics = res.data;
+            return cC;
+        }).catch((error: any) => {
+            console.error(error);
+            throw new Error('Failed to fetch customer configuration');
+        });
+    }
 }
