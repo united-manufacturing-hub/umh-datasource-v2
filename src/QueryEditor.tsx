@@ -11,6 +11,7 @@ import {
     Cascader,
     CascaderOption,
     Collapse,
+    ControlledCollapse,
     Field,
     FieldSet,
     HorizontalGroup,
@@ -23,10 +24,23 @@ import {
     Select,
     Switch,
     TagList,
+    VerticalGroup,
 } from '@grafana/ui';
 import {QueryEditorProps, SelectableValue} from '@grafana/data';
 import {DataSource} from './datasource';
-import {CustomerConfiguration, DatabaseStatistics, FactoryinsightDataSourceOptions, FactoryinsightQuery} from './types';
+import {
+    CustomerConfiguration,
+    FactoryinsightDataSourceOptions,
+    FactoryinsightQuery,
+    HyperTableCompression,
+    HyperTableRetention,
+    HypertableStats,
+    MaybeString,
+    NormalTableStats,
+    TableStatistic
+} from './types';
+import {filesize} from "filesize";
+import {sha256} from "js-sha256";
 
 type Props = QueryEditorProps<DataSource, FactoryinsightQuery, FactoryinsightDataSourceOptions>;
 
@@ -34,7 +48,8 @@ interface State {
     customerConfigurationIsOpen: boolean;
     customerConfiguration: CustomerConfiguration | null;
     databaseStatisticsIsOpen: boolean;
-    databaseStatistics: DatabaseStatistics | null;
+    databaseTables: Map<string, JSX.Element> | null;
+    databaseTableActive: string | null;
 }
 
 
@@ -109,10 +124,11 @@ export class QueryEditor extends PureComponent<Props, State> {
         super(props);
 
         this.state = {
-            databaseStatistics: null,
-            databaseStatisticsIsOpen: true, //for dbg
+            databaseStatisticsIsOpen: false,
             customerConfiguration: null,
-            customerConfigurationIsOpen: true //for dbg
+            customerConfigurationIsOpen: false,
+            databaseTables: null,
+            databaseTableActive: null,
         }
 
         if (this.props.query.fullTagName === undefined) {
@@ -608,8 +624,14 @@ export class QueryEditor extends PureComponent<Props, State> {
     async fetchDatabaseStatistics(props: Readonly<Props>) {
         const configuration = await props.datasource.getDatabaseStatistics();
         if (configuration) {
+            const tables: [string, JSX.Element][] = Object.entries(configuration).map(([key, value]) => {
+                return [key, this.generateDatabaseTable(key, value)];
+            })
+
+            // Convert array of tuples to map and store in state
             this.setState({
-                databaseStatistics: configuration
+                databaseTables: new Map(tables),
+                databaseTableActive: tables[0][0]
             });
         }
     }
@@ -619,10 +641,197 @@ export class QueryEditor extends PureComponent<Props, State> {
         return numberRegEx.test(input);
     }
 
+    generateBooleanOption(label: string, description: string, value: boolean | undefined): JSX.Element {
+        return (<Field label={label}
+                       description={description} horizontal={true}><Switch
+            value={value ? value : false}
+            disabled={true}></Switch></Field>)
+    }
+
+    generateNumberArrayOption(label: string, description: string, value: number[] | undefined): JSX.Element {
+        return this.generateStringArrayOption(label, description, value?.map((v) => v.toString()));
+    }
+
+
+    generateStringArrayOption(label: string, description: string, value: string[] | undefined): JSX.Element {
+        function generateNewTagListEveryNEntries(tags: string[], n: number) {
+            // Set n to tags.length if n is greater than tags.length
+            n = n > tags.length ? tags.length : n;
+
+            // Split tags into chunks of n elements
+            const chunks = [];
+            for (let i = 0; i < tags.length; i += n) {
+                chunks.push(tags.slice(i, i + n));
+            }
+
+            // For each chunk generate a <TagList> element
+            return chunks.map((chunk, index) => {
+                return <TagList key={index} tags={chunk}/>
+            })
+        }
+
+        const tags = value ? value.map((v) => v.toString()) : ["undefined"];
+        return (<Field label={label}
+                       description={description} horizontal={true}>
+            <div>{generateNewTagListEveryNEntries(tags, 6)}</div>
+        </Field>)
+    }
+
+
+    generateNumberOption(label: string, description: string, value: number | undefined): JSX.Element {
+        // I hate that 0 is falsy
+        return this.generateNumberArrayOption(label, description, (value !== undefined) ? [value] : undefined)
+    }
+
+    generateStringOption(label: string, description: string, value: string | undefined): JSX.Element {
+        return this.generateStringArrayOption(label, description, (value !== undefined) ? [value] : undefined)
+    }
+
+    generateByteOption(label: string, description: string, value: number | undefined): JSX.Element {
+        if (value === undefined) {
+            return this.generateNumberArrayOption(label, description, undefined)
+        }
+        // use filesize lib to display as human-readable (KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB)
+        const fs: string = filesize(value, {output: "string"}).toString();
+        return this.generateStringOption(label, description, fs)
+    }
+
+    generateMaybeStringOption(label: string, description: string, value: MaybeString, placeholder: string): JSX.Element {
+        if (value.Valid) {
+            return this.generateStringOption(label, description, value.String)
+        } else {
+            return this.generateStringOption(label, description, placeholder)
+        }
+    }
+
+    generateHyperTableStatistics(key: string, value: HypertableStats[] | null): JSX.Element {
+        if (value === null) {
+            return <div>no statistics available</div>
+        } else {
+            const chunkValues: JSX.Element[] = value.map((v, k) => {
+                const hash = sha256.create();
+                hash.update(JSON.stringify(v));
+                hash.update(k.toString());
+                hash.update(key);
+                const hashValue = hash.hex();
+                const args = {
+                    label: "Chunk-" + k
+                }
+                return (
+                    <div key={hashValue}>
+                        <ControlledCollapse {...args}>
+                            {this.generateByteOption("Table bytes", "The size of the table in bytes", v.TableBytes)}
+                            {this.generateByteOption("Index bytes", "The size of the index in bytes", v.IndexBytes)}
+                            {this.generateByteOption("Toast bytes", "The size of the toast in bytes", v.ToastBytes)}
+                            {this.generateByteOption("Total bytes", "The total size of the table", v.TotalBytes)}
+                            {this.generateMaybeStringOption("Node", "The node where the table is stored", v.NodeName, "/")}
+                        </ControlledCollapse>
+                    </div>
+                )
+            })
+            // reduce to single div element
+            return (<div>{chunkValues.reduce((prev, curr) => {
+                return (<div>{prev}{curr}</div>)
+            })}</div>)
+        }
+    }
+
+    generateNormalTableStatistics(value: NormalTableStats): JSX.Element {
+        return (<div>
+            {this.generateByteOption("Table size", "The size of the table in bytes", value.PgTableSize)}
+            {this.generateByteOption("Total relation size", "The total size of the table", value.PgTotalRelationSize)}
+            {this.generateByteOption("Index size", "The size of the index in bytes", value.PgIndexesSize)}
+            {this.generateByteOption("Relation size (Main)", "The size of the main relation in bytes", value.PgRelationSizeMain)}
+            {this.generateByteOption("Relation size (FSM)", "The size of the FSM relation in bytes", value.PgRelationSizeFsm)}
+            {this.generateByteOption("Relation size (VM)", "The size of the VM relation in bytes", value.PgRelationSizeVm)}
+            {this.generateByteOption("Relation size (Init)", "The size of the Init relation in bytes", value.PgRelationSizeInit)}
+        </div>)
+    }
+
+    generateScheduleConfigOption(label: string, description: string, value: HyperTableRetention | HyperTableCompression): JSX.Element {
+        if (value.Config.length === 0) {
+            return this.generateStringOption(label, description, "not set")
+        } else {
+            const args = {
+                label: label,
+            }
+            return (
+                <ControlledCollapse {...args}>
+                    {this.generateStringOption("Schedule", "The schedule to run the configured operation", value.ScheduleInterval)}
+                    {this.generateStringOption("Operation", "The operation to run", value.Config)}
+                </ControlledCollapse>
+            )
+        }
+    }
+
+
+    generateDatabaseTable(key: string, value: TableStatistic): JSX.Element {
+        const args = {
+            label: key
+        }
+        return (
+            <ControlledCollapse {...args}>
+                {this.generateNumberOption("Rows", "Approximate number of rows", value.ApproximateRows)}
+                {this.generateMaybeStringOption("Last auto analyze", "Last time the table was analyzed automatically", value.LastAutoAnalyze, "never")}
+                {this.generateMaybeStringOption("Last auto vacuum", "Last time the table was vacuumed automatically", value.LastAutoVacuum, "never")}
+                {this.generateMaybeStringOption("Last analyze", "Last time the table was analyzed", value.LastAnalyze, "never")}
+                {this.generateMaybeStringOption("Last vacuum", "Last time the table was vacuumed", value.LastVacuum, "never")}
+                {this.generateBooleanOption("Is Hypertable", "Is this table a TimescaleDB hypertable?", value.IsHyperTable)}
+                {value.IsHyperTable ? this.generateScheduleConfigOption("Retention Policy", "The retention policy for this hypertable", value.HyperRetention) : null}
+                {value.IsHyperTable ? this.generateScheduleConfigOption("Compression Policy", "The compression policy for this hypertable", value.HyperCompression) : null}
+                {value.IsHyperTable ? this.generateHyperTableStatistics(key, value.HyperStats) : this.generateNormalTableStatistics(value.NormalStats)}
+            </ControlledCollapse>
+        )
+    }
+
+    getDatabaseStatisticsTable() {
+        const collapseProps = {
+            label: "Database Statistics",
+            isOpen: this.state.databaseStatisticsIsOpen,
+            loading: false,
+
+            onToggle: () => {
+                this.setState({
+                    databaseStatisticsIsOpen: !this.state.databaseStatisticsIsOpen
+                })
+            }
+        }
+
+        if (this.state.databaseTables === undefined || this.state.databaseTables === null || this.state.databaseTableActive === undefined || this.state.databaseTableActive === null) {
+            collapseProps.loading = true;
+            return (
+                <div>
+                    <Collapse {...collapseProps}>
+                    </Collapse>
+                </div>
+            )
+        }
+
+        /*
+        const tables: JSX.Element = Object.entries(this.state.databaseStatistics.TableStatistics).map(([key, value]) => {
+            return this.generateDatabaseTable(key, value)
+        }).reduce((prev, curr) => {
+            return (<div>{prev}{curr}</div>)
+        })
+
+
+        return (
+            <div>
+                <Collapse {...collapseProps}>
+                    <div>
+                        {this.generateByteOption("Database size", "Exact size: " + this.state.databaseStatistics.DatabaseSizeInBytes + " byte", this.state.databaseStatistics.DatabaseSizeInBytes)}
+                    </div>
+                    <div>
+                        {tables}
+                    </div>
+                </Collapse>
+            </div>
+        )
+         */
+        return (<div></div>)
+    }
 
     getCustomerConfigurationCollapsible() {
-
-
         const collapseProps = {
             label: "Customer configuration",
             isOpen: this.state.customerConfigurationIsOpen,
@@ -635,7 +844,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             }
         }
 
-        if (this.state.customerConfiguration === undefined) {
+        if (this.state.customerConfiguration === undefined || this.state.customerConfiguration === null) {
             collapseProps.loading = true;
             return (
                 <div>
@@ -644,77 +853,35 @@ export class QueryEditor extends PureComponent<Props, State> {
                 </div>
             )
         }
-
-
-        console.log(this.state.customerConfiguration)
-
-        function generateBooleanOption(label: string, description: string, value: boolean | undefined) {
-
-            return (<Field label={label}
-                           description={description} horizontal={true}><Switch
-                value={value ? value : false}
-                disabled={true}></Switch></Field>)
-        }
-
-        function generateNumberArrayOption(label: string, description: string, value: number[] | undefined) {
-
-            function generateNewTagListEveryNEntries(tags: string[], n: number) {
-                // Set n to tags.length if n is greater than tags.length
-                n = n > tags.length ? tags.length : n;
-
-                // Split tags into chunks of n elements
-                const chunks = [];
-                for (let i = 0; i < tags.length; i += n) {
-                    chunks.push(tags.slice(i, i + n));
-                }
-
-                // For each chunk generate a <TagList> element
-                return chunks.map((chunk, index) => {
-                    return <TagList key={index} tags={chunk}/>
-                })
-            }
-
-            const tags = value ? value.map((v) => v.toString()) : ["undefined"];
-            return (<Field label={label}
-                           description={description} horizontal={true}>
-                <div>{generateNewTagListEveryNEntries(tags, 6)}</div>
-            </Field>)
-        }
-
-        function generateNumberOption(label: string, description: string, value: number | undefined) {
-            // I hate that 0 is falsy
-            return generateNumberArrayOption(label, description, (value !== undefined) ? [value] : undefined)
-        }
-
         return (
             <div>
                 <Collapse {...collapseProps}>
                     <div>
-                        {generateBooleanOption("Automatically identify changeovers", "TODO: Add description", this.state.customerConfiguration?.AutomaticallyIdentifyChangeovers)}
+                        {this.generateBooleanOption("Automatically identify changeovers", "TODO: Add description", this.state.customerConfiguration?.AutomaticallyIdentifyChangeovers)}
                     </div>
                     <div>
-                        {generateNumberArrayOption("Availability loss states", "TODO: Add description", this.state.customerConfiguration?.AvailabilityLossStates)}
+                        {this.generateNumberArrayOption("Availability loss states", "TODO: Add description", this.state.customerConfiguration?.AvailabilityLossStates)}
                     </div>
                     <div>
-                        {generateNumberOption("Ignore microstop under this duration in seconds", "TODO: Add description", this.state.customerConfiguration?.IgnoreMicrostopUnderThisDurationInSeconds)}
+                        {this.generateNumberOption("Ignore microstop under this duration in seconds", "TODO: Add description", this.state.customerConfiguration?.IgnoreMicrostopUnderThisDurationInSeconds)}
                     </div>
                     <div>
-                        {generateNumberOption("Language code", "TODO: Add description", this.state.customerConfiguration?.LanguageCode)}
+                        {this.generateNumberOption("Language code", "TODO: Add description", this.state.customerConfiguration?.LanguageCode)}
                     </div>
                     <div>
-                        {generateNumberOption("Low speed threshold in pcs/hour", "TODO: Add description", this.state.customerConfiguration?.LowSpeedThresholdInPcsPerHour)}
+                        {this.generateNumberOption("Low speed threshold in pcs/hour", "TODO: Add description", this.state.customerConfiguration?.LowSpeedThresholdInPcsPerHour)}
                     </div>
                     <div>
-                        {generateNumberOption("Microstop duration in seconds", "TODO: Add description", this.state.customerConfiguration?.MicrostopDurationInSeconds)}
+                        {this.generateNumberOption("Microstop duration in seconds", "TODO: Add description", this.state.customerConfiguration?.MicrostopDurationInSeconds)}
                     </div>
                     <div>
-                        {generateNumberOption("Minimum running time in seconds", "TODO: Add description", this.state.customerConfiguration?.MinimumRunningTimeInSeconds)}
+                        {this.generateNumberOption("Minimum running time in seconds", "TODO: Add description", this.state.customerConfiguration?.MinimumRunningTimeInSeconds)}
                     </div>
                     <div>
-                        {generateNumberArrayOption("Performance loss states", "TODO: Add description", this.state.customerConfiguration?.PerformanceLossStates)}
+                        {this.generateNumberArrayOption("Performance loss states", "TODO: Add description", this.state.customerConfiguration?.PerformanceLossStates)}
                     </div>
                     <div>
-                        {generateNumberOption("Threshold for no shifts to considered break in seconds", "TODO: Add description", this.state.customerConfiguration?.ThresholdForNoShiftsConsideredBreakInSeconds)}
+                        {this.generateNumberOption("Threshold for no shifts to considered break in seconds", "TODO: Add description", this.state.customerConfiguration?.ThresholdForNoShiftsConsideredBreakInSeconds)}
                     </div>
                 </Collapse>
             </div>
@@ -729,170 +896,173 @@ export class QueryEditor extends PureComponent<Props, State> {
 
         return (
             <div>
-                <HorizontalGroup>
-                    <div className="gf-form-group">
-                        <React.StrictMode>
-                            <FieldSet label="Work cell to query">
-                                <InlineField
-                                    label="Selected work cell"
-                                    labelWidth={23}
-                                    disabled={true}
-                                    tooltip="This is the currently selected object, even if in the menu below is empty"
-                                >
-                                    <Input width={100} value={this.selectedWorkCellDisplayed}
-                                           placeholder="No selected work cell"/>
-                                </InlineField>
-                                <InlineField
-                                    label="Select new work cell"
-                                    labelWidth={23}
-                                    tooltip={'Select the specific work cell you want to see the data of'}
-                                >
-                                    <Cascader
-                                        separator=" / "
-                                        options={this.objectStructure}
-                                        onSelect={this.onObjectChange}
-                                        displayAllSelectedLevels={false}
-                                        initialValue={this.selectedObject}
-                                        width={100}
-                                    />
-                                </InlineField>
-                            </FieldSet>
-                            <FieldSet label="Value to query"
-                                      hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
-                                <InlineField
-                                    label="Selected value"
-                                    labelWidth={23}
-                                    disabled={true}
-                                    tooltip="This is the currently selected value, even if in the menu below is empty"
-                                >
-                                    <Input width={100} value={this.selectedValueDisplayed}
-                                           placeholder="No selected value"/>
-                                </InlineField>
-                                <InlineField
-                                    label="Select new value"
-                                    labelWidth={23}
-                                    tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
-                                >
-                                    <Cascader
-                                        separator=" / "
-                                        options={this.valueStructure}
-                                        onSelect={this.onValueChange}
-                                        displayAllSelectedLevels={false}
-                                        initialValue={this.selectedValue}
-                                        width={100}
-                                    />
-                                </InlineField>
-                            </FieldSet>
-                            <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
-                                <InlineField label="Include running processes" labelWidth={'auto'}
-                                             tooltip={'Include running processes'}>
-                                    <InlineSwitch
-                                        value={this.selectedConfigurationIncludeRunningProcesses}
-                                        onClick={this.onConfigurationIncludeRunningProcessesChange}
-                                    />
-                                </InlineField>
-                                <InlineField label="Keep states" labelWidth={'auto'} tooltip={'Keep states'}>
-                                    <InlineSwitch value={this.selectedConfigurationKeepStates}
-                                                  onClick={this.onConfigurationKeepStatesChange}/>
-                                </InlineField>
-                            </FieldSet>
-                            <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
-                                <InlineFieldRow>
+                <VerticalGroup>
+                    <HorizontalGroup>
+                        <div className="gf-form-group">
+                            <React.StrictMode>
+                                <FieldSet label="Work cell to query">
                                     <InlineField
-                                        label="Time bucket"
-                                        labelWidth={'auto'}
-                                        tooltip="Enable if you want to group data in a time bucket"
+                                        label="Selected work cell"
+                                        labelWidth={23}
+                                        disabled={true}
+                                        tooltip="This is the currently selected object, even if in the menu below is empty"
                                     >
-                                        <InlineSwitch
-                                            label="Enable"
-                                            showLabel={true}
-                                            value={this.timeBucketEnabled}
-                                            onClick={this.onTimeBucketEnabledChange}
-                                        />
+                                        <Input width={100} value={this.selectedWorkCellDisplayed}
+                                               placeholder="No selected work cell"/>
                                     </InlineField>
                                     <InlineField
-                                        label={'Size'}
-                                        invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
-                                        error={'This input is required and must be a valid number'}
-                                        disabled={!this.timeBucketEnabled}
+                                        label="Select new work cell"
+                                        labelWidth={23}
+                                        tooltip={'Select the specific work cell you want to see the data of'}
                                     >
-                                        <Input value={this.selectedTimeBucketSize}
-                                               onChange={this.onTimeBucketSizeChange}
-                                               width={20}/>
-                                    </InlineField>
-                                    <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
-                                        <Select
-                                            options={this.tagTimeBucketUnitOptions}
-                                            width={20}
-                                            defaultValue={this.defaultTimeBucketUnit.value}
-                                            value={this.selectedTimeBucketUnit}
-                                            onChange={this.onTimeBucketUnitChange}
-                                        />
-                                    </InlineField>
-                                </InlineFieldRow>
-                                <FieldSet hidden={!this.timeBucketEnabled}>
-                                    <InlineField label="Aggregates" labelWidth={'auto'}
-                                                 tooltip={'Common statistical aggregates'}>
-                                        <MultiSelect
-                                            options={this.tagAggregatesOptions}
-                                            width={30}
-                                            defaultValue={this.defaultConfigurationAggregates}
-                                            value={this.selectedConfigurationAggregates}
-                                            onChange={this.onConfigurationAggregatesChange}
-                                        />
-                                    </InlineField>
-                                    <InlineField
-                                        label="Handling missing values"
-                                        labelWidth={35}
-                                        tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
-                                    >
-                                        <Select
-                                            options={this.tagGapfillingOptions}
-                                            width={30}
-                                            defaultValue={this.tagGapfillingOptions[0]}
-                                            value={this.selectedConfigurationGapfilling}
-                                            onChange={this.onConfigurationGapfillingChange}
-                                        />
-                                    </InlineField>
-                                    <InlineField
-                                        label="Include last datapoint before time interval"
-                                        labelWidth={35}
-                                        tooltip={'Include last datapoint before time interval'}
-                                    >
-                                        <InlineSwitch
-                                            value={this.selectedConfigurationIncludeLastDatapoint}
-                                            onClick={this.onConfigurationIncludeLastDatapointChange}
-                                        />
-                                    </InlineField>
-                                    <InlineField
-                                        label="Include next datapoint after time interval"
-                                        labelWidth={35}
-                                        tooltip={'Include next datapoint after time interval'}
-                                    >
-                                        <InlineSwitch
-                                            value={this.selectedConfigurationIncludeNextDatapoint}
-                                            onClick={this.onConfigurationIncludeNextDatapointChange}
+                                        <Cascader
+                                            separator=" / "
+                                            options={this.objectStructure}
+                                            onSelect={this.onObjectChange}
+                                            displayAllSelectedLevels={false}
+                                            initialValue={this.selectedObject}
+                                            width={100}
                                         />
                                     </InlineField>
                                 </FieldSet>
-                            </FieldSet>
-                            <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAStandardTag()}>
-                                <InlineField
-                                    label="Keep state integer"
-                                    labelWidth={'auto'}
-                                    tooltip={'Keep state as integer instead of converting them to their string value'}
-                                    hidden={!this.isStandardTagState()}
-                                >
-                                    <InlineSwitch value={this.selectedConfigurationKeepStates}
-                                                  onClick={this.onConfigurationKeepStatesChange}/>
-                                </InlineField>
-                            </FieldSet>
-                        </React.StrictMode>
-                    </div>
-                    <div>
-                        {this.getCustomerConfigurationCollapsible()}
-                    </div>
-                </HorizontalGroup>
+                                <FieldSet label="Value to query"
+                                          hidden={!(this.isObjectDataReady() && this.isObjectSelected())}>
+                                    <InlineField
+                                        label="Selected value"
+                                        labelWidth={23}
+                                        disabled={true}
+                                        tooltip="This is the currently selected value, even if in the menu below is empty"
+                                    >
+                                        <Input width={100} value={this.selectedValueDisplayed}
+                                               placeholder="No selected value"/>
+                                    </InlineField>
+                                    <InlineField
+                                        label="Select new value"
+                                        labelWidth={23}
+                                        tooltip={'Select an automatically calculated KPI or a tag for the selected work cell'}
+                                    >
+                                        <Cascader
+                                            separator=" / "
+                                            options={this.valueStructure}
+                                            onSelect={this.onValueChange}
+                                            displayAllSelectedLevels={false}
+                                            initialValue={this.selectedValue}
+                                            width={100}
+                                        />
+                                    </InlineField>
+                                </FieldSet>
+                                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAvailability()}>
+                                    <InlineField label="Include running processes" labelWidth={'auto'}
+                                                 tooltip={'Include running processes'}>
+                                        <InlineSwitch
+                                            value={this.selectedConfigurationIncludeRunningProcesses}
+                                            onClick={this.onConfigurationIncludeRunningProcessesChange}
+                                        />
+                                    </InlineField>
+                                    <InlineField label="Keep states" labelWidth={'auto'} tooltip={'Keep states'}>
+                                        <InlineSwitch value={this.selectedConfigurationKeepStates}
+                                                      onClick={this.onConfigurationKeepStatesChange}/>
+                                    </InlineField>
+                                </FieldSet>
+                                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueACustomTag()}>
+                                    <InlineFieldRow>
+                                        <InlineField
+                                            label="Time bucket"
+                                            labelWidth={'auto'}
+                                            tooltip="Enable if you want to group data in a time bucket"
+                                        >
+                                            <InlineSwitch
+                                                label="Enable"
+                                                showLabel={true}
+                                                value={this.timeBucketEnabled}
+                                                onClick={this.onTimeBucketEnabledChange}
+                                            />
+                                        </InlineField>
+                                        <InlineField
+                                            label={'Size'}
+                                            invalid={!this.isStringValidNumber(this.selectedTimeBucketSize)}
+                                            error={'This input is required and must be a valid number'}
+                                            disabled={!this.timeBucketEnabled}
+                                        >
+                                            <Input value={this.selectedTimeBucketSize}
+                                                   onChange={this.onTimeBucketSizeChange}
+                                                   width={20}/>
+                                        </InlineField>
+                                        <InlineField label={'Unit'} disabled={!this.timeBucketEnabled}>
+                                            <Select
+                                                options={this.tagTimeBucketUnitOptions}
+                                                width={20}
+                                                defaultValue={this.defaultTimeBucketUnit.value}
+                                                value={this.selectedTimeBucketUnit}
+                                                onChange={this.onTimeBucketUnitChange}
+                                            />
+                                        </InlineField>
+                                    </InlineFieldRow>
+                                    <FieldSet hidden={!this.timeBucketEnabled}>
+                                        <InlineField label="Aggregates" labelWidth={'auto'}
+                                                     tooltip={'Common statistical aggregates'}>
+                                            <MultiSelect
+                                                options={this.tagAggregatesOptions}
+                                                width={30}
+                                                defaultValue={this.defaultConfigurationAggregates}
+                                                value={this.selectedConfigurationAggregates}
+                                                onChange={this.onConfigurationAggregatesChange}
+                                            />
+                                        </InlineField>
+                                        <InlineField
+                                            label="Handling missing values"
+                                            labelWidth={35}
+                                            tooltip={'How missing data should be filled. For more information, please visit our documentation.'}
+                                        >
+                                            <Select
+                                                options={this.tagGapfillingOptions}
+                                                width={30}
+                                                defaultValue={this.tagGapfillingOptions[0]}
+                                                value={this.selectedConfigurationGapfilling}
+                                                onChange={this.onConfigurationGapfillingChange}
+                                            />
+                                        </InlineField>
+                                        <InlineField
+                                            label="Include last datapoint before time interval"
+                                            labelWidth={35}
+                                            tooltip={'Include last datapoint before time interval'}
+                                        >
+                                            <InlineSwitch
+                                                value={this.selectedConfigurationIncludeLastDatapoint}
+                                                onClick={this.onConfigurationIncludeLastDatapointChange}
+                                            />
+                                        </InlineField>
+                                        <InlineField
+                                            label="Include next datapoint after time interval"
+                                            labelWidth={35}
+                                            tooltip={'Include next datapoint after time interval'}
+                                        >
+                                            <InlineSwitch
+                                                value={this.selectedConfigurationIncludeNextDatapoint}
+                                                onClick={this.onConfigurationIncludeNextDatapointChange}
+                                            />
+                                        </InlineField>
+                                    </FieldSet>
+                                </FieldSet>
+                                <FieldSet label="Options" hidden={!this.isCurrentSelectedValueAStandardTag()}>
+                                    <InlineField
+                                        label="Keep state integer"
+                                        labelWidth={'auto'}
+                                        tooltip={'Keep state as integer instead of converting them to their string value'}
+                                        hidden={!this.isStandardTagState()}
+                                    >
+                                        <InlineSwitch value={this.selectedConfigurationKeepStates}
+                                                      onClick={this.onConfigurationKeepStatesChange}/>
+                                    </InlineField>
+                                </FieldSet>
+                            </React.StrictMode>
+                        </div>
+                        <div>
+                            {this.getCustomerConfigurationCollapsible()}
+                        </div>
+                    </HorizontalGroup>
+                    {this.getDatabaseStatisticsTable()}
+                </VerticalGroup>
             </div>
         );
     }

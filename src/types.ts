@@ -121,13 +121,14 @@ export interface DatabaseStatistics {
 
 export interface TableStatistic {
     ApproximateRows: number;
-    LastAutoAnalyze: LastAnalyze;
-    LastAutoVacuum: LastAnalyze;
-    LastAnalyze: LastAnalyze;
-    LastVacuum: LastAnalyze;
+    LastAutoAnalyze: MaybeString;
+    LastAutoVacuum: MaybeString;
+    LastAnalyze: MaybeString;
+    LastVacuum: MaybeString;
     IsHyperTable: boolean;
-    NormalStats: NormalStats;
-    HyperStats: HyperStat[] | null;
+
+    NormalStats: NormalTableStats;
+    HyperStats: HypertableStats[] | null;
     HyperRetention: HyperTableRetention;
     HyperCompression: HyperTableCompression;
 }
@@ -143,20 +144,20 @@ export interface HyperTableCompression {
 }
 
 
-export interface HyperStat {
+export interface HypertableStats {
     TableBytes: number;
     IndexBytes: number;
     ToastBytes: number;
     TotalBytes: number;
-    NodeName: LastAnalyze;
+    NodeName: MaybeString;
 }
 
-export interface LastAnalyze {
+export interface MaybeString {
     String: string;
     Valid: boolean;
 }
 
-export interface NormalStats {
+export interface NormalTableStats {
     PgTableSize: number;
     PgTotalRelationSize: number;
     PgIndexesSize: number;
