@@ -23,6 +23,9 @@ import {
     MultiSelect,
     Select,
     Switch,
+    Tab,
+    TabContent,
+    TabsBar,
     TagList,
     VerticalGroup,
 } from '@grafana/ui';
@@ -30,6 +33,7 @@ import {QueryEditorProps, SelectableValue} from '@grafana/data';
 import {DataSource} from './datasource';
 import {
     CustomerConfiguration,
+    DatabaseStatistics,
     FactoryinsightDataSourceOptions,
     FactoryinsightQuery,
     HyperTableCompression,
@@ -50,6 +54,7 @@ interface State {
     databaseStatisticsIsOpen: boolean;
     databaseTables: Map<string, JSX.Element> | null;
     databaseTableActive: string | null;
+    databaseStatistics: DatabaseStatistics | null;
 }
 
 
@@ -129,6 +134,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             customerConfigurationIsOpen: false,
             databaseTables: null,
             databaseTableActive: null,
+            databaseStatistics: null,
         }
 
         if (this.props.query.fullTagName === undefined) {
@@ -624,14 +630,15 @@ export class QueryEditor extends PureComponent<Props, State> {
     async fetchDatabaseStatistics(props: Readonly<Props>) {
         const configuration = await props.datasource.getDatabaseStatistics();
         if (configuration) {
-            const tables: [string, JSX.Element][] = Object.entries(configuration).map(([key, value]) => {
+            const tables: Array<[string, JSX.Element]> = Object.entries(configuration.TableStatistics).map(([key, value]) => {
                 return [key, this.generateDatabaseTable(key, value)];
             })
 
             // Convert array of tuples to map and store in state
             this.setState({
                 databaseTables: new Map(tables),
-                databaseTableActive: tables[0][0]
+                databaseTableActive: tables[0][0],
+                databaseStatistics: configuration
             });
         }
     }
@@ -766,11 +773,8 @@ export class QueryEditor extends PureComponent<Props, State> {
 
 
     generateDatabaseTable(key: string, value: TableStatistic): JSX.Element {
-        const args = {
-            label: key
-        }
         return (
-            <ControlledCollapse {...args}>
+            <div key={key}>
                 {this.generateNumberOption("Rows", "Approximate number of rows", value.ApproximateRows)}
                 {this.generateMaybeStringOption("Last auto analyze", "Last time the table was analyzed automatically", value.LastAutoAnalyze, "never")}
                 {this.generateMaybeStringOption("Last auto vacuum", "Last time the table was vacuumed automatically", value.LastAutoVacuum, "never")}
@@ -780,7 +784,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                 {value.IsHyperTable ? this.generateScheduleConfigOption("Retention Policy", "The retention policy for this hypertable", value.HyperRetention) : null}
                 {value.IsHyperTable ? this.generateScheduleConfigOption("Compression Policy", "The compression policy for this hypertable", value.HyperCompression) : null}
                 {value.IsHyperTable ? this.generateHyperTableStatistics(key, value.HyperStats) : this.generateNormalTableStatistics(value.NormalStats)}
-            </ControlledCollapse>
+            </div>
         )
     }
 
@@ -797,7 +801,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             }
         }
 
-        if (this.state.databaseTables === undefined || this.state.databaseTables === null || this.state.databaseTableActive === undefined || this.state.databaseTableActive === null) {
+        if (this.state.databaseTables === undefined || this.state.databaseTables === null || this.state.databaseTableActive === undefined || this.state.databaseTableActive === null || this.state.databaseStatistics === undefined || this.state.databaseStatistics === null) {
             collapseProps.loading = true;
             return (
                 <div>
@@ -807,13 +811,6 @@ export class QueryEditor extends PureComponent<Props, State> {
             )
         }
 
-        /*
-        const tables: JSX.Element = Object.entries(this.state.databaseStatistics.TableStatistics).map(([key, value]) => {
-            return this.generateDatabaseTable(key, value)
-        }).reduce((prev, curr) => {
-            return (<div>{prev}{curr}</div>)
-        })
-
 
         return (
             <div>
@@ -822,13 +819,35 @@ export class QueryEditor extends PureComponent<Props, State> {
                         {this.generateByteOption("Database size", "Exact size: " + this.state.databaseStatistics.DatabaseSizeInBytes + " byte", this.state.databaseStatistics.DatabaseSizeInBytes)}
                     </div>
                     <div>
-                        {tables}
+                        <TabsBar>
+                            {Array.from(this.state.databaseTables).map((v, k) => {
+                                // @ts-ignore //This cannot be null, as we check for that above
+                                const counter = this.state.databaseStatistics.TableStatistics[v[0]].ApproximateRows;
+                                return (
+                                    <Tab label={v[0]}
+                                         key={v[0]}
+                                         active={this.state.databaseTableActive === v[0]}
+                                         onChangeTab={() => {
+                                             console.log("changed: " + v[0])
+                                             this.setState({
+                                                 databaseTableActive: v[0]
+                                             })
+                                         }}
+                                         counter={counter}
+
+                                    />
+                                )
+                            })}
+                        </TabsBar>
+                        <TabContent>
+                            {
+                                this.state.databaseTables.get(this.state.databaseTableActive)
+                            }
+                        </TabContent>
                     </div>
                 </Collapse>
             </div>
         )
-         */
-        return (<div></div>)
     }
 
     getCustomerConfigurationCollapsible() {
