@@ -166,3 +166,17 @@ export interface NormalTableStats {
     PgRelationSizeVm: number;
     PgRelationSizeInit: number;
 }
+
+export interface GetValuesQueryReturn {
+    label:  string;
+    value:  string;
+    tables: ValueSubTree[] | null;
+    kpi:    ValueSubTree[] | null;
+    tags:   ValueSubTree[] | null;
+}
+
+export interface ValueSubTree {
+    entries: { [key: string]: ValueSubTree } | null;
+    label:   string;
+    value:   string;
+}

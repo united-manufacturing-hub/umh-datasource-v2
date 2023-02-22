@@ -15,7 +15,7 @@ import {
     DatabaseStatistics,
     defaultFactoryinsightQuery,
     FactoryinsightDataSourceOptions,
-    FactoryinsightQuery
+    FactoryinsightQuery, GetValuesQueryReturn
 } from './types';
 import {BackendSrvRequest, FetchResponse, getBackendSrv} from "@grafana/runtime";
 import {Buffer} from "buffer";
@@ -322,14 +322,13 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             });
     }
 
-    async GetValuesTree(queryPath: string) {
-
-
+    async GetValuesTree(queryPath: string) : Promise<GetValuesQueryReturn> {
         return this.fetchAPIRequest({
             url: this.baseUrl + this.apiPath + queryPath + '/getValues',
         }, this.enterpriseName, this.apiKey)
             .then((res: any) => {
-                return Object.entries(res.data);
+                let gv: GetValuesQueryReturn = JSON.parse(res.data);
+                return gv;
             })
             .catch((error: any) => {
                 console.error(error);

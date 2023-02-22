@@ -35,13 +35,13 @@ import {
     CustomerConfiguration,
     DatabaseStatistics,
     FactoryinsightDataSourceOptions,
-    FactoryinsightQuery,
+    FactoryinsightQuery, GetValuesQueryReturn,
     HyperTableCompression,
     HyperTableRetention,
     HypertableStats,
     MaybeString,
     NormalTableStats,
-    TableStatistic
+    TableStatistic, ValueSubTree
 } from './types';
 import {filesize} from "filesize";
 import {sha256} from "js-sha256";
@@ -319,7 +319,58 @@ export class QueryEditor extends PureComponent<Props, State> {
         if (this.selectedObject.split('/').length === 5) {
             const newValues: CascaderOption[] = [];
             let sVal: CascaderOption | null = null;
-            this.props.datasource.GetValuesTree(this.selectedObject).then((response: any) => {
+            this.props.datasource.GetValuesTree(this.selectedObject).then((response: GetValuesQueryReturn) => {
+
+                newValues.push({
+                    label: 'kpi',
+                    value: 'kpi',
+                    items: response.kpi?.map((kpi: ValueSubTree) => {
+                        let v = {
+                            label: kpi.label,
+                            value: kpi.value,
+                        };
+                        if (this.selectedValue === kpi.value) {
+                            sVal = v;
+                        }
+                        return v;
+                    }),
+                });
+
+                newValues.push({
+                    label: 'table',
+                    value: 'table',
+                    items: response.tables?.map((table: any) => {
+                        let v = {
+                            label: table.label,
+                            value: table.value,
+                        };
+                        if (this.selectedValue === table.value) {
+                            sVal = v;
+                        }
+                        return v;
+                    }),
+                });
+
+                newValues.push({
+                    label: 'tags',
+                    value: 'tags',
+                    items: response.tags?.map((groupTag: any) => {
+                        if (groupTag.entries === null) {
+                            groupTag.entries = [];
+                        }
+                        let vx = {
+                            label: groupTag.label,
+                            value: groupTag.value,
+                            items: this.mapToCascaderOptions(groupTag.entries, true),
+                        };
+                        if (this.selectedValue === groupTag.value) {
+                            sVal = vx;
+                        }
+                        return vx;
+                    }),
+                });
+
+                /*
                 for (const key in response) {
                     if (response.hasOwnProperty(key)) {
                         const element = response[key];
@@ -387,6 +438,7 @@ export class QueryEditor extends PureComponent<Props, State> {
                         }
                     }
                 }
+                */
                 this.valueStructure = newValues;
                 if (sVal !== null) {
                     this.selectedValue = sVal.value;
