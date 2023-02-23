@@ -26,7 +26,7 @@
     "node": ">=14"
   },
   "dependencies": {
-    "@grafana/runtime": "^9.0.2",
+    "@grafana/runtime": "^9.3.6",
     "buffer": "^6.0.3"
   }
 }

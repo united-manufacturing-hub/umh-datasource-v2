@@ -1,3 +1,4 @@
+// @ts-ignore
 import defaults from 'lodash/defaults';
 
 import {
@@ -63,7 +64,7 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             method: options.method || 'GET',
             headers: options.headers,
         });
-        return lastValueFrom(response);
+        return lastValueFrom(response as any);
     }
 
     async query(options: DataQueryRequest<FactoryinsightQuery>): Promise<DataQueryResponse> {

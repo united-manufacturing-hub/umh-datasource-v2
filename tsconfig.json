@@ -10,6 +10,7 @@
     "baseUrl": "./src",
     "typeRoots": [
       "./node_modules/@types"
-    ]
+    ],
+    "paths": { "rxjs/*": ["../node_modules/rxjs/*"]}
   }
 }
