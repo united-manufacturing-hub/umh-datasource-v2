@@ -322,12 +322,12 @@ export class DataSource extends DataSourceApi<FactoryinsightQuery, Factoryinsigh
             });
     }
 
-    async GetValuesTree(queryPath: string) : Promise<GetValuesQueryReturn> {
+    async GetValuesTree(queryPath: string): Promise<GetValuesQueryReturn> {
         return this.fetchAPIRequest({
             url: this.baseUrl + this.apiPath + queryPath + '/getValues',
         }, this.enterpriseName, this.apiKey)
             .then((res: any) => {
-                let gv: GetValuesQueryReturn = JSON.parse(res.data);
+                let gv: GetValuesQueryReturn = JSON.parse(JSON.stringify(res.data));
                 return gv;
             })
             .catch((error: any) => {

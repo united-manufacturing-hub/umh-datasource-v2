@@ -321,124 +321,61 @@ export class QueryEditor extends PureComponent<Props, State> {
             let sVal: CascaderOption | null = null;
             this.props.datasource.GetValuesTree(this.selectedObject).then((response: GetValuesQueryReturn) => {
 
-                newValues.push({
-                    label: 'kpi',
-                    value: 'kpi',
-                    items: response.kpi?.map((kpi: ValueSubTree) => {
-                        let v = {
-                            label: kpi.label,
-                            value: kpi.value,
-                        };
-                        if (this.selectedValue === kpi.value) {
-                            sVal = v;
-                        }
-                        return v;
-                    }),
-                });
-
-                newValues.push({
-                    label: 'table',
-                    value: 'table',
-                    items: response.tables?.map((table: any) => {
-                        let v = {
-                            label: table.label,
-                            value: table.value,
-                        };
-                        if (this.selectedValue === table.value) {
-                            sVal = v;
-                        }
-                        return v;
-                    }),
-                });
-
-                newValues.push({
-                    label: 'tags',
-                    value: 'tags',
-                    items: response.tags?.map((groupTag: any) => {
-                        if (groupTag.entries === null) {
-                            groupTag.entries = [];
-                        }
-                        let vx = {
-                            label: groupTag.label,
-                            value: groupTag.value,
-                            items: this.mapToCascaderOptions(groupTag.entries, true),
-                        };
-                        if (this.selectedValue === groupTag.value) {
-                            sVal = vx;
-                        }
-                        return vx;
-                    }),
-                });
-
-                /*
-                for (const key in response) {
-                    if (response.hasOwnProperty(key)) {
-                        const element = response[key];
-                        switch (element[0]) {
-                            case 'kpis':
-                                if (element[1] !== null && element[1] !== undefined) {
-                                    newValues.push({
-                                        label: 'kpi',
-                                        value: 'kpi',
-                                        items: element[1].map((kpi: any) => {
-                                            let v = {
-                                                label: kpi.label,
-                                                value: kpi.value,
-                                            };
-                                            if (this.selectedValue === kpi.value) {
-                                                sVal = v;
-                                            }
-                                            return v;
-                                        }),
-                                    });
-                                }
-                                break;
-                            case 'tables':
-                                if (element[1] !== null && element[1] !== undefined) {
-                                    newValues.push({
-                                        label: 'table',
-                                        value: 'table',
-                                        items: element[1].map((table: any) => {
-                                            let v = {
-                                                label: table.label,
-                                                value: table.value,
-                                            };
-                                            if (this.selectedValue === table.value) {
-                                                sVal = v;
-                                            }
-                                            return v;
-                                        }),
-                                    });
-                                }
-                                break;
-                            case 'tags':
-                                if (element[1] !== null && element[1] !== undefined) {
-                                    newValues.push({
-                                        label: 'tags',
-                                        value: 'tags',
-                                        items: element[1].map((groupTag: any) => {
-                                            if (groupTag.entries === null) {
-                                                groupTag.entries = [];
-                                            }
-                                            let vx = {
-                                                label: groupTag.label,
-                                                value: groupTag.value,
-                                                items: this.mapToCascaderOptions(groupTag.entries, true),
-                                            };
-                                            if (this.selectedValue === groupTag.value) {
-                                                sVal = vx;
-                                            }
-                                            return vx;
-                                        }),
-                                    });
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                if (response.kpi !== null && response.kpi !== undefined) {
+                    newValues.push({
+                        label: 'kpi',
+                        value: 'kpi',
+                        items: response.kpi?.map((kpi: ValueSubTree) => {
+                            let v = {
+                                label: kpi.label,
+                                value: kpi.value,
+                            };
+                            if (this.selectedValue === kpi.value) {
+                                sVal = v;
+                            }
+                            return v;
+                        }),
+                    });
                 }
-                */
+
+                if (response.tables !== null && response.tables !== undefined) {
+                    newValues.push({
+                        label: 'table',
+                        value: 'table',
+                        items: response.tables?.map((table: any) => {
+                            let v = {
+                                label: table.label,
+                                value: table.value,
+                            };
+                            if (this.selectedValue === table.value) {
+                                sVal = v;
+                            }
+                            return v;
+                        }),
+                    });
+                }
+
+                if (response.tags !== null && response.tags !== undefined) {
+                    newValues.push({
+                        label: 'tags',
+                        value: 'tags',
+                        items: response.tags?.map((groupTag: any) => {
+                            if (groupTag.entries === null) {
+                                groupTag.entries = [];
+                            }
+                            let vx = {
+                                label: groupTag.label,
+                                value: groupTag.value,
+                                items: this.mapToCascaderOptions(groupTag.entries, true),
+                            };
+                            if (this.selectedValue === groupTag.value) {
+                                sVal = vx;
+                            }
+                            return vx;
+                        }),
+                    });
+                }
+
                 this.valueStructure = newValues;
                 if (sVal !== null) {
                     this.selectedValue = sVal.value;
